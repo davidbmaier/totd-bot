@@ -76,6 +76,11 @@ const formatTOTDMessage = (totd) => {
 
   const track = `Today's track is **${trackName}** by **${trackAuthor}**.\n`;
 
+  let style = ``;
+  if (totd.tmxTags) {
+    style = `Map styles (according to TMX): ${totd.tmxTags.join(', ')}\n`;
+  }
+
   // assemble medal info
   const bronze = `<:MedalBronze:763718615764566016> Bronze: ||${formatTime(totd.bronzeScore.toString())}||\n`;
   const silver = `<:MedalSilver:763718615689330699> Silver: ||${formatTime(totd.silverScore.toString())}||\n`;
@@ -83,35 +88,11 @@ const formatTOTDMessage = (totd) => {
   const author = `<:MedalAuthor:763718159714222100> Author: ||${formatTime(totd.authorScore.toString())}||\n`;
 
   const medals = `Medal times:\n${bronze}${silver}${gold}${author}\n`;
-  const scoreNote = `React to this message below to rate the TOTD!`;
+  const scoreNote = `React to this message to rate the TOTD!`;
 
-  return `${title}${track}${medals}${scoreNote}`;
+  return `${title}${track}${style}${medals}${scoreNote}`;
 };
 
 module.exports = {
   formatTOTDMessage
 };
-
-formatTOTDMessage({
-  author: 'a2a59490-6834-4ba1-bdb9-ea18097570c8',
-  authorScore: 52275,
-  bronzeScore: 79000,
-  collectionName: 'Stadium',
-  environment: 'Stadium',
-  filename: 'MTC - Summit Run.Map.Gbx',
-  goldScore: 56000,
-  isPlayable: true,
-  mapId: '452d8c33-14ba-4163-98a7-3eae99a64416',
-  mapUid: 'OdR7q03M87_avNbET6358mfcPCd',
-  name: '$o$fffMTC - $efeS$dfdu$cfcm$bfbm$afai$9f9t $8f8R$7f7u$6f6n',
-  silverScore: 63000,
-  submitter: 'a2a59490-6834-4ba1-bdb9-ea18097570c8',
-  timestamp: '2021-01-20T20:17:11+00:00',
-  fileUrl: 'https://prod.trackmania.core.nadeo.online/storageObjects/7a12f7de-55f9-40ad-b704-a553fee921d5',
-  thumbnailUrl: 'https://prod.trackmania.core.nadeo.online/storageObjects/28f5cae9-6055-4e37-afe4-9243d202f561.jpg',
-  authorName: 'Rexasaurus13',
-  tmxName: 'MTC - Summit Run',
-  tmxStyle: 'Mixed',
-  tmxAuthor: 'Rexasaurus',
-  tmxTrackId: 20186
-});

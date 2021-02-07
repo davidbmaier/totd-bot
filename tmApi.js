@@ -54,7 +54,13 @@ const getTMXInfo = async (mapUid) => {
   try {
     const tmxResponse = await axios.get(`https://trackmania.exchange/api/tracks/get_track_info/multi/${mapUid}`);
     if (tmxResponse.data.length === 1) {
-      return tmxResponse.data[0];
+      const tmxTagsResponse = await axios.get(`https://trackmania.exchange/api/tags/gettags`);
+      const resolvedTags = [];
+      tmxResponse.data[0].Tags.split(',').forEach((tag) => {
+        const matchingTag = tmxTagsResponse.data.find((tmxTag) => tmxTag.ID.toString() === tag);
+        resolvedTags.push(matchingTag.Name);
+      });
+      return { ...tmxResponse.data[0], Tags: resolvedTags };
     } else {
       return;
     }
@@ -89,6 +95,7 @@ const getCurrentTOTD = async (credentials) => {
       currentTOTD.tmxStyle = tmxInfo.StyleName;
       currentTOTD.tmxAuthor = tmxInfo.Username;
       currentTOTD.tmxTrackId = tmxInfo.TrackID;
+      currentTOTD.tmxTags = tmxInfo.Tags;
     }
 
     return currentTOTD;
