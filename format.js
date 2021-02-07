@@ -76,6 +76,7 @@ const formatTOTDMessage = (totd) => {
 
   const track = `Today's track is **${trackName}** by **${trackAuthor}**.\n`;
 
+  // assemble style info
   let style = ``;
   if (totd.tmxTags) {
     style = `Map styles (according to TMX): ${totd.tmxTags.join(', ')}\n`;
@@ -88,9 +89,18 @@ const formatTOTDMessage = (totd) => {
   const author = `<:MedalAuthor:763718159714222100> Author: ||${formatTime(totd.authorScore.toString())}||\n`;
 
   const medals = `Medal times:\n${bronze}${silver}${gold}${author}\n`;
+
+  // assemble links
+  let links = `[TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})`;
+
+  if (totd.tmxTrackId) {
+    links += `| [TMX](https://trackmania.exchange/s/tr/${totd.tmxTrackId})`;
+  }
+  links += `\n`;
+
   const scoreNote = `React to this message to rate the TOTD!`;
 
-  return `${title}${track}${style}${medals}${scoreNote}`;
+  return `${title}${track}${style}${medals}${links}${scoreNote}`;
 };
 
 module.exports = {

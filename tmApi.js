@@ -86,6 +86,7 @@ const getCurrentTOTD = async (credentials) => {
 
     const currentTOTDArray = await getMaps(credentials.level1, [currentTOTDMeta.mapUid]);
     const currentTOTD = currentTOTDArray[0];
+    currentTOTD.seasonUid = currentTOTDMeta.seasonUid;
 
     currentTOTD.authorName = await getAuthorName(credentials, currentTOTD);
 
