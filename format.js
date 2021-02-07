@@ -73,7 +73,6 @@ const formatTOTDMessage = (totd) => {
   } else if (totd.tmxAuthor) {
     trackAuthor = totd.tmxAuthor;
   }
-  test;
 
   const track = `Today's track is **${trackName}** by **${trackAuthor}**.\n`;
 
