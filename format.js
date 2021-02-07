@@ -61,7 +61,7 @@ const formatTOTDMessage = (totd) => {
     }
   };
 
-  const title = `**The ${monthNames[month]} ${formatDay(day)} Track of the Day is now live!**\n`;
+  const title = `**Here's the ${monthNames[month]} ${formatDay(day)} Track of the Day!**\n`;
 
   // assemble track info
   let trackName = totd.name;
