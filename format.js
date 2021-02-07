@@ -1,9 +1,12 @@
 const formatTime = (time) => {
   const millisecs = time.substr(-3);
-  const secs = time.substr(-5, 2);
-  const mins = 0;
-  if (time.length > 6) {
-    mins = time[0];
+  let secs = time.substr(0, time.length - 3);
+  // minutes/seconds need to be calculated
+  const mins = Math.floor(secs / 60);
+  secs = secs % 60;
+  // pad the seconds if they're only a single digit
+  if (secs < 10) {
+    secs = secs.toString().padStart(2, '0');
   }
 
   return `${mins}:${secs}.${millisecs}`;
@@ -74,33 +77,76 @@ const formatTOTDMessage = (totd) => {
     trackAuthor = totd.tmxAuthor;
   }
 
-  const track = `Today's track is **${trackName}** by **${trackAuthor}**.\n`;
-
   // assemble style info
-  let style = ``;
+  let styles;
   if (totd.tmxTags) {
-    style = `Map styles (according to TMX): ${totd.tmxTags.join(', ')}\n`;
+    styles = `${totd.tmxTags.join(', ')}`;
   }
 
   // assemble medal info
-  const bronze = `<:MedalBronze:763718615764566016> Bronze: ||${formatTime(totd.bronzeScore.toString())}||\n`;
-  const silver = `<:MedalSilver:763718615689330699> Silver: ||${formatTime(totd.silverScore.toString())}||\n`;
-  const gold = `<:MedalGold:763718328685559811> Gold: ||${formatTime(totd.goldScore.toString())}||\n`;
-  const author = `<:MedalAuthor:763718159714222100> Author: ||${formatTime(totd.authorScore.toString())}||\n`;
-
-  const medals = `Medal times:\n${bronze}${silver}${gold}${author}\n`;
+  const bronze = `<:MedalBronze:763718615764566016> Bronze`;
+  const bronzeTime = `${formatTime(totd.bronzeScore.toString())}`;
+  const silver = `<:MedalSilver:763718615689330699> Silver`;
+  const silverTime = `${formatTime(totd.silverScore.toString())}`;
+  const gold = `<:MedalGold:763718328685559811> Gold`;
+  const goldTime = `${formatTime(totd.goldScore.toString())}`;
+  const author = `<:MedalAuthor:763718159714222100> Author`;
+  const authorTime = `${formatTime(totd.authorScore.toString())}`;
 
   // assemble links
-  let links = `[TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})`;
+  let links = `[TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})  `;
 
   if (totd.tmxTrackId) {
-    links += `| [TMX](https://trackmania.exchange/s/tr/${totd.tmxTrackId})`;
+    links += `|  [TMX](https://trackmania.exchange/s/tr/${totd.tmxTrackId})`;
   }
-  links += `\n`;
 
   const scoreNote = `React to this message to rate the TOTD!`;
 
-  return `${title}${track}${style}${medals}${links}${scoreNote}`;
+  const embed = {
+    embed: {
+      title: title,
+      type: 'rich',
+      image: {
+        url: totd.thumbnailUrl
+      },
+      description: scoreNote,
+      fields: [
+        {
+          name: 'Name',
+          value: trackName,
+          inline: true
+        },
+        {
+          name: 'Author',
+          value: trackAuthor,
+          inline: true
+        },
+        {
+          name: 'Medals',
+          value: `${bronze}\n${silver}\n${gold}\n${author}`,
+          inline: true
+        },
+        {
+          name: 'Times',
+          value: `${bronzeTime}\n${silverTime}\n${goldTime}\n${authorTime}`,
+          inline: true
+        },
+        {
+          name: 'Links',
+          value: links
+        }
+      ]
+    }
+  };
+
+  if (styles) {
+    embed.embed.fields.splice(2, 0, {
+      name: 'Styles (according to TMX)',
+      value: styles
+    });
+  }
+
+  return embed;
 };
 
 module.exports = {

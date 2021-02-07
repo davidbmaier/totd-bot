@@ -54,13 +54,28 @@ const getTMXInfo = async (mapUid) => {
   try {
     const tmxResponse = await axios.get(`https://trackmania.exchange/api/tracks/get_track_info/multi/${mapUid}`);
     if (tmxResponse.data.length === 1) {
+      // get tags
       const tmxTagsResponse = await axios.get(`https://trackmania.exchange/api/tags/gettags`);
       const resolvedTags = [];
       tmxResponse.data[0].Tags.split(',').forEach((tag) => {
         const matchingTag = tmxTagsResponse.data.find((tmxTag) => tmxTag.ID.toString() === tag);
         resolvedTags.push(matchingTag.Name);
       });
-      return { ...tmxResponse.data[0], Tags: resolvedTags };
+
+      // get available image
+      let imageLink;
+      if (tmxResponse.data[0].ImageCount > 0) {
+        imageLink = `https://trackmania.exchange/maps/${tmxResponse.data[0].TrackID}/image/1`;
+      } else if (tmxResponse.data[0].HasThumbnail) {
+        imageLink = `https://trackmania.exchange/maps/thumbnail/${tmxResponse.data[0].TrackID}`;
+      }
+
+      const tmxResult = { ...tmxResponse.data[0], Tags: resolvedTags };
+      if (imageLink) {
+        tmxResult.ImageLink = imageLink;
+      }
+
+      return tmxResult;
     } else {
       return;
     }
@@ -93,10 +108,12 @@ const getCurrentTOTD = async (credentials) => {
     const tmxInfo = await getTMXInfo(currentTOTD.mapUid);
     if (tmxInfo) {
       currentTOTD.tmxName = tmxInfo.Name;
-      currentTOTD.tmxStyle = tmxInfo.StyleName;
       currentTOTD.tmxAuthor = tmxInfo.Username;
       currentTOTD.tmxTrackId = tmxInfo.TrackID;
       currentTOTD.tmxTags = tmxInfo.Tags;
+      if (tmxInfo.ImageLink) {
+        currentTOTD.thumbnailUrl = tmxInfo.ImageLink;
+      }
     }
 
     return currentTOTD;
