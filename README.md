@@ -2,7 +2,10 @@
 
 This is a Discord bot for displaying the daily Trackmania Track of the Day (and maybe more in the future).
 
+Disclaimer: This bot uses undocumented APIs (and libraries based on them), so it may break at any time - potentially indefinitely if Nadeo/Ubisoft decide to close off those APIs.
+
 To run it, just run an `npm i` and an `npm start`. Make sure you've added a `.env` file (see the template for the format).
+I suggest not using your main UPlay/Ubisoft Connect account - it doesn't have to own the game, so you can just create a new one for this bot.
 
 Currently, it only listens to `!totd` and the prints the current track's data.
 
