@@ -11,11 +11,12 @@ The bot is written in Node.js - so you'll need to install [Node](https://nodejs.
 To run it, just run an `npm i` and an `npm start`. Make sure you've added a `.env` file (see the template for the format).
 I suggest not using your main UPlay/Ubisoft Connect account - it doesn't have to own the game, so you can just create a new one for this bot.
 
-Currently, it only listens to `!totd` and the prints the current track's data.
+Currently, it posts every day at just after 7PM.
+
+Every commit on main triggers an update to the live version of the bot running on a Heroku dyno.
 
 ## Planned features
 
-- Automatically posting on a schedule (when the new TOTD comes out) - this probably requires some external storage to keep track of the servers it has to send it to (or some simple logic like looking for a channel name pattern).
+- Some external storage to keep track of the servers it has to send the message to (or some simple logic like looking for a channel name pattern).
 - Looking up previous TOTDs using a date.
 - More data (currently uses TM and TMX when available) - there's probably more interesting metadata the bot could display.
-- Set up easy deployment (maybe through a Github action) to an arbitrary server (maybe also just to a Cloud provider to make it easy) - currently I've only run it locally for test purposes.
