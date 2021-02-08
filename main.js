@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const cron = require('cron');
+const cron = require('cron').CronJob;
 
 const tmAPI = require('./tmApi');
 const format = require('./format');
@@ -30,11 +30,17 @@ const displayCurrentTOTD = async (channel) => {
 };
 
 // display the current totd every day at 19:00:30
-let scheduledTOTD = new cron.CronJob('30 00 19 * * *', async () => {
-  // TODO: get the channels this should post to
-  const channel = await client.channels.fetch('763052026028359690');
-  displayCurrentTOTD(channel);
-}).start();
+new cron(
+  '30 00 19 * * *',
+  async () => {
+    // TODO: get the channels this should post to
+    const channel = await client.channels.fetch('763052026028359690');
+    displayCurrentTOTD(channel);
+  },
+  null,
+  true,
+  'Europe/Berlin'
+);
 
 client.on('ready', () => {
   console.log(`Ready as ${client.user.tag}!`);
@@ -45,3 +51,10 @@ client.on('message', (msg) => {
 });
 
 client.login(discordToken);
+'0 0 9 4 * *',
+  function () {
+    console.log('message');
+  },
+  null,
+  true,
+  'America/Sao_Paulo';
