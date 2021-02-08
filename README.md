@@ -1,6 +1,6 @@
 # TOTD Discord Bot
 
-This is a Discord bot for displaying the daily Trackmania Track of the Day (and maybe more in the future).
+This is a Discord bot for displaying the daily [Trackmania](https://www.trackmania.com/) Track of the Day (and maybe more in the future).
 
 Disclaimer: This bot uses undocumented APIs (and libraries based on them), so it may break at any time - potentially indefinitely if Nadeo/Ubisoft decide to close off those APIs.
 
