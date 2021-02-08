@@ -61,7 +61,12 @@ const formatTOTDMessage = (totd) => {
     }
   };
 
-  const title = `**Here's the ${monthNames[month]} ${formatDay(day)} Track of the Day!**\n`;
+  let trackLabel = 'Track';
+  if (totd.tmxTags && totd.tmxTags.includes(`Scenery`)) {
+    trackLabel = 'Scenery';
+  }
+
+  const title = `**Here's the ${monthNames[month]} ${formatDay(day)} ${trackLabel} of the Day!**\n`;
 
   // assemble track info
   let trackName = totd.name;
