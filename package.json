@@ -5,6 +5,7 @@
   "dependencies": {
     "axios": ">=0.21.1",
     "bufferutil": "^4.0.3",
+    "cron": "^1.8.2",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "erlpack": "github:discord/erlpack",
