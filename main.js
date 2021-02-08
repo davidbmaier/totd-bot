@@ -30,7 +30,7 @@ const displayCurrentTOTD = async (channel) => {
 };
 
 // display the current totd every day at 19:00:30
-let scheduledTOTD = new cron.CronJob('30 25 * * * *', async () => {
+let scheduledTOTD = new cron.CronJob('30 30 * * * *', async () => {
   // TODO: get the channels this should post to
   const channel = await client.channels.fetch('763052026028359690');
   displayCurrentTOTD(channel);
