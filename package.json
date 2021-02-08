@@ -11,5 +11,8 @@
     "erlpack": "github:discord/erlpack",
     "trackmania-api-node": "^0.0.26",
     "utf-8-validate": "^5.0.4"
+  },
+  "engines": {
+    "node": "15.x"
   }
 }
