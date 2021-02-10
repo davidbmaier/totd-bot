@@ -46,15 +46,13 @@ client.on('ready', () => {
   console.log(`Ready as ${client.user.tag}!`);
 });
 
-client.on('message', (msg) => {
+client.on('message', async (msg) => {
+  if (msg.content === '!totd') {
+    displayCurrentTOTD(msg.channel);
+  } else if (msg.content === '!debug') {
+    console.log('Generic debug message :)');
+  }
   // TODO: handle config messages
 });
 
 client.login(discordToken);
-'0 0 9 4 * *',
-  function () {
-    console.log('message');
-  },
-  null,
-  true,
-  'America/Sao_Paulo';
