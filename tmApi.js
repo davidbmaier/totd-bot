@@ -66,7 +66,15 @@ const getTMXInfo = async (mapUid) => {
       let imageLink;
       if (tmxResponse.data[0].ImageCount > 0) {
         imageLink = `https://trackmania.exchange/maps/${tmxResponse.data[0].TrackID}/image/1`;
-      } else if (tmxResponse.data[0].HasThumbnail) {
+        // check that it's a valid image file (sometimes it might be a file without an ending, resulting in a raw octet stream)
+        // Discord can't handle those, so we switch back to the thumbnail
+        const imageResponse = await axios.get(imageLink);
+        if (imageResponse.headers['content-type'] === 'application/octet-stream') {
+          imageLink = undefined;
+        }
+      }
+
+      if (!imageLink && tmxResponse.data[0].HasThumbnail) {
         imageLink = `https://trackmania.exchange/maps/thumbnail/${tmxResponse.data[0].TrackID}`;
       }
 
