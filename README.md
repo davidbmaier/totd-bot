@@ -4,6 +4,8 @@ This is a Discord bot for displaying the daily [Trackmania](https://www.trackman
 
 Disclaimer: This bot uses undocumented APIs (and libraries based on them), so it may break at any time - potentially indefinitely if Nadeo/Ubisoft decide to close off those APIs.
 
+Extra disclaimer: This is just a pet project I'm working on for fun (and to learn a bit about Discord bots) - don't expect super-tidy code or great documentation. If you encounter any issues with it, either open an issue on Github or talk to me on Discord (tooInfinite#5113).
+
 Currently, it posts every day at just after 7PM. It also posts when triggered by `!totd` in any channel it has access to.
 
 ## Setup/Development
@@ -17,5 +19,7 @@ Every commit on main triggers an update to the live version of the bot running o
 
 ## Planned features
 
-- Some external storage to keep track of the servers it has to send the message to (or some simple logic like looking for a channel name pattern).
+- Some persistent storage to keep track of the servers it has to send the message to (currently just sends to a test server). Will also need some configuration commands to set it up.
 - More data (currently uses TM and TMX when available) - there's probably more interesting metadata the bot could display.
+  - How many TOTDs did the author have before?
+  - Current WR (but I guess that's not very useful when it gets TOTD)

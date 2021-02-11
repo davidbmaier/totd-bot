@@ -35,7 +35,7 @@ new cron(
   '30 00 19 * * *',
   async () => {
     // TODO: get the channels this should post to
-    const channel = await client.channels.fetch('763052026028359690');
+    const channel = await client.channels.fetch('763052026028359690'); // test server for the moment
     displayCurrentTOTD(channel);
   },
   null,
@@ -48,7 +48,7 @@ client.on('ready', () => {
 });
 
 // add the prefix 'dev' to each command when not in prod mode
-// (so you can test it without triggering the live bot as well - assuming you have both running)
+// (so you can test it without triggering the live bot as well - assuming you have both running with the same ID)
 const addDevPrefix = (command) => {
   if (deployMode && deployMode !== 'prod') {
     // this assumes every command starts with '!'
@@ -61,7 +61,7 @@ const addDevPrefix = (command) => {
 client.on('message', async (msg) => {
   if (msg.content === addDevPrefix(`!totd`)) {
     displayCurrentTOTD(msg.channel);
-  } else if (msg.content === '!debug') {
+  } else if (msg.content === addDevPrefix(`!debug`)) {
     console.log('Generic debug message :)');
   }
   // TODO: handle config messages
