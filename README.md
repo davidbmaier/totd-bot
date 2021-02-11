@@ -25,3 +25,4 @@ Every commit on main triggers an update to the live version of the bot running o
 - More data (currently uses TM and TMX when available) - there's probably more interesting metadata the bot could display.
   - How many TOTDs did the author have before?
   - Current WR (but I guess that's not very useful when it gets TOTD)
+  - Summary of the last TOTD with top 5 (incl. player links to tm.io and maybe some aggregate data like player numbers)
