@@ -53,6 +53,8 @@ const addDevPrefix = (command) => {
   if (deployMode && deployMode !== 'prod') {
     // this assumes every command starts with '!'
     return `!dev${command.substr(1)}`;
+  } else {
+    return command;
   }
 };
 
