@@ -8,6 +8,8 @@ Extra disclaimer: This is just a pet project I'm working on for fun (and to lear
 
 Currently, it posts every day at just after 7PM. It also posts when triggered by `!totd` in any channel it has access to.
 
+![Bot screenshot](https://i.imgur.com/Cjky9X0.png)
+
 ## Setup/Development
 
 The bot is written in Node.js - so you'll need to install [Node](https://nodejs.org/en/), which automatically comes with NPM, the default package manager.
