@@ -127,6 +127,11 @@ const formatTOTDMessage = (totd) => {
           inline: true
         },
         {
+          name: 'Uploaded on',
+          value: new Date(totd.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+          inline: true
+        },
+        {
           name: 'Medals',
           value: `${bronze}\n${silver}\n${gold}\n${author}`,
           inline: true
@@ -145,9 +150,10 @@ const formatTOTDMessage = (totd) => {
   };
 
   if (styles) {
-    embed.embed.fields.splice(2, 0, {
+    embed.embed.fields.splice(5, 0, {
       name: 'Styles (according to TMX)',
-      value: styles
+      value: styles,
+      inline: true
     });
   }
 

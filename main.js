@@ -8,6 +8,7 @@ const format = require('./format');
 require('dotenv').config();
 
 const discordToken = process.env.DISCORD_TOKEN;
+const deployMode = process.env.DEPLOY_MODE;
 
 const displayCurrentTOTD = async (channel) => {
   console.log(`Sending current TOTD to ${channel.name} in ${channel.guild.name}`);
@@ -46,8 +47,17 @@ client.on('ready', () => {
   console.log(`Ready as ${client.user.tag}!`);
 });
 
+// add the prefix 'dev' to each command when not in prod mode
+// (so you can test it without triggering the live bot as well - assuming you have both running)
+const addDevPrefix = (command) => {
+  if (deployMode && deployMode !== 'prod') {
+    // this assumes every command starts with '!'
+    return `!dev${command.substr(1)}`;
+  }
+};
+
 client.on('message', async (msg) => {
-  if (msg.content === '!totd') {
+  if (msg.content === addDevPrefix(`!totd`)) {
     displayCurrentTOTD(msg.channel);
   } else if (msg.content === '!debug') {
     console.log('Generic debug message :)');
