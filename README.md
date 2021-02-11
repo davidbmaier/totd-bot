@@ -22,6 +22,7 @@ Every commit on main triggers an update to the live version of the bot running o
 ## Planned features
 
 - Some persistent storage to keep track of the servers it has to send the message to (currently just sends to a test server). Will also need some configuration commands to set it up.
+- Find better voting emojis - the current ones are just screenshots from TMNF.
 - More data (currently uses TM and TMX when available) - there's probably more interesting metadata the bot could display.
   - How many TOTDs did the author have before?
   - Current WR (but I guess that's not very useful when it gets TOTD)
