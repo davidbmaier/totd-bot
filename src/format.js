@@ -160,6 +160,29 @@ const formatTOTDMessage = (totd) => {
   return embed;
 };
 
+const formatHelpMessage = (commands) => {
+  return {
+    embed: {
+      title: "Hey, I'm TOTD Bot!",
+      type: 'rich',
+      description: "Here's what you can tell me to do:",
+      fields: [
+        {
+          name: 'Commands',
+          value: commands
+        },
+        {
+          name: 'More Info',
+          value:
+            "I've been developed by <@141627532335251456> - feel free to let him know if you like me (or when something broke). \
+            My code can be found [here](https://github.com/davidbmaier/todt-bot)."
+        }
+      ]
+    }
+  };
+};
+
 module.exports = {
-  formatTOTDMessage
+  formatTOTDMessage,
+  formatHelpMessage
 };

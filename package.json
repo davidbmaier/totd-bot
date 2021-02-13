@@ -9,6 +9,7 @@
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "erlpack": "github:discord/erlpack",
+    "redis": "^3.0.2",
     "trackmania-api-node": "^0.0.26",
     "utf-8-validate": "^5.0.4"
   },
