@@ -24,19 +24,23 @@ const getTOTDMessage = async () => {
 const sendTOTDMessage = async (channel, message) => {
   console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
 
-  const discordMessage = await channel.send(message);
-  // add rating emojis
-  const emojis = [
-    client.emojis.resolve(`807983766239838208`),
-    client.emojis.resolve(`807983738603962368`),
-    client.emojis.resolve(`807983713698316308`),
-    client.emojis.resolve(`807983669330706482`),
-    client.emojis.resolve(`807983625001107497`),
-    client.emojis.resolve(`807983052046598165`)
-  ];
-  emojis.forEach(async (emoji) => {
-    await discordMessage.react(emoji);
-  });
+  try {
+    const discordMessage = await channel.send(message);
+    // add rating emojis
+    const emojis = [
+      client.emojis.resolve(`807983766239838208`),
+      client.emojis.resolve(`807983738603962368`),
+      client.emojis.resolve(`807983713698316308`),
+      client.emojis.resolve(`807983669330706482`),
+      client.emojis.resolve(`807983625001107497`),
+      client.emojis.resolve(`807983052046598165`)
+    ];
+    emojis.forEach(async (emoji) => {
+      await discordMessage.react(emoji);
+    });
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const distributeTOTDMessages = async () => {
