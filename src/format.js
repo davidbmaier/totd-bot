@@ -16,7 +16,7 @@ const formatTime = (time) => {
 
 const removeNameFormatting = (text) => {
   // this should take care of all the possible options, see https://doc.maniaplanet.com/client/text-formatting for reference
-  let cleanedText = text.replace(/\$[0-9a-fA-F]{3}/, ``);
+  let cleanedText = text.replace(/\$[0-9a-fA-F]{3}/g, ``);
   cleanedText = cleanedText.replace(`$w`, ``);
   cleanedText = cleanedText.replace(`$n`, ``);
   cleanedText = cleanedText.replace(`$o`, ``);
@@ -76,6 +76,7 @@ const formatTOTDMessage = (totd) => {
     trackName = totd.tmxName;
   } else {
     trackName = removeNameFormatting(totd.name);
+    console.log(trackName);
   }
   let trackAuthor = totd.author;
   if (totd.authorName) {
