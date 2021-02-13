@@ -88,7 +88,7 @@ const addDevPrefix = (command) => {
 
 client.on('message', async (msg) => {
   if (msg.guild && msg.content.startsWith(addDevPrefix('!totd'))) {
-    console.log(`Received message: ${msg.content}`);
+    console.log(`Received message: ${msg.content} (${msg.channel.name} in ${msg.guild.name})`);
     switch (msg.content) {
       case addDevPrefix('!totd today'):
         try {
