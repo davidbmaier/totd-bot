@@ -6,9 +6,11 @@ const redisURL = process.env.REDIS_URL;
 
 const login = () => {
   return new Promise((resolve) => {
-    const redisUrl = new url.URL(redisURL);
-    const redisConn = redis.createClient(redisUrl.port, redisUrl.hostname);
-    redisConn.auth(redisUrl.password);
+    const parsedRedisURL = new url.URL(redisURL);
+    const redisConn = redis.createClient(parsedRedisURL.port, parsedRedisURL.hostname);
+    if (parsedRedisURL.password) {
+      redisConn.auth(parsedRedisURL.password);
+    }
     redisConn.on('ready', () => {
       resolve(redisConn);
     });
