@@ -8,6 +8,8 @@ Extra disclaimer: This is just a pet project I'm working on for fun (and to lear
 
 ## What can this bot do? 🤖
 
+Public invite link coming soon!
+
 - `!totd today` - Prints the current TOTD information to the current channel.
 - `!totd enable` - Stores the current channel to the list the scheduled TOTD post gets sent to. One channel per server. Admin only.
 - `!totd disable` - Removes the current channel from the list the scheduled TOTD post gets sent to. Admin only.
