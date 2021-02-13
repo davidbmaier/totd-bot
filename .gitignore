@@ -1,3 +1,6 @@
+# image cache
+images/
+
 # Logs
 logs
 *.log

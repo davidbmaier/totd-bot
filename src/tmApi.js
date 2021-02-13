@@ -10,6 +10,8 @@ const {
 require(`dotenv`).config();
 const axios = require(`axios`);
 
+const utils = require(`./utils`);
+
 const uplayLogin = Buffer.from(process.env.USER_LOGIN).toString(`base64`);
 
 const loginToTM = async () => {
@@ -66,12 +68,6 @@ const getTMXInfo = async (mapUid) => {
       let imageLink;
       if (tmxResponse.data[0].ImageCount > 0) {
         imageLink = `https://trackmania.exchange/maps/${tmxResponse.data[0].TrackID}/image/1`;
-        // check that it's a valid image file (sometimes it might be a file without an ending, resulting in a raw octet stream)
-        // Discord can't handle those, so we switch back to the thumbnail
-        const imageResponse = await axios.get(imageLink);
-        if (imageResponse.headers[`content-type`] === `application/octet-stream`) {
-          imageLink = undefined;
-        }
       }
 
       if (!imageLink && tmxResponse.data[0].HasThumbnail) {
@@ -114,6 +110,7 @@ const getCurrentTOTD = async (credentials) => {
     currentTOTD.authorName = await getAuthorName(credentials, currentTOTD);
 
     const tmxInfo = await getTMXInfo(currentTOTD.mapUid);
+
     if (tmxInfo) {
       currentTOTD.tmxName = tmxInfo.Name;
       currentTOTD.tmxAuthor = tmxInfo.Username;
@@ -123,6 +120,8 @@ const getCurrentTOTD = async (credentials) => {
         currentTOTD.thumbnailUrl = tmxInfo.ImageLink;
       }
     }
+
+    currentTOTD.thumbnailUrl = await utils.downloadThumbnail(currentTOTD.thumbnailUrl, `thumbnail.jpg`);
 
     return currentTOTD;
   } catch (e) {

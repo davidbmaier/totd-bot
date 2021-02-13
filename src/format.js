@@ -1,3 +1,5 @@
+const Discord = require(`discord.js`);
+
 const formatTime = (time) => {
   const millisecs = time.substr(-3);
   let secs = time.substr(0, time.length - 3);
@@ -107,12 +109,16 @@ const formatTOTDMessage = (totd) => {
 
   const scoreNote = `React to this message to rate the TOTD!`;
 
+  const attachment = new Discord.MessageAttachment(totd.thumbnailUrl, `thumbnail.jpg`);
   const embed = {
     embed: {
       title: title,
       type: `rich`,
+      files: [
+        attachment
+      ],
       image: {
-        url: totd.thumbnailUrl
+        url: `attachment://thumbnail.jpg`
       },
       description: scoreNote,
       fields: [

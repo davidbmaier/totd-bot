@@ -1,4 +1,6 @@
 require(`dotenv`).config();
+const axios = require(`axios`);
+const fs = require(`fs`);
 
 const deployMode = process.env.DEPLOY_MODE;
 
@@ -13,6 +15,32 @@ const addDevPrefix = (command) => {
   }
 };
 
+const downloadThumbnail = (url, fileName) => {
+  const writer = fs.createWriteStream(`./images/${fileName}`);
+
+  return axios({
+    method: `get`,
+    url: url,
+    responseType: `stream`,
+  }).then(response => {
+    return new Promise((resolve, reject) => {
+      response.data.pipe(writer);
+      let error;
+      writer.on(`error`, err => {
+        error = err;
+        writer.close();
+        reject(err);
+      });
+      writer.on(`close`, () => {
+        if (!error) {
+          resolve(`./images/${fileName}`);
+        }
+      });
+    });
+  });
+};
+
 module.exports = {
-  addDevPrefix
+  addDevPrefix,
+  downloadThumbnail
 };
