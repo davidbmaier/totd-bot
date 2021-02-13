@@ -98,7 +98,7 @@ client.on('message', async (msg) => {
         }
         break;
       case addDevPrefix('!totd enable'):
-        if (msg.member.hasPermission('ADMINISTRATOR')) {
+        if (msg.member.hasPermission('ADMINISTRATOR') || msg.author.tag === adminTag) {
           try {
             const redisClient = await redisAPI.login();
             await redisAPI.addConfig(redisClient, msg.guild.id, {
@@ -114,7 +114,7 @@ client.on('message', async (msg) => {
         }
         break;
       case addDevPrefix(`!totd disable`):
-        if (msg.member.hasPermission('ADMINISTRATOR')) {
+        if (msg.member.hasPermission('ADMINISTRATOR') || msg.author.tag === adminTag) {
           try {
             const redisClient = await redisAPI.login();
             await redisAPI.removeConfig(redisClient, msg.guild.id);
@@ -138,8 +138,8 @@ client.on('message', async (msg) => {
         break;
       case addDevPrefix('!totd help'):
         const message = `\`${addDevPrefix('!totd today')}\`  -  Prints the current TOTD information.\n \
-          \`${addDevPrefix('!totd enable')}\`  -  Enables daily TOTD posts in this channel.\n \
-          \`${addDevPrefix('!totd disable')}\`  -  Disables the daily posts again.\n \
+          \`${addDevPrefix('!totd enable')}\`  -  Enables daily TOTD posts in this channel (admin only).\n \
+          \`${addDevPrefix('!totd disable')}\`  -  Disables the daily posts again (admin only).\n \
           \`${addDevPrefix('!totd help')}\`  -  You're looking at it.`;
         const formattedMessage = format.formatHelpMessage(message);
         msg.channel.send(formattedMessage);
