@@ -24,7 +24,7 @@ I suggest not using your main UPlay/Ubisoft Connect account - it doesn't have to
 
 Every commit on main triggers an update to the live version of the bot running on a Heroku dyno.
 
-## Planned Features 📋
+## Planned Features/TODOs 📋
 
 - Find better voting emojis - the current ones are just screenshots from TMNF.
 - Add a short info message when joining a new server.
@@ -32,6 +32,7 @@ Every commit on main triggers an update to the live version of the bot running o
   - How many TOTDs did the author have before?
   - Current WR (but I guess that's not very useful when it gets TOTD)
   - Summary of the last TOTD with top 5 (incl. player links to tm.io and maybe some aggregate data like player numbers)
+- Some general restructuring of the code and some more documentation of the existing functionality.
 
 ## Special Thanks ❤️
 
