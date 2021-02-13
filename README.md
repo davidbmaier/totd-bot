@@ -38,6 +38,6 @@ Every commit on main triggers an update to the live version of the bot running o
 
 Thanks go to:
 
-- the TMX team for their platform and well-documented API
-- Miss (@codecat) for her work on trackmania.io
-- breeku for creating a neat wrapper around a bunch of reverse-engineered Nadeo APIs (let's hope they don't break)
+- The [TMX](https://trackmania.exchange/) team for their platform and well-documented API.
+- Miss (@codecat) for her work on [trackmania.io](https://trackmania.io).
+- @breeku for creating [a neat wrapper](https://github.com/breeku/trackmania-api-node) around a bunch of reverse-engineered Nadeo APIs (let's hope they don't break).
