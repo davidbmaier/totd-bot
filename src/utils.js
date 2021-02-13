@@ -16,6 +16,15 @@ const addDevPrefix = (command) => {
 };
 
 const downloadThumbnail = (url, fileName) => {
+  // create folder first
+  try {
+    fs.readdirSync(`./images`);
+  } catch (error) {
+    if (error.code === `ENOENT`) {
+      fs.mkdirSync(`./images`);
+    }
+  }
+
   const writer = fs.createWriteStream(`./images/${fileName}`);
 
   return axios({

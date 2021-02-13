@@ -76,7 +76,6 @@ const formatTOTDMessage = (totd) => {
     trackName = totd.tmxName;
   } else {
     trackName = removeNameFormatting(totd.name);
-    console.log(trackName);
   }
   let trackAuthor = totd.author;
   if (totd.authorName) {
