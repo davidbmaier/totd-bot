@@ -87,7 +87,7 @@ const addDevPrefix = (command) => {
 };
 
 client.on('message', async (msg) => {
-  if (msg.content.startsWith(addDevPrefix('!totd'))) {
+  if (msg.guild && msg.content.startsWith(addDevPrefix('!totd'))) {
     console.log(`Received message: ${msg.content}`);
     switch (msg.content) {
       case addDevPrefix('!totd today'):
@@ -98,27 +98,35 @@ client.on('message', async (msg) => {
         }
         break;
       case addDevPrefix('!totd enable'):
-        try {
-          const redisClient = await redisAPI.login();
-          await redisAPI.addConfig(redisClient, msg.guild.id, {
-            channelID: msg.channel.id
-          });
-          redisAPI.logout(redisClient);
-          msg.channel.send("You got it, I'll post the TOTD every day just after it comes out.");
-        } catch (error) {
-          sendErrorMessage(msg.channel);
+        if (msg.member.hasPermission('ADMINISTRATOR')) {
+          try {
+            const redisClient = await redisAPI.login();
+            await redisAPI.addConfig(redisClient, msg.guild.id, {
+              channelID: msg.channel.id
+            });
+            redisAPI.logout(redisClient);
+            msg.channel.send("You got it, I'll post the TOTD every day just after it comes out.");
+          } catch (error) {
+            sendErrorMessage(msg.channel);
+          }
+        } else {
+          msg.channel.send("You don't have the `ADMINISTRATOR` permission, sorry.");
         }
         break;
       case addDevPrefix(`!totd disable`):
-        try {
-          const redisClient = await redisAPI.login();
-          await redisAPI.removeConfig(redisClient, msg.guild.id);
-          redisAPI.logout(redisClient);
-          msg.channel.send("Alright, I'll stop posting from now on.");
-        } catch (error) {
-          sendErrorMessage(msg.channel);
+        if (msg.member.hasPermission('ADMINISTRATOR')) {
+          try {
+            const redisClient = await redisAPI.login();
+            await redisAPI.removeConfig(redisClient, msg.guild.id);
+            redisAPI.logout(redisClient);
+            msg.channel.send("Alright, I'll stop posting from now on.");
+          } catch (error) {
+            sendErrorMessage(msg.channel);
+          }
+          break;
+        } else {
+          msg.channel.send("You don't have the `ADMINISTRATOR` permissions, sorry.");
         }
-        break;
       case addDevPrefix('!totd debug'):
         if (msg.author.tag === adminTag) {
           try {
