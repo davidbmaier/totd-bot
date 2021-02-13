@@ -2,13 +2,15 @@
 
 This is a Discord bot for displaying the daily [Trackmania](https://www.trackmania.com/) Track of the Day (and maybe more in the future).
 
-Disclaimer: This bot uses undocumented APIs (and libraries based on them), so it may break at any time - potentially indefinitely if Nadeo/Ubisoft decide to close off those APIs.
+**Disclaimer:** This bot uses undocumented APIs (and libraries based on them), so it may break at any time - potentially indefinitely if Nadeo/Ubisoft decide to close off those APIs.
 
-Extra disclaimer: This is just a pet project I'm working on for fun (and to learn a bit about Discord bots) - don't expect super-tidy code or great documentation. If you encounter any issues with it, either open an issue on Github or talk to me on Discord (tooInfinite#5113).
+**Extra disclaimer:** This is just a pet project I'm working on for fun (and to learn a bit about Discord bots) - don't expect super-tidy code or great documentation. If you encounter any issues with it, either open an issue on Github or talk to me on Discord (tooInfinite#5113).
 
 ## What can this bot do? 🤖
 
-Public invite link coming soon!
+**Public invite link:** [Click here!](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=354368&scope=bot)
+
+Use at your own risk - the bot is in development and may break from time to time.
 
 - `!totd today` - Prints the current TOTD information to the current channel.
 - `!totd enable` - Stores the current channel to the list the daily scheduled TOTD post gets sent to. One channel per server. Admin only.
@@ -41,7 +43,6 @@ Every commit on `main` triggers an update to the live version of the bot running
   - Current WR (but I guess that's not very useful when it gets TOTD)
   - Summary of the last TOTD with top 5 (incl. player links to tm.io and maybe some aggregate data like player numbers)
 - Some general restructuring of the code and some more documentation of the existing functionality.
-- Documentation for the environment variable configuration.
 
 ## Special Thanks ❤️
 
