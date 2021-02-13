@@ -22,7 +22,7 @@ The bot is written in Node.js - so you'll need to install [Node](https://nodejs.
 To run it, just run an `npm i` and an `npm start`. Make sure you've added a `.env` file (see the template for the format).
 I suggest not using your main UPlay/Ubisoft Connect account - it doesn't have to own the game, so you can just create a new one for this bot.
 
-Every commit on main triggers an update to the live version of the bot running on a Heroku dyno.
+Every commit on `main` triggers an update to the live version of the bot running on a Heroku dyno.
 
 ## Planned Features/TODOs 📋
 
@@ -33,6 +33,7 @@ Every commit on main triggers an update to the live version of the bot running o
   - Current WR (but I guess that's not very useful when it gets TOTD)
   - Summary of the last TOTD with top 5 (incl. player links to tm.io and maybe some aggregate data like player numbers)
 - Some general restructuring of the code and some more documentation of the existing functionality.
+- Documentation for the environment variable configuration.
 
 ## Special Thanks ❤️
 
