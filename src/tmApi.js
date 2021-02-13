@@ -6,17 +6,17 @@ const {
   getTOTDs,
   getProfiles,
   getProfilesById
-} = require('trackmania-api-node');
-require('dotenv').config();
-const axios = require('axios');
+} = require(`trackmania-api-node`);
+require(`dotenv`).config();
+const axios = require(`axios`);
 
-const uplayLogin = Buffer.from(process.env.USER_LOGIN).toString('base64');
+const uplayLogin = Buffer.from(process.env.USER_LOGIN).toString(`base64`);
 
 const loginToTM = async () => {
   try {
     const ubi = await loginUbi(uplayLogin); // login to ubi, level 0
     const tmUbi = await loginTrackmaniaUbi(ubi.ticket); // login to trackmania, level 1
-    const nadeo = await loginTrackmaniaNadeo(tmUbi.accessToken, 'NadeoLiveServices'); // login to nadeo, level 2
+    const nadeo = await loginTrackmaniaNadeo(tmUbi.accessToken, `NadeoLiveServices`); // login to nadeo, level 2
 
     return {
       level0: ubi.ticket,
@@ -24,7 +24,7 @@ const loginToTM = async () => {
       level2: nadeo.accessToken
     };
   } catch (e) {
-    console.log('loginToTM error:');
+    console.log(`loginToTM error:`);
     console.log(e);
   }
 };
@@ -45,7 +45,7 @@ const getAuthorName = async (credentials, map) => {
 
     return ubiProfiles.profiles[0].nameOnPlatform;
   } catch (e) {
-    console.log('getAuthorName error:');
+    console.log(`getAuthorName error:`);
     console.log(e);
   }
 };
@@ -57,7 +57,7 @@ const getTMXInfo = async (mapUid) => {
       // get tags
       const tmxTagsResponse = await axios.get(`https://trackmania.exchange/api/tags/gettags`);
       const resolvedTags = [];
-      tmxResponse.data[0].Tags.split(',').forEach((tag) => {
+      tmxResponse.data[0].Tags.split(`,`).forEach((tag) => {
         const matchingTag = tmxTagsResponse.data.find((tmxTag) => tmxTag.ID.toString() === tag);
         resolvedTags.push(matchingTag.Name);
       });
@@ -69,7 +69,7 @@ const getTMXInfo = async (mapUid) => {
         // check that it's a valid image file (sometimes it might be a file without an ending, resulting in a raw octet stream)
         // Discord can't handle those, so we switch back to the thumbnail
         const imageResponse = await axios.get(imageLink);
-        if (imageResponse.headers['content-type'] === 'application/octet-stream') {
+        if (imageResponse.headers[`content-type`] === `application/octet-stream`) {
           imageLink = undefined;
         }
       }
@@ -88,7 +88,7 @@ const getTMXInfo = async (mapUid) => {
       return;
     }
   } catch (e) {
-    console.log('getTMXInfo error:');
+    console.log(`getTMXInfo error:`);
     console.log(e);
   }
 };
@@ -126,7 +126,7 @@ const getCurrentTOTD = async (credentials) => {
 
     return currentTOTD;
   } catch (e) {
-    console.log('getCurrentTOTD error:');
+    console.log(`getCurrentTOTD error:`);
     console.log(e);
   }
 };

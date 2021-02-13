@@ -1,6 +1,6 @@
-const tmAPI = require('./tmApi');
-const format = require('./format');
-const redisAPI = require('./redisApi');
+const tmAPI = require(`./tmApi`);
+const format = require(`./format`);
+const redisAPI = require(`./redisApi`);
 
 const getTOTDMessage = async () => {
   const credentials = await tmAPI.loginToTM();
@@ -38,8 +38,8 @@ const distributeTOTDMessages = async (client) => {
       const channel = await client.channels.fetch(config.channelID);
       sendTOTDMessage(client, channel, message);
     } catch (error) {
-      if (error.message === 'Missing Access') {
-        console.log("Can't access server, bot was probably kicked.");
+      if (error.message === `Missing Access`) {
+        console.log(`Can't access server, bot was probably kicked.`);
       } else {
         console.error(error);
       }
@@ -48,7 +48,7 @@ const distributeTOTDMessages = async (client) => {
 };
 
 const sendErrorMessage = (channel) => {
-  channel.send("Oops, something went wrong here - please talk to my dev and let him know that didn't work.");
+  channel.send(`Oops, something went wrong here - please talk to my dev and let him know that didn't work.`);
 };
 
 module.exports = {

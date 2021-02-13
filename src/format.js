@@ -6,7 +6,7 @@ const formatTime = (time) => {
   secs = secs % 60;
   // pad the seconds if they're only a single digit
   if (secs < 10) {
-    secs = secs.toString().padStart(2, '0');
+    secs = secs.toString().padStart(2, `0`);
   }
 
   return `${mins}:${secs}.${millisecs}`;
@@ -14,17 +14,17 @@ const formatTime = (time) => {
 
 const removeNameFormatting = (text) => {
   // this should take care of all the possible options, see https://doc.maniaplanet.com/client/text-formatting for reference
-  let cleanedText = text.replace(/\$[0-9a-fA-F]{3}/, '');
-  cleanedText = cleanedText.replace('$w', '');
-  cleanedText = cleanedText.replace('$n', '');
-  cleanedText = cleanedText.replace('$o', '');
-  cleanedText = cleanedText.replace('$b', '');
-  cleanedText = cleanedText.replace('$i', '');
-  cleanedText = cleanedText.replace('$t', '');
-  cleanedText = cleanedText.replace('$s', '');
-  cleanedText = cleanedText.replace('$g', '');
-  cleanedText = cleanedText.replace('$z', '');
-  cleanedText = cleanedText.replace('$$', '');
+  let cleanedText = text.replace(/\$[0-9a-fA-F]{3}/, ``);
+  cleanedText = cleanedText.replace(`$w`, ``);
+  cleanedText = cleanedText.replace(`$n`, ``);
+  cleanedText = cleanedText.replace(`$o`, ``);
+  cleanedText = cleanedText.replace(`$b`, ``);
+  cleanedText = cleanedText.replace(`$i`, ``);
+  cleanedText = cleanedText.replace(`$t`, ``);
+  cleanedText = cleanedText.replace(`$s`, ``);
+  cleanedText = cleanedText.replace(`$g`, ``);
+  cleanedText = cleanedText.replace(`$z`, ``);
+  cleanedText = cleanedText.replace(`$$`, ``);
   return cleanedText;
 };
 
@@ -35,18 +35,18 @@ const formatTOTDMessage = (totd) => {
   const day = today.getDate();
 
   const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
+    `January`,
+    `February`,
+    `March`,
+    `April`,
+    `May`,
+    `June`,
+    `July`,
+    `August`,
+    `September`,
+    `October`,
+    `November`,
+    `December`
   ];
 
   const formatDay = (dayNum) => {
@@ -61,9 +61,9 @@ const formatTOTDMessage = (totd) => {
     }
   };
 
-  let trackLabel = 'Track';
+  let trackLabel = `Track`;
   if (totd.tmxTags && totd.tmxTags.includes(`Scenery`)) {
-    trackLabel = 'Scenery';
+    trackLabel = `Scenery`;
   }
 
   const title = `**Here's the ${monthNames[month]} ${formatDay(day)} ${trackLabel} of the Day!**\n`;
@@ -85,7 +85,7 @@ const formatTOTDMessage = (totd) => {
   // assemble style info
   let styles;
   if (totd.tmxTags) {
-    styles = `${totd.tmxTags.join(', ')}`;
+    styles = `${totd.tmxTags.join(`, `)}`;
   }
 
   // assemble medal info
@@ -110,39 +110,39 @@ const formatTOTDMessage = (totd) => {
   const embed = {
     embed: {
       title: title,
-      type: 'rich',
+      type: `rich`,
       image: {
         url: totd.thumbnailUrl
       },
       description: scoreNote,
       fields: [
         {
-          name: 'Name',
+          name: `Name`,
           value: trackName,
           inline: true
         },
         {
-          name: 'Author',
+          name: `Author`,
           value: trackAuthor,
           inline: true
         },
         {
-          name: 'Uploaded on',
-          value: new Date(totd.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+          name: `Uploaded on`,
+          value: new Date(totd.timestamp).toLocaleDateString(`en-US`, { year: `numeric`, month: `long`, day: `numeric` }),
           inline: true
         },
         {
-          name: 'Medals',
+          name: `Medals`,
           value: `${bronze}\n${silver}\n${gold}\n${author}`,
           inline: true
         },
         {
-          name: 'Times',
+          name: `Times`,
           value: `${bronzeTime}\n${silverTime}\n${goldTime}\n${authorTime}`,
           inline: true
         },
         {
-          name: 'Links',
+          name: `Links`,
           value: links
         }
       ]
@@ -151,7 +151,7 @@ const formatTOTDMessage = (totd) => {
 
   if (styles) {
     embed.embed.fields.splice(5, 0, {
-      name: 'Styles (according to TMX)',
+      name: `Styles (according to TMX)`,
       value: styles,
       inline: true
     });
@@ -163,19 +163,19 @@ const formatTOTDMessage = (totd) => {
 const formatHelpMessage = (commands) => {
   return {
     embed: {
-      title: "Hey, I'm TOTD Bot!",
-      type: 'rich',
-      description: "Here's what you can tell me to do:",
+      title: `Hey, I'm TOTD Bot!`,
+      type: `rich`,
+      description: `Here's what you can tell me to do:`,
       fields: [
         {
-          name: 'Commands',
+          name: `Commands`,
           value: commands
         },
         {
-          name: 'More Info',
+          name: `More Info`,
           value:
-            "I've been developed by <@141627532335251456> - feel free to let him know if you like me (or when something broke). \
-            My code can be found [here](https://github.com/davidbmaier/todt-bot)."
+            `I've been developed by <@141627532335251456> - feel free to let him know if you like me (or when something broke). \
+            My code can be found [here](https://github.com/davidbmaier/todt-bot).`
         }
       ]
     }

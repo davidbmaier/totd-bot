@@ -1,6 +1,6 @@
-const url = require('url');
-const redis = require('redis');
-require('dotenv').config();
+const url = require(`url`);
+const redis = require(`redis`);
+require(`dotenv`).config();
 
 const redisURL = process.env.REDIS_URL;
 
@@ -11,7 +11,7 @@ const login = () => {
     if (parsedRedisURL.password) {
       redisConn.auth(parsedRedisURL.password);
     }
-    redisConn.on('ready', () => {
+    redisConn.on(`ready`, () => {
       resolve(redisConn);
     });
   });
@@ -25,7 +25,7 @@ const logout = (redisClient) => {
 };
 
 const addConfig = (redisClient, serverID, config) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     redisClient.set(serverID, JSON.stringify(config), (err) => {
       if (err) {
         reject(err);
@@ -37,7 +37,7 @@ const addConfig = (redisClient, serverID, config) => {
 };
 
 const removeConfig = (redisClient, serverID) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     redisClient.del(serverID, (err) => {
       if (err) {
         reject(err);
@@ -49,7 +49,7 @@ const removeConfig = (redisClient, serverID) => {
 };
 
 const getConfig = (redisClient, key) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     redisClient.get(key, (getErr, config) => {
       redisClient.quit();
       if (getErr) {
@@ -67,9 +67,9 @@ const getConfig = (redisClient, key) => {
 };
 
 const getAllConfigs = (redisClient) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     // get all entries
-    redisClient.keys('*', async (keyErr, keys) => {
+    redisClient.keys(`*`, async (keyErr, keys) => {
       if (keyErr) {
         reject(keyErr);
       } else {
