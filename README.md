@@ -8,7 +8,7 @@ This is a Discord bot for displaying the daily [Trackmania](https://www.trackman
 
 ## What can this bot do? 🤖
 
-**Public invite link:** [Click here!](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=354368&scope=bot)
+**Public invite link:** [Click here!](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=387136&scope=bot)
 
 Use at your own risk - the bot is in development and may break from time to time.
 
