@@ -153,4 +153,12 @@ client.on('message', async (msg) => {
   }
 });
 
+client.on('guildCreate', (guild) => {
+  console.log(`Joined new server: ${guild.name}`);
+});
+
+client.on('guildDelete', (guild) => {
+  console.log(`Left server: ${guild.name}`);
+});
+
 client.login(discordToken);
