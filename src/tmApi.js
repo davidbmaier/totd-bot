@@ -5,7 +5,8 @@ const {
   getMaps,
   getTOTDs,
   getProfiles,
-  getProfilesById
+  getProfilesById,
+  getLeaderboardsAroundScore
 } = require(`trackmania-api-node`);
 require(`dotenv`).config();
 const axios = require(`axios`);
@@ -31,23 +32,23 @@ const loginToTM = async () => {
   }
 };
 
-const getAuthorName = async (credentials, map) => {
+const getPlayerName = async (credentials, playerId) => {
   try {
-    const tmProfiles = await getProfiles(credentials.level1, [map.author]);
+    const tmProfiles = await getProfiles(credentials.level1, [playerId]);
 
     if (tmProfiles.length === 0) {
-      return map.author;
+      return playerId;
     }
 
     const ubiProfiles = await getProfilesById(credentials.level0, [tmProfiles[0].uid]);
 
     if (ubiProfiles.profiles.length === 0) {
-      return map.author;
+      return playerId;
     }
 
     return ubiProfiles.profiles[0].nameOnPlatform;
   } catch (e) {
-    console.log(`getAuthorName error:`);
+    console.log(`getPlayerName error:`);
     console.log(e);
   }
 };
@@ -107,7 +108,7 @@ const getCurrentTOTD = async (credentials) => {
     const currentTOTD = currentTOTDArray[0];
     currentTOTD.seasonUid = currentTOTDMeta.seasonUid;
 
-    currentTOTD.authorName = await getAuthorName(credentials, currentTOTD);
+    currentTOTD.authorName = await getPlayerName(credentials, currentTOTD.author);
 
     const tmxInfo = await getTMXInfo(currentTOTD.mapUid);
 
@@ -130,7 +131,35 @@ const getCurrentTOTD = async (credentials) => {
   }
 };
 
+const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
+  try {
+    const leaderboard = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, 0);
+    const records = leaderboard.tops[0].top.slice(1, 11);
+
+    const extendedLeaderboard1 = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, leaderboard.tops[0].top[50].score);
+    const extendedLeaderboard2 = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, extendedLeaderboard1.tops[0].top[30].score);
+
+    records.push(extendedLeaderboard2.tops[0].top.find((top) => top.position === 100));
+
+    for (let i = 0; i < records.length; i++) {
+      records[i].playerName = await getPlayerName(credentials, records[i].accountId);
+      // 100 already has the correct position
+      if (records[i].position !== 100) {
+        records[i].position = i + 1;
+      }
+    }
+
+
+    return records;
+    
+  } catch (e) {
+    console.log(`getTOTDLeaderboard error:`);
+    console.log(e);
+  }
+};
+
 module.exports = {
   loginToTM,
-  getCurrentTOTD
+  getCurrentTOTD,
+  getTOTDLeaderboard
 };

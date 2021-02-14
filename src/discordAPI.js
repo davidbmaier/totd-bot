@@ -8,6 +8,13 @@ const getTOTDMessage = async () => {
   return format.formatTOTDMessage(totd);
 };
 
+const getTOTDLeaderboardMessage = async () => {
+  const credentials = await tmAPI.loginToTM();
+  const totd = await tmAPI.getCurrentTOTD(credentials);
+  const top = await tmAPI.getTOTDLeaderboard(credentials, totd.seasonUid, totd.mapUid);
+  return format.formatLeaderboardMessage(totd, top);
+};
+
 const sendTOTDMessage = async (client, channel, message) => {
   console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
 
@@ -24,6 +31,15 @@ const sendTOTDMessage = async (client, channel, message) => {
   emojis.forEach(async (emoji) => {
     await discordMessage.react(emoji);
   });
+};
+
+const sendTOTDLeaderboard = async (client, channel) => {
+  console.log(`Sending current leaderboard to #${channel.name} in ${channel.guild.name}`);
+
+  const discordMessage = await channel.send(`Fetching current leaderboard, give me a second...`);
+
+  const leaderboardMessage = await getTOTDLeaderboardMessage();
+  discordMessage.edit(leaderboardMessage);
 };
 
 const distributeTOTDMessages = async (client) => {
@@ -56,5 +72,6 @@ module.exports = {
   sendTOTDMessage,
   getTOTDMessage,
   sendErrorMessage,
+  sendTOTDLeaderboard,
   distributeTOTDMessages
 };

@@ -166,6 +166,51 @@ const formatTOTDMessage = (totd) => {
   return embed;
 };
 
+const formatLeaderboardMessage = (totd, records) => {
+  const topTen = records.slice(0, 10);
+  const top100 = records[10];
+
+  const times = topTen.map((top) => formatTime(top.score.toString())).join(`\n`);
+  const positions = topTen.map((top) => top.position).join(`\n`);
+  const names = topTen.map((top) => `[${top.playerName}](https://trackmania.io/#/player/${top.accountId})`).join(`\n`);
+
+  const embed = {
+    content: ``,
+    embed: {
+      title: `Here's today's TOTD leaderboard!`,
+      type: `rich`,
+      description: `Here's the current top 10:`,
+      fields: [
+        {
+          name: `Position`,
+          value: positions,
+          inline: true
+        },
+        {
+          name: `Name`,
+          value: names,
+          inline: true
+        },
+        {
+          name: `Time`,
+          value: times,
+          inline: true
+        },
+        {
+          name: `Top 100`,
+          value: `To get top 100, you need to drive at least a **${formatTime(top100.score.toString())}**.`
+        },
+        {
+          name: `Links`,
+          value: `Full leaderboard on [TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})`
+        }
+      ]
+    }
+  };
+
+  return embed;
+};
+
 const formatHelpMessage = (commands) => {
   return {
     embed: {
@@ -190,5 +235,6 @@ const formatHelpMessage = (commands) => {
 
 module.exports = {
   formatTOTDMessage,
+  formatLeaderboardMessage,
   formatHelpMessage
 };

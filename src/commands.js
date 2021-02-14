@@ -19,6 +19,18 @@ const today = {
   }
 };
 
+const leaderboard = {
+  command: utils.addDevPrefix(`!totd leaderboard`),
+  action: async (msg, client) => {
+    try {
+      await discordAPI.sendTOTDLeaderboard(client, msg.channel);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
+    }
+  }
+};
+
 const enable = {
   command: utils.addDevPrefix(`!totd enable`),
   action: async (msg) => {
@@ -62,7 +74,8 @@ const disable = {
 const help = {
   command: utils.addDevPrefix(`!totd help`),
   action: async (msg) => {
-    const message = `\`${utils.addDevPrefix(`!totd today`)}\`  -  Prints the current TOTD information.\n \
+    const message = `\`${utils.addDevPrefix(`!totd today`)}\`  -  Displays the current TOTD information.\n \
+      \`${utils.addDevPrefix(`!totd leaderboard`)}\`  -  Display the current top 10 (and the time for top 100).\n \
       \`${utils.addDevPrefix(`!totd enable`)}\`  -  Enables daily TOTD posts in this channel (admin only).\n \
       \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disables the daily posts again (admin only).\n \
       \`${utils.addDevPrefix(`!totd help`)}\`  -  You're looking at it.`;
@@ -85,4 +98,4 @@ const debug = {
   }
 };
 
-module.exports = [help, debug, today, enable, disable];
+module.exports = [help, debug, today, leaderboard, enable, disable];
