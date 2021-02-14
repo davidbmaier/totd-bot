@@ -18,6 +18,11 @@ Use at your own risk - the bot is in development and may break from time to time
 - `!totd disable` - Removes the current channel from the list the scheduled TOTD post gets sent to. Admin only.
 - `!totd help` - Displays some info about the bot.
 
+Debug (and bot admin) only:
+
+- `!totd refresh today` - Refreshes the internally cached TOTD information.
+- `!totd refresh leaderboard` - Refreshes the internally cached leaderboard information.
+
 ![Bot screenshot](https://i.imgur.com/Cjky9X0.png)
 
 ## Setup/Development 💻

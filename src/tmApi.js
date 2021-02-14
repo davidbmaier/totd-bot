@@ -134,6 +134,10 @@ const getCurrentTOTD = async (credentials) => {
 const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
   try {
     const leaderboard = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, 0);
+    // if there aren't at least 50 records, return null
+    if (!leaderboard.tops[0].top[50]) {
+      return null;
+    }
     const records = leaderboard.tops[0].top.slice(1, 11);
 
     const extendedLeaderboard1 = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, leaderboard.tops[0].top[50].score);

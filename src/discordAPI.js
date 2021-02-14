@@ -22,6 +22,9 @@ const getTOTDMessage = async (forceRefresh) => {
   const totd = await tmAPI.getCurrentTOTD(credentials);
   const formattedMessage = format.formatTOTDMessage(totd);
 
+  // also refresh the leaderboard
+  getTOTDLeaderboardMessage(true);
+
   // save fresh message to redis
   const redisClient = await redisAPI.login();
   await redisAPI.saveCurrentTOTD(redisClient, formattedMessage);
@@ -45,6 +48,11 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
     const credentials = await tmAPI.loginToTM();
     const totd = await tmAPI.getCurrentTOTD(credentials);
     const top = await tmAPI.getTOTDLeaderboard(credentials, totd.seasonUid, totd.mapUid);
+    // if top doesn't exist yet, fall back
+    if (!top) {
+      return `Hmm, I can't find enough records yet - please check again in a couple minutes`;
+    }
+
     const formattedMessage = format.formatLeaderboardMessage(totd, top, utils.convertToUNIXSeconds(new Date()));
 
     // save fresh message to redis
@@ -61,7 +69,6 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
 
 const sendTOTDMessage = async (client, channel, message) => {
   console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
-
   const discordMessage = await channel.send(message);
   // add rating emojis
   const emojis = [
@@ -78,18 +85,20 @@ const sendTOTDMessage = async (client, channel, message) => {
 };
 
 const sendTOTDLeaderboard = async (client, channel) => {
-  console.log(`Sending current leaderboard to #${channel.name} in ${channel.guild.name}`);
-
   const discordMessage = await channel.send(`Fetching current leaderboard, give me a second...`);
 
   const leaderboardMessage = await getTOTDLeaderboardMessage();
-  const minutesAgo = utils.getMinutesAgo(new Date(leaderboardMessage.date * 1000));
-  if (minutesAgo === 0) {
-    leaderboardMessage.embed.description = `Last refreshed: Just now`;
-  } else {
-    leaderboardMessage.embed.description = `Last refreshed: ${minutesAgo} minutes ago`;
+  // if no records exist yet, it'll just be a string
+  if (leaderboardMessage.date) {
+    const minutesAgo = utils.getMinutesAgo(new Date(leaderboardMessage.date * 1000));
+    if (minutesAgo === 0) {
+      leaderboardMessage.embed.description = `Last refreshed: Just now`;
+    } else {
+      leaderboardMessage.embed.description = `Last refreshed: ${minutesAgo} minutes ago`;
+    }
   }
   
+  console.log(`Sending current leaderboard to #${channel.name} in ${channel.guild.name}`);
   discordMessage.edit(leaderboardMessage);
 };
 
