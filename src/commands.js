@@ -82,11 +82,42 @@ const help = {
   }
 };
 
+const refresh = {
+  command: utils.addDevPrefix(`!totd refresh today`),
+  action: async (msg) => {
+    if (msg.author.tag === adminTag) {
+      try {
+        await discordAPI.getTOTDMessage(true);
+        msg.channel.send(`I've refreshed the current TOTD data!`);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.error(error);
+      }
+    }
+  }
+};
+
+const refreshLeaderboard = {
+  command: utils.addDevPrefix(`!totd refresh leaderboard`),
+  action: async (msg) => {
+    if (msg.author.tag === adminTag) {
+      try {
+        await discordAPI.getTOTDLeaderboardMessage(true);
+        msg.channel.send(`I've refreshed the current leaderboard data!`);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.error(error);
+      }
+    }
+  }
+};
+
 const debug = {
   command: utils.addDevPrefix(`!totd debug`),
   action: async (msg, client) => {
     if (msg.author.tag === adminTag) {
       try {
+        //await discordAPI.distributeTOTDMessages(client);
         const redisClient = await redisAPI.login();
         console.log(await redisAPI.getAllConfigs(redisClient));
         redisAPI.logout(redisClient);
@@ -98,4 +129,4 @@ const debug = {
   }
 };
 
-module.exports = [help, debug, today, leaderboard, enable, disable];
+module.exports = [help, refresh, refreshLeaderboard, debug, today, leaderboard, enable, disable];

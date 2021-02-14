@@ -166,7 +166,7 @@ const formatTOTDMessage = (totd) => {
   return embed;
 };
 
-const formatLeaderboardMessage = (totd, records) => {
+const formatLeaderboardMessage = (totd, records, date) => {
   const topTen = records.slice(0, 10);
   const top100 = records[10];
 
@@ -175,6 +175,7 @@ const formatLeaderboardMessage = (totd, records) => {
   const names = topTen.map((top) => `[${top.playerName}](https://trackmania.io/#/player/${top.accountId})`).join(`\n`);
 
   const embed = {
+    date: date,
     content: ``,
     embed: {
       title: `Here's today's TOTD leaderboard!`,

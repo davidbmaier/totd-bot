@@ -85,10 +85,66 @@ const getAllConfigs = async (redisClient) => {
   return Promise.resolve(configs);
 };
 
+const saveCurrentTOTD = async (redisClient, totd) => {
+  return new Promise((resolve, reject) => {
+    // save to redis
+    redisClient.set(`totd`, JSON.stringify(totd), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+const getCurrentTOTD = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    // save to redis
+    redisClient.get(`totd`, (err, totd) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(totd) || undefined);
+      }
+    });
+  });
+};
+
+const saveCurrentLeaderboard = async (redisClient, leaderboard) => {
+  return new Promise((resolve, reject) => {
+    // save to redis
+    redisClient.set(`leaderboard`, JSON.stringify(leaderboard), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+const getCurrentLeaderboard = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    // save to redis
+    redisClient.get(`leaderboard`, (err, leaderboard) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(leaderboard) || undefined);
+      }
+    });
+  });
+};
+
 module.exports = {
   login,
   logout,
   addConfig,
   removeConfig,
-  getAllConfigs
+  getAllConfigs,
+  saveCurrentTOTD,
+  saveCurrentLeaderboard,
+  getCurrentTOTD,
+  getCurrentLeaderboard
 };

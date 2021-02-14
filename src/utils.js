@@ -15,6 +15,10 @@ const addDevPrefix = (command) => {
   }
 };
 
+const convertToUNIXSeconds = (date) => {
+  return Math.round(date.getTime()/1000);
+};
+
 const downloadThumbnail = (url, fileName) => {
   // create folder first
   try {
@@ -51,5 +55,6 @@ const downloadThumbnail = (url, fileName) => {
 
 module.exports = {
   addDevPrefix,
-  downloadThumbnail
+  downloadThumbnail,
+  convertToUNIXSeconds
 };

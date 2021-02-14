@@ -1,18 +1,62 @@
 const tmAPI = require(`./tmApi`);
 const format = require(`./format`);
 const redisAPI = require(`./redisApi`);
+const utils = require(`./utils`);
 
-const getTOTDMessage = async () => {
+const getTOTDMessage = async (forceRefresh) => {
+  if (!forceRefresh) {
+    console.log(`Using cached TOTD...`);
+    const redisClient = await redisAPI.login();
+    const totdMessage = await redisAPI.getCurrentTOTD(redisClient);
+    redisAPI.logout(redisClient);
+
+    if (totdMessage) {
+      return totdMessage;
+    }
+    // if there is no message yet, refresh
+    console.log(`No cached TOTD exists yet, falling back to refresh`);
+  }
+
+  console.log(`Refreshing TOTD from API...`);
   const credentials = await tmAPI.loginToTM();
   const totd = await tmAPI.getCurrentTOTD(credentials);
-  return format.formatTOTDMessage(totd);
+  const formattedMessage = format.formatTOTDMessage(totd);
+
+  // save fresh message to redis
+  const redisClient = await redisAPI.login();
+  await redisAPI.saveCurrentTOTD(redisClient, formattedMessage);
+  redisAPI.logout(redisClient);
+
+  return formattedMessage;
 };
 
-const getTOTDLeaderboardMessage = async () => {
-  const credentials = await tmAPI.loginToTM();
-  const totd = await tmAPI.getCurrentTOTD(credentials);
-  const top = await tmAPI.getTOTDLeaderboard(credentials, totd.seasonUid, totd.mapUid);
-  return format.formatLeaderboardMessage(totd, top);
+const getTOTDLeaderboardMessage = async (forceRefresh) => {
+  const redisClient = await redisAPI.login();
+  const cachedleaderBoardMessage = await redisAPI.getCurrentLeaderboard(redisClient);
+  redisAPI.logout(redisClient);
+
+  if (
+    forceRefresh
+    || !cachedleaderBoardMessage
+    || cachedleaderBoardMessage.date < utils.convertToUNIXSeconds(new Date()) - 600
+  ) {
+    // if cached message does not exist or is older than ten minutes, refresh
+    console.log(`Refreshing leaderboard from API...`);
+    const credentials = await tmAPI.loginToTM();
+    const totd = await tmAPI.getCurrentTOTD(credentials);
+    const top = await tmAPI.getTOTDLeaderboard(credentials, totd.seasonUid, totd.mapUid);
+    const formattedMessage = format.formatLeaderboardMessage(totd, top, utils.convertToUNIXSeconds(new Date()));
+
+    // save fresh message to redis
+    const redisClient = await redisAPI.login();
+    await redisAPI.saveCurrentLeaderboard(redisClient, formattedMessage);
+    redisAPI.logout(redisClient);
+
+    return formattedMessage;
+  } else {
+    console.log(`Using cached leaderboard...`);
+    return cachedleaderBoardMessage;  
+  }
 };
 
 const sendTOTDMessage = async (client, channel, message) => {
@@ -44,7 +88,7 @@ const sendTOTDLeaderboard = async (client, channel) => {
 
 const distributeTOTDMessages = async (client) => {
   console.log(`Broadcasting TOTD message to subscribed channels`);
-  const message = await getTOTDMessage();
+  const message = await getTOTDMessage(true);
 
   const redisClient = await redisAPI.login();
   const configs = await redisAPI.getAllConfigs(redisClient);
@@ -71,6 +115,7 @@ const sendErrorMessage = (channel) => {
 module.exports = {
   sendTOTDMessage,
   getTOTDMessage,
+  getTOTDLeaderboardMessage,
   sendErrorMessage,
   sendTOTDLeaderboard,
   distributeTOTDMessages
