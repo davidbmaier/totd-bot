@@ -19,6 +19,13 @@ const convertToUNIXSeconds = (date) => {
   return Math.round(date.getTime()/1000);
 };
 
+const getMinutesAgo = (date) => {
+  var seconds = Math.floor((new Date() - date) / 1000);
+  var interval = seconds / 31536000;
+  interval = seconds / 60;
+  return Math.floor(interval);
+};
+
 const downloadThumbnail = (url, fileName) => {
   // create folder first
   try {
@@ -56,5 +63,6 @@ const downloadThumbnail = (url, fileName) => {
 module.exports = {
   addDevPrefix,
   downloadThumbnail,
-  convertToUNIXSeconds
+  convertToUNIXSeconds,
+  getMinutesAgo
 };

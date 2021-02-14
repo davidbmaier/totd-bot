@@ -180,7 +180,6 @@ const formatLeaderboardMessage = (totd, records, date) => {
     embed: {
       title: `Here's today's TOTD leaderboard!`,
       type: `rich`,
-      description: `Here's the current top 10:`,
       fields: [
         {
           name: `Position`,
@@ -203,7 +202,7 @@ const formatLeaderboardMessage = (totd, records, date) => {
         },
         {
           name: `Links`,
-          value: `Full leaderboard on [TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})`
+          value: `Full leaderboards on [TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})`
         }
       ]
     }

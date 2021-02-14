@@ -83,6 +83,13 @@ const sendTOTDLeaderboard = async (client, channel) => {
   const discordMessage = await channel.send(`Fetching current leaderboard, give me a second...`);
 
   const leaderboardMessage = await getTOTDLeaderboardMessage();
+  const minutesAgo = utils.getMinutesAgo(new Date(leaderboardMessage.date * 1000));
+  if (minutesAgo === 0) {
+    leaderboardMessage.embed.description = `Last refreshed: Just now`;
+  } else {
+    leaderboardMessage.embed.description = `Last refreshed: ${minutesAgo} minutes ago`;
+  }
+  
   discordMessage.edit(leaderboardMessage);
 };
 
