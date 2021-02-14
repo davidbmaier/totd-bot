@@ -43,6 +43,7 @@ Every commit on `main` triggers an update to the live version of the bot running
   - Current WR (but I guess that's not very useful when it gets TOTD)
   - Summary of the last TOTD with top 5 (incl. player links to tm.io and maybe some aggregate data like player numbers)
 - Some general restructuring of the code and some more documentation of the existing functionality.
+- Handling of non-JPG image files.
 
 ## Special Thanks ❤️
 

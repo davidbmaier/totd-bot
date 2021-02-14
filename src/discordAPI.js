@@ -27,6 +27,7 @@ const sendTOTDMessage = async (client, channel, message) => {
 };
 
 const distributeTOTDMessages = async (client) => {
+  console.log(`Broadcasting TOTD message to subscribed channels`);
   const message = await getTOTDMessage();
 
   const redisClient = await redisAPI.login();
