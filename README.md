@@ -43,6 +43,7 @@ Every commit on `main` triggers an update to the live version of the bot running
 
 - Find better voting emojis - the current ones are just screenshots from TMNF.
 - Add emojis in general (e.g. a loading emoji when it's loading the leaderboards).
+- Maybe improve mobile formatting of embeds - but it's not a priority.
 - Add a short info message when joining a new server (if there's a reliable way to find the "main" channel).
 - More data (currently uses TM and TMX when available) - there's probably more interesting metadata the bot could display.
   - How many TOTDs did the author have before?
