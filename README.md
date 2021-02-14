@@ -42,8 +42,8 @@ Every commit on `main` triggers an update to the live version of the bot running
 ## Planned Features/TODOs 📋
 
 - Find better voting emojis - the current ones are just screenshots from TMNF.
+- Add emojis in general (e.g. a loading emoji when it's loading the leaderboards).
 - Add a short info message when joining a new server (if there's a reliable way to find the "main" channel).
-- Cache TOTD data once per day.
 - More data (currently uses TM and TMX when available) - there's probably more interesting metadata the bot could display.
   - How many TOTDs did the author have before?
   - Current WR (but I guess that's not very useful when it gets TOTD)

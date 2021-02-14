@@ -91,7 +91,7 @@ const sendTOTDLeaderboard = async (client, channel) => {
   // if no records exist yet, it'll just be a string
   if (leaderboardMessage.date) {
     const minutesAgo = utils.getMinutesAgo(new Date(leaderboardMessage.date * 1000));
-    if (minutesAgo === 0) {
+    if (minutesAgo < 1) {
       leaderboardMessage.embed.description = `Last refreshed: Just now`;
     } else {
       leaderboardMessage.embed.description = `Last refreshed: ${minutesAgo} minutes ago`;
