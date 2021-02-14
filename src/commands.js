@@ -37,9 +37,7 @@ const enable = {
     if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
       try {
         const redisClient = await redisAPI.login();
-        await redisAPI.addConfig(redisClient, msg.guild.id, {
-          channelID: msg.channel.id
-        });
+        await redisAPI.addConfig(redisClient, msg.guild.id, msg.channel.id);
         redisAPI.logout(redisClient);
         msg.channel.send(`You got it, I'll post the TOTD every day just after it comes out.`);
       } catch (error) {
@@ -89,7 +87,9 @@ const debug = {
   action: async (msg, client) => {
     if (msg.author.tag === adminTag) {
       try {
-        discordAPI.distributeTOTDMessages(client);
+        const redisClient = await redisAPI.login();
+        console.log(await redisAPI.getAllConfigs(redisClient));
+        redisAPI.logout(redisClient);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);

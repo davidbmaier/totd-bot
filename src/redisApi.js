@@ -24,9 +24,32 @@ const logout = (redisClient) => {
   });
 };
 
-const addConfig = (redisClient, serverID, config) => {
+const getConfigs = (redisClient) => {
   return new Promise((resolve, reject) => {
-    redisClient.set(serverID, JSON.stringify(config), (err) => {
+    redisClient.get(`serverConfigs`, (err, configs) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(configs) || []);
+      }
+    });
+  });
+};
+
+const addConfig = async (redisClient, serverID, channelID) => {
+  let configs = await getConfigs(redisClient);
+  return new Promise((resolve, reject) => {
+    // remove duplicate
+    for (let i = 0; i < configs.length; i++) {
+      if (configs[i].serverID === serverID){
+        configs.splice(i, 1);
+        break;
+      }
+    }
+    // add new config
+    configs.push({serverID: serverID, channelID: channelID});
+    // save to redis
+    redisClient.set(`serverConfigs`, JSON.stringify(configs), (err) => {
       if (err) {
         reject(err);
       } else {
@@ -36,9 +59,18 @@ const addConfig = (redisClient, serverID, config) => {
   });
 };
 
-const removeConfig = (redisClient, serverID) => {
+const removeConfig = async (redisClient, serverID) => {
+  let configs = await getConfigs(redisClient);
   return new Promise((resolve, reject) => {
-    redisClient.del(serverID, (err) => {
+    // remove config with serverID
+    for (let i = 0; i < configs.length; i++) {
+      if (configs[i].serverID === serverID){
+        configs.splice(i, 1);
+        break;
+      }
+    }
+    // save to redis
+    redisClient.set(`serverConfigs`, JSON.stringify(configs), (err) => {
       if (err) {
         reject(err);
       } else {
@@ -48,40 +80,9 @@ const removeConfig = (redisClient, serverID) => {
   });
 };
 
-const getConfig = (redisClient, key) => {
-  return new Promise((resolve, reject) => {
-    redisClient.get(key, (getErr, config) => {
-      redisClient.quit();
-      if (getErr) {
-        reject(getErr);
-      } else {
-        try {
-          const parsedConfig = JSON.parse(config);
-          resolve(parsedConfig);
-        } catch (configParseErr) {
-          reject(configParseErr);
-        }
-      }
-    });
-  });
-};
-
-const getAllConfigs = (redisClient) => {
-  return new Promise((resolve, reject) => {
-    // get all entries
-    redisClient.keys(`*`, async (keyErr, keys) => {
-      if (keyErr) {
-        reject(keyErr);
-      } else {
-        const configs = [];
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
-          configs.push(getConfig(redisClient, key));
-        }
-        resolve(await Promise.all(configs));
-      }
-    });
-  });
+const getAllConfigs = async (redisClient) => {
+  const configs = await getConfigs(redisClient);
+  return Promise.resolve(configs);
 };
 
 module.exports = {
@@ -89,6 +90,5 @@ module.exports = {
   logout,
   addConfig,
   removeConfig,
-  getConfig,
   getAllConfigs
 };
