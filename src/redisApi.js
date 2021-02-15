@@ -137,6 +137,19 @@ const getCurrentLeaderboard = async (redisClient) => {
   });
 };
 
+const clearCurrentLeaderboard = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    // clear in redis
+    redisClient.del(`leaderboard`, (err, leaderboard) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(leaderboard) || undefined);
+      }
+    });
+  });
+};
+
 module.exports = {
   login,
   logout,
@@ -146,5 +159,6 @@ module.exports = {
   saveCurrentTOTD,
   saveCurrentLeaderboard,
   getCurrentTOTD,
-  getCurrentLeaderboard
+  getCurrentLeaderboard,
+  clearCurrentLeaderboard
 };

@@ -136,6 +136,7 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
     const leaderboard = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, 0);
     // if there aren't at least 50 records, return null
     if (!leaderboard.tops[0].top[50]) {
+      console.log(`Can't find at least 50 records, stopping`);
       return null;
     }
     const records = leaderboard.tops[0].top.slice(1, 11);
@@ -144,6 +145,12 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
     const extendedLeaderboard2 = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, extendedLeaderboard1.tops[0].top[30].score);
 
     records.push(extendedLeaderboard2.tops[0].top.find((top) => top.position === 100));
+
+    // if we can't find top 100 in the records, the leaderboard is still updating too fast - so we just stop and recommend waiting a bit
+    if (!records[records.length - 1]) {
+      console.log(`Can't find top 100, stopping`);
+      return null;
+    }
 
     for (let i = 0; i < records.length; i++) {
       records[i].playerName = await getPlayerName(credentials, records[i].accountId);

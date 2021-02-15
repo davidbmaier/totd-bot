@@ -50,7 +50,14 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
     const top = await tmAPI.getTOTDLeaderboard(credentials, totd.seasonUid, totd.mapUid);
     // if top doesn't exist yet, fall back
     if (!top) {
-      return `Hmm, I can't find enough records yet - please check again in a couple minutes`;
+      const fallbackMessage = `Hmm, either there's not enough records yet, or the leaderboard is being updated too fast - please check again in a couple minutes.`;
+
+      // clear leaderboard message in redis
+      const redisClient = await redisAPI.login();
+      await redisAPI.clearCurrentLeaderboard(redisClient);
+      redisAPI.logout(redisClient);
+
+      return fallbackMessage;
     }
 
     const formattedMessage = format.formatLeaderboardMessage(totd, top, utils.convertToUNIXSeconds(new Date()));
