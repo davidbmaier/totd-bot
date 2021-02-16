@@ -132,7 +132,7 @@ const distributeTOTDMessages = async (client) => {
 };
 
 const sendErrorMessage = (channel) => {
-  channel.send(`Oops, something went wrong here - please talk to my dev and let him know that didn't work.`);
+  channel.send(`Oops, something went wrong here - please talk to <@141627532335251456> and let him know that didn't work.`);
 };
 
 module.exports = {

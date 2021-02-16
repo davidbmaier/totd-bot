@@ -6,6 +6,8 @@ This is a Discord bot for displaying the daily [Trackmania](https://www.trackman
 
 **Extra disclaimer:** This is just a pet project I'm working on for fun (and to learn a bit about Discord bots) - don't expect super-tidy code or great documentation. If you encounter any issues with it, either open an issue on Github or talk to me on Discord (tooInfinite#5113).
 
+Note that the bot is generally built to be generic enough to run anywhere - the only exception are custom emojis, whose IDs resolve to emojis on a dev server.
+
 ## What can this bot do? 🤖
 
 **Public invite link:** [Click here!](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot)
@@ -42,7 +44,6 @@ Every commit on `main` triggers an update to the live version of the bot running
 ## Planned Features/TODOs 📋
 
 - Find better voting emojis - the current ones are just screenshots from TMNF.
-- Add emojis in general (e.g. a loading emoji when it's loading the leaderboards).
 - Some way to share the track votes over all servers (maybe just as text?). Probably without duplicate detection - just too much work.
 - Add a short info message when joining a new server (if there's a reliable way to find the "main" channel).
 - More data (currently uses TM and TMX when available) - there's probably more interesting metadata the bot could display.

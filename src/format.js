@@ -204,7 +204,7 @@ const formatLeaderboardMessage = (totd, records, date) => {
 const formatHelpMessage = (commands) => {
   return {
     embed: {
-      title: `Hey, I'm TOTD Bot!`,
+      title: `Hey, I'm the TOTD Bot!`,
       type: `rich`,
       description: `Here's what you can tell me to do:`,
       fields: [
