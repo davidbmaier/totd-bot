@@ -92,7 +92,7 @@ const sendTOTDMessage = async (client, channel, message) => {
 };
 
 const sendTOTDLeaderboard = async (client, channel) => {
-  const discordMessage = await channel.send(`Fetching current leaderboard, give me a second...`);
+  const discordMessage = await channel.send(`Fetching current leaderboard, give me a second... <a:Loading:811285307706179615>`);
 
   const leaderboardMessage = await getTOTDLeaderboardMessage();
   // if no records exist yet, it'll just be a string
