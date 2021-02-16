@@ -91,20 +91,16 @@ const formatTOTDMessage = (totd) => {
   }
 
   // assemble medal info
-  const bronze = `<:MedalBronze:763718615764566016> Bronze`;
-  const bronzeTime = `${formatTime(totd.bronzeScore.toString())}`;
-  const silver = `<:MedalSilver:763718615689330699> Silver`;
-  const silverTime = `${formatTime(totd.silverScore.toString())}`;
-  const gold = `<:MedalGold:763718328685559811> Gold`;
-  const goldTime = `${formatTime(totd.goldScore.toString())}`;
-  const author = `<:MedalAuthor:763718159714222100> Author`;
-  const authorTime = `${formatTime(totd.authorScore.toString())}`;
+  const bronze = `<:MedalBronze:763718615764566016> ${formatTime(totd.bronzeScore.toString())}`;
+  const silver = `<:MedalSilver:763718615689330699> ${formatTime(totd.silverScore.toString())}`;
+  const gold = `<:MedalGold:763718328685559811> ${formatTime(totd.goldScore.toString())}`;
+  const author = `<:MedalAuthor:763718159714222100> ${formatTime(totd.authorScore.toString())}`;
 
   // assemble links
-  let links = `[TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})  `;
+  let links = `[TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid}) `;
 
   if (totd.tmxTrackId) {
-    links += `|  [TMX](https://trackmania.exchange/s/tr/${totd.tmxTrackId})`;
+    links += `| [TMX](https://trackmania.exchange/s/tr/${totd.tmxTrackId})`;
   }
 
   const scoreNote = `React to this message to rate the TOTD!`;
@@ -135,16 +131,10 @@ const formatTOTDMessage = (totd) => {
         {
           name: `Uploaded on`,
           value: new Date(totd.timestamp).toLocaleDateString(`en-US`, { year: `numeric`, month: `long`, day: `numeric` }),
-          inline: true
         },
         {
-          name: `Medals`,
+          name: `Medal Times`,
           value: `${bronze}\n${silver}\n${gold}\n${author}`,
-          inline: true
-        },
-        {
-          name: `Times`,
-          value: `${bronzeTime}\n${silverTime}\n${goldTime}\n${authorTime}`,
           inline: true
         },
         {
@@ -156,7 +146,7 @@ const formatTOTDMessage = (totd) => {
   };
 
   if (styles) {
-    embed.embed.fields.splice(5, 0, {
+    embed.embed.fields.splice(4, 0, {
       name: `Styles (according to TMX)`,
       value: styles,
       inline: true
@@ -170,9 +160,20 @@ const formatLeaderboardMessage = (totd, records, date) => {
   const topTen = records.slice(0, 10);
   const top100 = records[10];
 
-  const times = topTen.map((top) => formatTime(top.score.toString())).join(`\n`);
-  const positions = topTen.map((top) => top.position).join(`\n`);
-  const names = topTen.map((top) => `[${top.playerName}](https://trackmania.io/#/player/${top.accountId})`).join(`\n`);
+  const times = topTen.map((top) => formatTime(top.score.toString()));
+  const positions = topTen.map((top) => top.position);
+  const names = topTen.map((top) => top.playerName);
+
+  // assemble makeshift table using spaces
+  let topTenField = `\`\`\`\n        Time        Name\n`;
+  for (let i = 0; i < topTen.length; i++) {
+    const positionString = positions[i].toString().length > 1 ? ` ${positions[i]}   ` : ` ${positions[i]}    `;
+    const timeString = `${times[i]}  `;
+    const nameString = names[i];
+    topTenField += `${positionString}${timeString}${nameString}\n`;
+  }
+
+  topTenField += `\n\`\`\``;
 
   const embed = {
     date: date,
@@ -182,19 +183,8 @@ const formatLeaderboardMessage = (totd, records, date) => {
       type: `rich`,
       fields: [
         {
-          name: `Position`,
-          value: positions,
-          inline: true
-        },
-        {
-          name: `Name`,
-          value: names,
-          inline: true
-        },
-        {
-          name: `Time`,
-          value: times,
-          inline: true
+          name: `Top 10`,
+          value: topTenField
         },
         {
           name: `Top 100`,
