@@ -194,7 +194,10 @@ const formatLeaderboardMessage = (totd, records, date) => {
           name: `Links`,
           value: `Full leaderboards on [TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})`
         }
-      ]
+      ],
+      footer: {
+        text: `The top 100 time is not exact - it might be slightly off by one or two positions.`
+      }
     }
   };
 
