@@ -30,6 +30,7 @@ const getTOTDMessage = async (forceRefresh) => {
   await redisAPI.saveCurrentTOTD(redisClient, formattedMessage);
   redisAPI.logout(redisClient);
 
+  console.log(`Refreshed TOTD in Redis`);
   return formattedMessage;
 };
 
@@ -67,6 +68,7 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
     await redisAPI.saveCurrentLeaderboard(redisClient, formattedMessage);
     redisAPI.logout(redisClient);
 
+    console.log(`Refreshed leaderboard in Redis`);
     return formattedMessage;
   } else {
     console.log(`Using cached leaderboard...`);
