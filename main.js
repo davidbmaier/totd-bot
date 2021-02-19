@@ -20,8 +20,10 @@ new cron(
   `Europe/Berlin`
 );
 
-client.on(`ready`, () => {
+client.on(`ready`, async () => {
   console.log(`Ready as ${client.user.tag}!`);
+  // refresh TOTD to make sure there is a thumbnail in the images for cached messages
+  await discordAPI.getTOTDMessage(true);
 });
 
 client.on(`message`, async (msg) => {
