@@ -6,7 +6,7 @@ This is a Discord bot for displaying the daily [Trackmania](https://www.trackman
 
 **Extra disclaimer:** This is just a pet project I'm working on for fun (and to learn a bit about Discord bots) - don't expect super-tidy code or great documentation. If you encounter any issues with it, either open an issue on Github or talk to me on Discord (tooInfinite#5113).
 
-Note that the bot is generally built to be generic enough to run anywhere - the only exception are custom emojis, whose IDs resolve to emojis on a dev server.
+Note that the bot is generally built to be generic enough to run anywhere - the only exception are custom emojis, so you'll need to change the mappings in `./emojiMapping.json` to point to emojis and their IDs that your bot will have access to.
 
 ## What can this bot do? 🤖
 

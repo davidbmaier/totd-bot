@@ -81,12 +81,12 @@ const sendTOTDMessage = async (client, channel, message) => {
   const discordMessage = await channel.send(message);
   // add rating emojis
   const emojis = [
-    client.emojis.resolve(`807983766239838208`),
-    client.emojis.resolve(`807983738603962368`),
-    client.emojis.resolve(`807983713698316308`),
-    client.emojis.resolve(`807983669330706482`),
-    client.emojis.resolve(`807983625001107497`),
-    client.emojis.resolve(`807983052046598165`)
+    client.emojis.resolve(utils.getEmojiMapping(`MinusMinusMinusID`)),
+    client.emojis.resolve(utils.getEmojiMapping(`MinusMinusID`)),
+    client.emojis.resolve(utils.getEmojiMapping(`MinusID`)),
+    client.emojis.resolve(utils.getEmojiMapping(`PlusID`)),
+    client.emojis.resolve(utils.getEmojiMapping(`PlusPlusID`)),
+    client.emojis.resolve(utils.getEmojiMapping(`PlusPlusPlusID`))
   ];
   emojis.forEach(async (emoji) => {
     await discordMessage.react(emoji);
@@ -94,7 +94,7 @@ const sendTOTDMessage = async (client, channel, message) => {
 };
 
 const sendTOTDLeaderboard = async (client, channel) => {
-  const discordMessage = await channel.send(`Fetching current leaderboard, give me a second... <a:Loading:811285307706179615>`);
+  const discordMessage = await channel.send(`Fetching current leaderboard, give me a second... ${utils.getEmojiMapping(`Loading`)}`);
 
   const leaderboardMessage = await getTOTDLeaderboardMessage();
   // if no records exist yet, it'll just be a string

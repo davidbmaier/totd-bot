@@ -60,9 +60,15 @@ const downloadThumbnail = (url, fileName) => {
   });
 };
 
+const getEmojiMapping = (emojiName) => {
+  const mapping = require(`../emojiMapping.json`);
+  return mapping[emojiName] || ``;
+};
+
 module.exports = {
   addDevPrefix,
   downloadThumbnail,
   convertToUNIXSeconds,
-  getMinutesAgo
+  getMinutesAgo,
+  getEmojiMapping
 };

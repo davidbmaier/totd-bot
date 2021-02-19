@@ -1,5 +1,7 @@
 const Discord = require(`discord.js`);
 
+const utils = require(`./utils`);
+
 const formatTime = (time) => {
   const millisecs = time.substr(-3);
   let secs = time.substr(0, time.length - 3);
@@ -67,6 +69,9 @@ const formatTOTDMessage = (totd) => {
   if (totd.tmxTags && totd.tmxTags.includes(`Scenery`)) {
     trackLabel = `Scenery`;
   }
+  if (totd.tmxTags && totd.tmxTags.includes(`Nascar`)) {
+    trackLabel = `Nascar`;
+  }
 
   const title = `**Here's the ${monthNames[month]} ${formatDay(day)} ${trackLabel} of the Day!**\n`;
 
@@ -91,10 +96,10 @@ const formatTOTDMessage = (totd) => {
   }
 
   // assemble medal info
-  const bronze = `<:MedalBronze:763718615764566016> ${formatTime(totd.bronzeScore.toString())}`;
-  const silver = `<:MedalSilver:763718615689330699> ${formatTime(totd.silverScore.toString())}`;
-  const gold = `<:MedalGold:763718328685559811> ${formatTime(totd.goldScore.toString())}`;
-  const author = `<:MedalAuthor:763718159714222100> ${formatTime(totd.authorScore.toString())}`;
+  const bronze = `${utils.getEmojiMapping(`Bronze`)} ${formatTime(totd.bronzeScore.toString())}`;
+  const silver = `${utils.getEmojiMapping(`Silver`)} ${formatTime(totd.silverScore.toString())}`;
+  const gold = `${utils.getEmojiMapping(`Gold`)} ${formatTime(totd.goldScore.toString())}`;
+  const author = `${utils.getEmojiMapping(`Author`)} ${formatTime(totd.authorScore.toString())}`;
 
   // assemble links
   let links = `[TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid}) `;
