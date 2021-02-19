@@ -31,6 +31,20 @@ const leaderboard = {
   }
 };
 
+const ratings = {
+  command: utils.addDevPrefix(`!totd ratings`),
+  action: async (msg, client) => {  // for now, this is admin only :)
+    if (msg.author.tag === adminTag) {
+      try {
+        await discordAPI.sendTOTDRatings(client, msg.channel);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.log(error);
+      }
+    }
+  }
+};
+
 const enable = {
   command: utils.addDevPrefix(`!totd enable`),
   action: async (msg) => {
@@ -112,15 +126,15 @@ const refreshLeaderboard = {
   }
 };
 
-const debug = {
-  command: utils.addDevPrefix(`!totd debug`),
-  action: async (msg, client) => {
+const refreshRating = {
+  command: utils.addDevPrefix(`!totd refresh ratings`),
+  action: async (msg) => {
     if (msg.author.tag === adminTag) {
       try {
-        //await discordAPI.distributeTOTDMessages(client);
         const redisClient = await redisAPI.login();
-        console.log(await redisAPI.getAllConfigs(redisClient));
+        await redisAPI.clearTOTDRatings(redisClient);
         redisAPI.logout(redisClient);
+        msg.channel.send(`I've refreshed the current rating data!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -129,4 +143,22 @@ const debug = {
   }
 };
 
-module.exports = [help, refresh, refreshLeaderboard, debug, today, leaderboard, enable, disable];
+const debug = {
+  command: utils.addDevPrefix(`!totd debug`),
+  action: async (msg, client) => {
+    if (msg.author.tag === adminTag) {
+      try {
+        const redisClient = await redisAPI.login();
+        const ratings = await redisAPI.getTOTDRatings(redisClient);
+        redisAPI.logout(redisClient);
+
+        console.log(ratings);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.error(error);
+      }
+    }
+  }
+};
+
+module.exports = [help, refresh, refreshLeaderboard, refreshRating, debug, today, leaderboard, ratings, enable, disable];

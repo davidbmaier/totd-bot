@@ -73,7 +73,7 @@ const formatTOTDMessage = (totd) => {
     trackLabel = `Nascar`;
   }
 
-  const title = `**Here's the ${monthNames[month]} ${formatDay(day)} ${trackLabel} of the Day!**\n`;
+  const title = `**Here's the ${monthNames[month]} ${formatDay(day)} ${trackLabel} of the Day!**`;
 
   // assemble track info
   let trackName = totd.name;
@@ -209,6 +209,66 @@ const formatLeaderboardMessage = (totd, records, date) => {
   return embed;
 };
 
+const formatRatingsMessage = (ratings) => {
+  let formattedRatings = ``;
+  let totalVotes = 0;
+  let weightedVotes = 0;
+
+  for (const item in ratings) {
+    const rating = ratings[item];
+    // add it to the front since the ratings go from --- to +++
+    formattedRatings = `${utils.getEmojiMapping(item)} - ${rating}\n${formattedRatings}`;
+    totalVotes += rating;
+
+    if (item.includes(`Plus`)) {
+      const weight = (item.match(/Plus/g) || []).length;
+      weightedVotes += weight * rating;
+    } else {
+      const weight = (item.match(/Minus/g) || []).length;
+      weightedVotes -= weight * rating;
+    }
+  }
+
+  formattedRatings.slice(0, -2); // remove the last line break
+
+  const averageRating = Math.round(weightedVotes / totalVotes * 10) / 10;
+
+  let verdict = `Total ratings: ${totalVotes}\nAverage rating: ${averageRating}\n\n`;
+  if (averageRating < -2) {
+    verdict += `Looks like it was an absolute nightmare of a track!`;
+  } else if (averageRating < -1) {
+    verdict += `Best to just forget about this one, huh?`;
+  } else if (averageRating < 0) {
+    verdict += `Not exactly a good track, but it could have been worse.`;
+  } else if (averageRating < 1) {
+    verdict += `An alright track, nothing special though.`;
+  } else if (averageRating < 2) {
+    verdict += `Pretty good track today, but not quite perfect.`;
+  } else {
+    verdict += `Absolutely fantastic track, definitely a highlight!`;
+  }
+
+  return {
+    embed: {
+      title: `Here are today's TOTD ratings!`,
+      type: `rich`,
+      description: `These ratings aren't just from here - I collect feedback from a bunch of other channels as well!`,
+      fields: [
+        {
+          name: `Ratings`,
+          value: formattedRatings,
+          inline: true
+        },
+        {
+          name: `Verdict`,
+          value: verdict,
+          inline: true
+        }
+      ]
+    }
+  };
+};
+
 const formatHelpMessage = (commands) => {
   return {
     embed: {
@@ -234,5 +294,6 @@ const formatHelpMessage = (commands) => {
 module.exports = {
   formatTOTDMessage,
   formatLeaderboardMessage,
+  formatRatingsMessage,
   formatHelpMessage
 };

@@ -1,5 +1,5 @@
 const Discord = require(`discord.js`);
-const client = new Discord.Client();
+const client = new Discord.Client({ partials: [`MESSAGE`, `CHANNEL`, `REACTION`] });
 const cron = require(`cron`).CronJob;
 require(`dotenv`).config();
 
@@ -46,6 +46,33 @@ client.on(`message`, async (msg) => {
       );
     }
   }
+});
+
+const handleReaction = async (reaction, user, add) => {
+  if (reaction.partial) {
+		// if reaction is partial (not cached), try to fetch it fully
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error(`Something went wrong when fetching the full reaction: `, error);
+			return;
+		}
+	}
+
+  if (
+    reaction.message.author.id === client.user.id // check the message was sent by the bot
+    && user.id !== client.user.id // check the reaction was not sent by the bot
+  ) {
+    discordAPI.updateTOTDReactionCount(reaction, add);
+  }
+};
+
+client.on(`messageReactionAdd`, (reaction, user) => {
+  handleReaction(reaction, user, true);
+});
+
+client.on(`messageReactionRemove`, async (reaction, user) => {
+  handleReaction(reaction, user, false);
 });
 
 client.on(`guildCreate`, (guild) => {

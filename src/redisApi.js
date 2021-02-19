@@ -2,6 +2,8 @@ const url = require(`url`);
 const redis = require(`redis`);
 require(`dotenv`).config();
 
+const constants = require(`./constants`);
+
 const redisURL = process.env.REDIS_URL;
 
 const login = () => {
@@ -150,6 +152,79 @@ const clearCurrentLeaderboard = async (redisClient) => {
   });
 };
 
+const getTOTDRatings = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(`ratings`, async (err, ratings) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (ratings) {
+          try {
+            const parsedRatings = JSON.parse(ratings);
+            resolve(parsedRatings);
+          } catch (error) {
+            reject(`Unable to parse rating JSON`);
+          }
+        } else {
+          const clearedRatings = await clearTOTDRatings(redisClient);
+          resolve(clearedRatings);
+        }
+      }
+    });
+  });
+};
+
+const clearTOTDRatings = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    const baseRating = {};
+    for (let i = 0; i < constants.ratingEmojis.length; i++) {
+      baseRating[constants.ratingEmojis[i]] = 0;
+    }
+
+    redisClient.set(`ratings`, JSON.stringify(baseRating), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(baseRating);
+      }
+    });
+  });
+};
+
+const updateTOTDRatings = async (redisClient, emojiName, add) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(`ratings`, async (getErr, rating) => {
+      if (getErr) {
+        reject(getErr);
+      } else {
+        if (!rating) {
+          rating = await clearTOTDRatings(redisClient);
+        } else {
+          rating = JSON.parse(rating);
+        }
+
+        if (add) {
+          rating[emojiName] += 1;
+        } else {
+          rating[emojiName] -= 1;
+          // check that it can't go below 0
+          if (rating[emojiName] < 0) {
+            rating[emojiName] = 0;
+          }
+        }
+        
+        redisClient.set(`ratings`, JSON.stringify(rating), (setErr) => {
+          if (setErr) {
+            reject(setErr);
+          } else {
+            resolve(rating);
+          }
+        });
+      }
+    });
+  });
+};
+
 module.exports = {
   login,
   logout,
@@ -160,5 +235,8 @@ module.exports = {
   saveCurrentLeaderboard,
   getCurrentTOTD,
   getCurrentLeaderboard,
-  clearCurrentLeaderboard
+  clearCurrentLeaderboard,
+  getTOTDRatings,
+  clearTOTDRatings,
+  updateTOTDRatings
 };

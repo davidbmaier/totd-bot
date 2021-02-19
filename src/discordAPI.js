@@ -2,6 +2,7 @@ const tmAPI = require(`./tmApi`);
 const format = require(`./format`);
 const redisAPI = require(`./redisApi`);
 const utils = require(`./utils`);
+const constants = require(`./constants`);
 
 const getTOTDMessage = async (forceRefresh) => {
   if (!forceRefresh) {
@@ -76,18 +77,22 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
   }
 };
 
+const getRatingMessage = async () => {
+  const redisClient = await redisAPI.login();
+  const ratings = await redisAPI.getTOTDRatings(redisClient);
+  redisAPI.logout(redisClient);
+
+  return format.formatRatingsMessage(ratings);
+};
+
 const sendTOTDMessage = async (client, channel, message) => {
   console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
   const discordMessage = await channel.send(message);
   // add rating emojis
-  const emojis = [
-    client.emojis.resolve(utils.getEmojiMapping(`MinusMinusMinusID`)),
-    client.emojis.resolve(utils.getEmojiMapping(`MinusMinusID`)),
-    client.emojis.resolve(utils.getEmojiMapping(`MinusID`)),
-    client.emojis.resolve(utils.getEmojiMapping(`PlusID`)),
-    client.emojis.resolve(utils.getEmojiMapping(`PlusPlusID`)),
-    client.emojis.resolve(utils.getEmojiMapping(`PlusPlusPlusID`))
-  ];
+  const emojis = [];
+  for (let i = 0; i < constants.ratingEmojis.length; i++) {
+    emojis.push(utils.getEmojiMapping(constants.ratingEmojis[i]));
+  }
   emojis.forEach(async (emoji) => {
     await discordMessage.react(emoji);
   });
@@ -109,6 +114,12 @@ const sendTOTDLeaderboard = async (client, channel) => {
   
   console.log(`Sending current leaderboard to #${channel.name} in ${channel.guild.name}`);
   discordMessage.edit(leaderboardMessage);
+};
+
+const sendTOTDRatings = async (client, channel) => {
+  console.log(`Sending current ratings to #${channel.name} in ${channel.guild.name}`);
+  const message = await getRatingMessage();
+  await channel.send(message);
 };
 
 const distributeTOTDMessages = async (client) => {
@@ -133,6 +144,29 @@ const distributeTOTDMessages = async (client) => {
   });
 };
 
+const updateTOTDReactionCount = async (reaction, add) => {
+  // check that the message really is the current TOTD
+  const redisClient = await redisAPI.login();
+  const totdMessage = await redisAPI.getCurrentTOTD(redisClient);
+
+  // it's possible there is no message in the redis cache, but that's a rare edge case (in which reactions won't be recorded)
+  if (totdMessage?.embed?.title === reaction.message?.embeds[0]?.title) {
+    const ratingEmojis = constants.ratingEmojis;
+    for (let i = 0; i < ratingEmojis.length; i++) {
+      const ratingIdentifier = utils.getEmojiMapping(ratingEmojis[i]);
+
+      if (ratingIdentifier.includes(reaction.emoji.identifier)) {
+        await redisAPI.updateTOTDRatings(redisClient, ratingEmojis[i], add);
+        break;
+      }
+    }
+    redisAPI.logout(redisClient);
+  } else {
+    // not a TOTD post, close the redis connection
+    redisAPI.logout(redisClient);
+  }
+};
+
 const sendErrorMessage = (channel) => {
   channel.send(`Oops, something went wrong here - please talk to <@141627532335251456> and let him know that didn't work.`);
 };
@@ -143,5 +177,7 @@ module.exports = {
   getTOTDLeaderboardMessage,
   sendErrorMessage,
   sendTOTDLeaderboard,
-  distributeTOTDMessages
+  sendTOTDRatings,
+  distributeTOTDMessages,
+  updateTOTDReactionCount
 };
