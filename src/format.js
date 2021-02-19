@@ -213,6 +213,7 @@ const formatRatingsMessage = (ratings) => {
   let formattedRatings = ``;
   let totalVotes = 0;
   let weightedVotes = 0;
+  let averageRating;
 
   for (const item in ratings) {
     const rating = ratings[item];
@@ -231,10 +232,17 @@ const formatRatingsMessage = (ratings) => {
 
   formattedRatings.slice(0, -2); // remove the last line break
 
-  const averageRating = Math.round(weightedVotes / totalVotes * 10) / 10;
+  let verdict = `Total ratings: ${totalVotes}\n`;
+  if (totalVotes > 0) {
+    averageRating = Math.round(weightedVotes / totalVotes * 10) / 10;
+    verdict += `Average rating: ${averageRating}\n`;
+  }
 
-  let verdict = `Total ratings: ${totalVotes}\nAverage rating: ${averageRating}\n\n`;
-  if (averageRating < -2) {
+  verdict += `\n`;
+  
+  if (totalVotes === 0) {
+    verdict += `Looks like I don't have any votes yet...`;
+  } else if (averageRating < -2) {
     verdict += `Looks like it was an absolute nightmare of a track!`;
   } else if (averageRating < -1) {
     verdict += `Best to just forget about this one, huh?`;
