@@ -128,6 +128,7 @@ const distributeTOTDMessages = async (client) => {
 
   const redisClient = await redisAPI.login();
   const configs = await redisAPI.getAllConfigs(redisClient);
+  await redisAPI.clearTOTDRatings(redisClient);
   redisAPI.logout(redisClient);
 
   configs.forEach(async (config) => {

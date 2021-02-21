@@ -13,7 +13,7 @@ const discordToken = process.env.DISCORD_TOKEN;
 new cron(
   `30 00 19 * * *`,
   async () => {
-    discordAPI.distributeTOTDMessages(client);
+    await discordAPI.distributeTOTDMessages(client);
   },
   null,
   true,
