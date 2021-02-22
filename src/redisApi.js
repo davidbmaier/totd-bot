@@ -152,6 +152,39 @@ const clearCurrentLeaderboard = async (redisClient) => {
   });
 };
 
+const getLastTOTDVerdict = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(`verdict`, async (err, verdict) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (verdict) {
+          try {
+            const parsedVerdict = JSON.parse(verdict);
+            resolve(parsedVerdict);
+          } catch (error) {
+            reject(`Unable to parse verdict JSON`);
+          }
+        } else {
+          resolve();
+        }
+      }
+    });
+  });
+};
+
+const saveLastTOTDVerdict = async (redisClient, verdict) => {
+  return new Promise((resolve, reject) => {
+    redisClient.set(`verdict`, JSON.stringify(verdict), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
 const getTOTDRatings = async (redisClient) => {
   return new Promise((resolve, reject) => {
     redisClient.get(`ratings`, async (err, ratings) => {
@@ -236,6 +269,8 @@ module.exports = {
   getCurrentTOTD,
   getCurrentLeaderboard,
   clearCurrentLeaderboard,
+  getLastTOTDVerdict,
+  saveLastTOTDVerdict,
   getTOTDRatings,
   clearTOTDRatings,
   updateTOTDRatings

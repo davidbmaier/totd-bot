@@ -209,7 +209,7 @@ const formatLeaderboardMessage = (totd, records, date) => {
   return embed;
 };
 
-const formatRatingsMessage = (ratings) => {
+const formatRatingsMessage = (ratings, yesterday) => {
   let formattedRatings = ``;
   let totalVotes = 0;
   let weightedVotes = 0;
@@ -241,7 +241,11 @@ const formatRatingsMessage = (ratings) => {
   verdict += `\n`;
   
   if (totalVotes === 0) {
-    verdict += `Looks like I don't have any votes yet...`;
+    if (yesterday) {
+       verdict += `Looks like I didn't get any votes yesterday...`;
+    } else {
+      verdict += `Looks like I don't have any votes yet...`;
+    }
   } else if (averageRating < -2) {
     verdict += `Looks like it was an absolute nightmare of a track!`;
   } else if (averageRating < -1) {
@@ -258,9 +262,15 @@ const formatRatingsMessage = (ratings) => {
 
   return {
     embed: {
-      title: `Here are today's TOTD ratings!`,
+      title: 
+        yesterday
+          ? `Here are yesterday's TOTD ratings!`
+          : `Here are today's TOTD ratings!`,
       type: `rich`,
-      description: `These ratings aren't just from here - I collect feedback from a bunch of other channels as well!`,
+      description:
+        yesterday
+          ? `These ratings aren't just from here - I collect feedback from a bunch of other servers as well!`
+          : `This track is still being voted on, so take these numbers with a grain of salt.`,
       fields: [
         {
           name: `Ratings`,

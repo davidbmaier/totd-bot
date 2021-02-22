@@ -142,11 +142,26 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
     const records = leaderboard.tops[0].top.slice(1, 11);
 
     const extendedLeaderboard1 = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, leaderboard.tops[0].top[50].score);
-    const extendedLeaderboard2 = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, extendedLeaderboard1.tops[0].top[30].score);
+    const extendedLeaderboard2 = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, extendedLeaderboard1.tops[0].top[50].score);
 
-    records.push(extendedLeaderboard2.tops[0].top.find((top) => top.position === 100));
+    const fullLeaderboard = [
+      ...leaderboard.tops[0].top.slice(1),
+      ...extendedLeaderboard1.tops[0].top.slice(1),
+      ...extendedLeaderboard2.tops[0].top.slice(1)
+    ];
+
+    // try to find position 100 in the first 150
+    let position100 = fullLeaderboard.find((top) => top.position === 100);
+
+    // sometimes the position 100 can't be found, then we try 101
+    if (!position100) {
+      position100 = fullLeaderboard.find((top) => top.position === 101);
+    }
+
+    records.push(position100);
 
     // if we can't find top 100 in the records, the leaderboard is still updating too fast - so we just stop and recommend waiting a bit
+    // this checks if the last element is undefined
     if (!records[records.length - 1]) {
       console.log(`Can't find top 100, stopping`);
       return null;
@@ -154,12 +169,15 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
 
     for (let i = 0; i < records.length; i++) {
       records[i].playerName = await getPlayerName(credentials, records[i].accountId);
-      // 100 already has the correct position
-      if (records[i].position !== 100) {
+
+      if (i !== records.length - 1) {
+        // adjust top 10 positions
         records[i].position = i + 1;
+      } else {
+        // set top 100 position (even if it's not exactly top 100)
+        records[i].position = 100;
       }
     }
-
 
     return records;
     

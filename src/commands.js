@@ -31,16 +31,29 @@ const leaderboard = {
   }
 };
 
+// debug command to see the current ratings
 const ratings = {
   command: utils.addDevPrefix(`!totd ratings`),
-  action: async (msg, client) => {  // for now, this is admin only :)
-    if (msg.author.tag === adminTag) {
+  action: async (msg, client) => {
+    if (msg.author.tag === adminTag) { // admin only, verdict is public (for yesterday's track)
       try {
         await discordAPI.sendTOTDRatings(client, msg.channel);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.log(error);
       }
+    }
+  }
+};
+
+const verdict = {
+  command: utils.addDevPrefix(`!totd verdict`),
+  action: async (msg, client) => {
+    try {
+      await discordAPI.sendTOTDRatings(client, msg.channel, true);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
     }
   }
 };
@@ -126,7 +139,7 @@ const refreshLeaderboard = {
   }
 };
 
-const refreshRating = {
+const refreshRatings = {
   command: utils.addDevPrefix(`!totd refresh ratings`),
   action: async (msg) => {
     if (msg.author.tag === adminTag) {
@@ -148,11 +161,7 @@ const debug = {
   action: async (msg, client) => {
     if (msg.author.tag === adminTag) {
       try {
-        const redisClient = await redisAPI.login();
-        const ratings = await redisAPI.getTOTDRatings(redisClient);
-        redisAPI.logout(redisClient);
-
-        console.log(ratings);
+        await discordAPI.distributeTOTDMessages(client);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -161,4 +170,4 @@ const debug = {
   }
 };
 
-module.exports = [help, refresh, refreshLeaderboard, refreshRating, debug, today, leaderboard, ratings, enable, disable];
+module.exports = [help, refresh, refreshLeaderboard, refreshRatings, debug, today, leaderboard, ratings, verdict, enable, disable];

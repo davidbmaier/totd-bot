@@ -77,12 +77,21 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
   }
 };
 
-const getRatingMessage = async () => {
+const getRatingMessage = async (yesterday) => {
   const redisClient = await redisAPI.login();
-  const ratings = await redisAPI.getTOTDRatings(redisClient);
+  let ratings;
+  if (yesterday) {
+    ratings = await redisAPI.getLastTOTDVerdict(redisClient);
+  } else {
+    ratings = await redisAPI.getTOTDRatings(redisClient);
+  }
   redisAPI.logout(redisClient);
 
-  return format.formatRatingsMessage(ratings);
+  if (ratings) {
+    return format.formatRatingsMessage(ratings, yesterday);
+  } else {
+    return `Hmm, I don't seem to remember yesterday's track. Sorry about that!`;
+  }
 };
 
 const sendTOTDMessage = async (client, channel, message) => {
@@ -116,19 +125,33 @@ const sendTOTDLeaderboard = async (client, channel) => {
   discordMessage.edit(leaderboardMessage);
 };
 
-const sendTOTDRatings = async (client, channel) => {
+const sendTOTDRatings = async (client, channel, yesterday) => {
   console.log(`Sending current ratings to #${channel.name} in ${channel.guild.name}`);
-  const message = await getRatingMessage();
+  const message = await getRatingMessage(yesterday);
   await channel.send(message);
+};
+
+const archiveRatings = async () => {
+  console.log(`Archiving existing ratings and clearing current ones`);
+  const redisClient = await redisAPI.login();
+  const ratings = await redisAPI.getTOTDRatings(redisClient);
+
+  if (ratings) {
+    await redisAPI.saveLastTOTDVerdict(redisClient, ratings);
+  }
+  await redisAPI.clearTOTDRatings(redisClient);
+
+  redisAPI.logout(redisClient);
 };
 
 const distributeTOTDMessages = async (client) => {
   console.log(`Broadcasting TOTD message to subscribed channels`);
   const message = await getTOTDMessage(true);
 
+  archiveRatings();
+
   const redisClient = await redisAPI.login();
   const configs = await redisAPI.getAllConfigs(redisClient);
-  await redisAPI.clearTOTDRatings(redisClient);
   redisAPI.logout(redisClient);
 
   configs.forEach(async (config) => {
