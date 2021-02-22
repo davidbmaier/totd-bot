@@ -16,6 +16,7 @@ Use at your own risk - the bot is in development and may break from time to time
 
 - `!totd today` - Prints the current TOTD information to the current channel.
 - `!totd leaderboard` - Prints the current TOTD top 10 and the time needed for top 100 to the current channel.
+- `!totd verdict` - Prints yesterday's global ratings and a short verdict based on them.
 - `!totd enable` - Stores the current channel to the list the daily scheduled TOTD post gets sent to. One channel per server. Admin only.
 - `!totd disable` - Removes the current channel from the list the scheduled TOTD post gets sent to. Admin only.
 - `!totd help` - Displays some info about the bot.
