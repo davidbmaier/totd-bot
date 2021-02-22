@@ -8,6 +8,7 @@ const commands = require(`./src/commands`);
 const utils = require(`./src/utils`);
 
 const discordToken = process.env.DISCORD_TOKEN;
+  const deployMode = process.env.DEPLOY_MODE;
 
 // display the current totd every day at 19:00:30
 new cron(
@@ -22,8 +23,11 @@ new cron(
 
 client.on(`ready`, async () => {
   console.log(`Ready as ${client.user.tag}!`);
-  // refresh TOTD to make sure there is a thumbnail in the images for cached messages
-  await discordAPI.getTOTDMessage(true);
+  
+  // in production, refresh TOTD to make sure there is a thumbnail in the images for cached messages
+  if (deployMode === `prod`) {
+    await discordAPI.getTOTDMessage(true);
+  }
 });
 
 client.on(`message`, async (msg) => {
