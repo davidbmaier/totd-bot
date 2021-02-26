@@ -258,6 +258,34 @@ const updateTOTDRatings = async (redisClient, emojiName, add) => {
   });
 };
 
+const getBingoBoard = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(`bingo`, (err, board) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (board) {
+          resolve(JSON.parse(board));
+        } else {
+          resolve();
+        }
+      }
+    });
+  });
+};
+
+const saveBingoBoard = async (redisClient, board) => {
+  return new Promise((resolve, reject) => {
+    redisClient.set(`bingo`, JSON.stringify(board), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(board);
+      }
+    });
+  });
+};
+
 module.exports = {
   login,
   logout,
@@ -273,5 +301,7 @@ module.exports = {
   saveLastTOTDVerdict,
   getTOTDRatings,
   clearTOTDRatings,
-  updateTOTDRatings
+  updateTOTDRatings,
+  getBingoBoard,
+  saveBingoBoard
 };

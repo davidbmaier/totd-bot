@@ -94,6 +94,33 @@ const getRatingMessage = async (yesterday) => {
   }
 };
 
+const getBingoMessage = async (forceRefresh) => {
+  const redisClient = await redisAPI.login();
+  let board = await redisAPI.getBingoBoard(redisClient);
+  
+  if (!board || forceRefresh) {
+    console.log(`Regenerating bingo board...`);
+    const bingoFields = [...constants.bingoFields];
+    const pickedFields = [];
+    while (pickedFields.length < 24) {
+      // TODO: add weights so there's only max 3 map themes/3 author fields
+      const randomPick = Math.floor(Math.random() * bingoFields.length);
+      const pickedField = bingoFields.splice(randomPick, 1)[0];
+      pickedFields.push(pickedField);
+    }
+
+    board = pickedFields;
+
+    await redisAPI.saveBingoBoard(redisClient, board);
+    console.log(`Refreshed bingo board in Redis`);
+  } else {
+    console.log(`Using cached bingo board...`);
+  }
+
+  redisAPI.logout(redisClient);
+  return await format.formatBingoBoard(board);
+};
+
 const sendTOTDMessage = async (client, channel, message) => {
   console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
   const discordMessage = await channel.send(message);
@@ -128,6 +155,12 @@ const sendTOTDLeaderboard = async (client, channel) => {
 const sendTOTDRatings = async (client, channel, yesterday) => {
   console.log(`Sending current ratings to #${channel.name} in ${channel.guild.name}`);
   const message = await getRatingMessage(yesterday);
+  await channel.send(message);
+};
+
+const sendBingoBoard = async (channel) => {
+  console.log(`Sending bingo board to #${channel.name} in ${channel.guild.name}`);
+  const message = await getBingoMessage();
   await channel.send(message);
 };
 
@@ -202,9 +235,11 @@ module.exports = {
   sendTOTDMessage,
   getTOTDMessage,
   getTOTDLeaderboardMessage,
+  getBingoMessage,
   sendErrorMessage,
   sendTOTDLeaderboard,
   sendTOTDRatings,
+  sendBingoBoard,
   distributeTOTDMessages,
   updateTOTDReactionCount
 };

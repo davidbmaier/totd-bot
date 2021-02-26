@@ -1,4 +1,6 @@
 const Discord = require(`discord.js`);
+const Canvas = require(`canvas`);
+const path = require(`path`);
 
 const utils = require(`./utils`);
 
@@ -287,6 +289,70 @@ const formatRatingsMessage = (ratings, yesterday) => {
   };
 };
 
+const formatBingoBoard = async (fields) => {
+  // add free space to the center
+  fields.splice(12, 0, `Free space`);
+
+  Canvas.registerFont(path.resolve(`./src/resources/Quicksand.ttf`), {family: `Quicksand`});
+  const fontName = `Quicksand`;
+
+  // 5x5 board, each field is 160x120
+  // borders around the board and each field as 2px wide
+  // inline padding is 10px on each side -> inside width is 140px
+  const canvas = Canvas.createCanvas(812, 612);
+  const ctx = canvas.getContext(`2d`);
+
+  const background = await Canvas.loadImage(`./src/resources/bingo.png`);
+  ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+  ctx.font = `18px ${fontName} medium`;
+  ctx.textAlign = `center`;
+  ctx.textBaseline = `middle`;
+  ctx.fillStyle = `#FFFFFF`;
+
+  let fieldCount = 0;
+  for (let y = 0; y < 5; y++) {
+    for (let x = 0; x < 5; x++) {
+      if (ctx.measureText(fields[fieldCount]).width > 140) {
+        console.log(`Bingo warning: Field is too long for one line:`, fields[fieldCount]);
+      }
+
+      const textPieces = fields[fieldCount].split(`\n`);
+
+      const horizontalCenter = (x * 162) + 82; // skip x cells incl their left border, then move to the cell center (incl the border)
+      const verticalCenter = (y * 122) + 62; // skip y cells incl their upper border, then move to the cell center (incl the border)
+
+      for (let i = 0; i < textPieces.length; i++) {
+        const cellTop = verticalCenter - 60;
+        // (full height / spaces between text pieces) * piece index = offset for this specific piece
+        const pieceOffset = (120 / (textPieces.length + 1)) * (i + 1);
+
+        const currentHeight = cellTop + pieceOffset;
+        ctx.fillText(textPieces[i], horizontalCenter, currentHeight);
+      }
+
+      fieldCount++;
+    }
+  }
+
+  const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `bingo.png`);
+
+  const embed = {
+    embed: {
+      title: `Here's this week's TOTD bingo board!`,
+      type: `rich`,
+      files: [
+        attachment
+      ],
+      image: {
+        url: `attachment://bingo.png`
+      }
+    }
+  };
+
+  return embed;
+};
+
 const formatHelpMessage = (commands) => {
   return {
     embed: {
@@ -313,5 +379,6 @@ module.exports = {
   formatTOTDMessage,
   formatLeaderboardMessage,
   formatRatingsMessage,
-  formatHelpMessage
+  formatHelpMessage,
+  formatBingoBoard
 };

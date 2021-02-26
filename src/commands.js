@@ -96,6 +96,18 @@ const disable = {
   }
 };
 
+const bingo = {
+  command: utils.addDevPrefix(`!totd bingo`),
+  action: async (msg) => {
+    try {
+      await discordAPI.sendBingoBoard(msg.channel);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
+    }
+  }
+};
+
 const help = {
   command: utils.addDevPrefix(`!totd help`),
   action: async (msg) => {
@@ -157,6 +169,21 @@ const refreshRatings = {
   }
 };
 
+const refreshBingo = {
+  command: utils.addDevPrefix(`!totd refresh bingo`),
+  action: async (msg) => {
+    if (msg.author.tag === adminTag) {
+      try {
+        await discordAPI.getBingoMessage(true);
+        msg.channel.send(`I've refreshed the current bingo board!`);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.error(error);
+      }
+    }
+  }
+};
+
 const debug = {
   command: utils.addDevPrefix(`!totd debug`),
   action: async (msg, client) => {
@@ -171,4 +198,18 @@ const debug = {
   }
 };
 
-module.exports = [help, refresh, refreshLeaderboard, refreshRatings, debug, today, leaderboard, ratings, verdict, enable, disable];
+module.exports = [
+  help,
+  refresh,
+  refreshLeaderboard,
+  refreshRatings,
+  refreshBingo,
+  debug,
+  today,
+  leaderboard,
+  ratings,
+  verdict,
+  enable,
+  disable,
+  bingo
+];

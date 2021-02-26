@@ -21,6 +21,17 @@ new cron(
   `Europe/Berlin`
 );
 
+// refresh bingo every week on Monday at 00:00:00
+new cron(
+  `00 00 00 * * 1`,
+  async () => {
+    await discordAPI.getBingoMessage(true);
+  },
+  null,
+  true,
+  `Europe/Berlin`
+);
+
 client.on(`ready`, async () => {
   console.log(`Ready as ${client.user.tag}!`);
   
