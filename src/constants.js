@@ -13,7 +13,7 @@ const bingoFields = [
   `Nascar\nof the Day`,
   `Ice of the Day`,
   `Dirt of the Day`,
-  `Grass of the Day`,
+  `Grass\nof the Day`,
   `RPG of the Day`,
   `Dirt of the Day`,
   `FullSpeed\nof the Day`,
@@ -39,7 +39,7 @@ const bingoFields = [
   `Non-\nrespawnable\ncheckpoint`,
   // author
   `Author's\nfirst TOTD`,
-  `More than one\nTOTD by\nthe same author\n`,
+  `More than one\nTOTD by\nthe same author`,
   `Map by a\nTMGL player`,
   `Map by\nEverios96`,
   `Map by htimh`,
@@ -57,10 +57,10 @@ const bingoFields = [
   `Author medal\nthat's insanely\ndifficult`,
   `Free\nAuthor medal`,
   `WR-level GPS`,
-  `Bronze-level GPS`,
+  `Bronze-level\nGPS`,
   // technical things
   `Cup of the Day\nbreaks`,
-  `Super-laggy map`,
+  `Super-laggy\nmap`,
   `Map with\nthe Openplanet\nsound bug`,
   `Fake WR times\ndue to\ncheckpoint bug`
 ];
