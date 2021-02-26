@@ -26,8 +26,12 @@ Debug (and bot admin) only:
 
 - `!totd refresh today` - Refreshes the internally cached TOTD information.
 - `!totd refresh leaderboard` - Refreshes the internally cached leaderboard information.
+- `!totd refresh bingo` - Regenerates the current bingo board.
 
-![Bot screenshot](https://i.imgur.com/Cjky9X0.png)
+## Screenshots 📷
+
+![Screenshot today](https://i.imgur.com/gTiFt3S.png)
+![Screenshot bingo](https://i.imgur.com/QnSKOPC.png)
 
 ## Setup/Development 💻
 
