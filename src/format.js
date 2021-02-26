@@ -305,7 +305,7 @@ const formatBingoBoard = async (fields) => {
   const background = await Canvas.loadImage(`./src/resources/bingoTemplate.png`);
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-  ctx.font = `18px ${fontName} medium`;
+  ctx.font = `18px ${fontName}`;
   ctx.textAlign = `center`;
   ctx.textBaseline = `middle`;
   ctx.fillStyle = `#FFFFFF`;
