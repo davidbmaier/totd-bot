@@ -207,8 +207,8 @@ const updateTOTDReactionCount = async (reaction, add) => {
   const totdMessage = await redisAPI.getCurrentTOTD(redisClient);
 
   // it's possible there is no message in the redis cache, but that's a rare edge case (in which reactions won't be recorded)
-  const currentTrackName = totdMessage?.embed?.fields.find((field) => field.name === `Name`).value;
-  const reactionTrackName = reaction.message?.embeds[0]?.fields.find((field) => field.name === `Name`).value;
+  const currentTrackName = totdMessage?.embed?.fields.find((field) => field.name === `Name`)?.value;
+  const reactionTrackName = reaction.message?.embeds[0]?.fields.find((field) => field.name === `Name`)?.value;
   if (currentTrackName === reactionTrackName) {
     const ratingEmojis = constants.ratingEmojis;
     for (let i = 0; i < ratingEmojis.length; i++) {
