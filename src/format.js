@@ -293,7 +293,7 @@ const formatBingoBoard = async (fields) => {
   // add free space to the center
   fields.splice(12, 0, `Free space`);
 
-  Canvas.registerFont(path.resolve(`./src/resources/Quicksand.ttf`), {family: `Quicksand`});
+  Canvas.registerFont(path.resolve(`./src/fonts/Quicksand.ttf`), {family: `Quicksand`});
   const fontName = `Quicksand`;
 
   // 5x5 board, each field is 160x90
@@ -302,8 +302,28 @@ const formatBingoBoard = async (fields) => {
   const canvas = Canvas.createCanvas(812, 462);
   const ctx = canvas.getContext(`2d`);
 
-  const background = await Canvas.loadImage(`./src/resources/bingoTemplate.png`);
-  ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+  const board = await Canvas.loadImage(`./src/backgrounds/bingoTemplate.png`);
+  ctx.drawImage(board, 0, 0, canvas.width, canvas.height);
+
+  // set alpha to .5 only for the background image
+  ctx.globalAlpha = 0.5;
+
+  // get the current week number
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  // Thursday in current week decides the year.
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  // January 4 is always in week 1.
+  const week1 = new Date(date.getFullYear(), 0, 4);
+  // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+  const weekNumber =  1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+
+  // translate the weekNumber into one of the 18 background images
+  const backgroundNo = weekNumber % 18;
+  const background = await Canvas.loadImage(`./src/backgrounds/${backgroundNo}.jpg`);
+  ctx.drawImage(background, 2, 2, canvas.width - 4, canvas.height - 4);
+
+  ctx.globalAlpha = 1;
 
   ctx.font = `18px ${fontName} medium`;
   ctx.textAlign = `center`;
@@ -339,7 +359,8 @@ const formatBingoBoard = async (fields) => {
 
   const embed = {
     embed: {
-      title: `Here's this week's TOTD bingo board!`,
+      title: `Here's the TOTD bingo board for this week!`,
+      description: `This one is for week ${weekNumber} - I'll generate a new one next Monday.`,
       type: `rich`,
       files: [
         attachment
