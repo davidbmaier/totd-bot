@@ -49,8 +49,9 @@ Every commit on `main` triggers an update to the live version of the bot running
 
 ## Planned Features/TODOs 📋
 
+- Add `!totd votebingo` command to suggest a vote on a bingo field (yes/no reactions, resolve when the next TOTD rolls over - so there needs to be a persistent list of ongoing votes, remove the original author of the vote from the outcome).
+- Add support for crossing off stuff from the weekly bingo (needs to be persisted as well).
 - Find better voting emojis - the current ones are just screenshots from TMNF.
-- Some way to share the track votes over all servers (maybe just as text?). Probably without duplicate detection - just too much work.
 - Add a short info message when joining a new server (if there's a reliable way to find the "main" channel).
 - More data (currently uses TM and TMX when available) - there's probably more interesting metadata the bot could display.
   - How many TOTDs did the author have before?
