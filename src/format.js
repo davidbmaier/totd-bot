@@ -323,6 +323,10 @@ const formatBingoBoard = async (fields) => {
   const background = await Canvas.loadImage(`./src/backgrounds/${backgroundNo}.jpg`);
   ctx.drawImage(background, 2, 2, canvas.width - 4, canvas.height - 4);
 
+  // draw a black rect in the center to highlight the free space (.5 alpha so it doesn't block the background)
+  ctx.fillStyle = `#000000`;
+  ctx.fillRect(326, 186, 160, 90);
+
   ctx.globalAlpha = 1;
 
   ctx.font = `18px ${fontName} medium`;
