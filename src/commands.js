@@ -204,6 +204,21 @@ const refreshBingo = {
   }
 };
 
+const bingoCount = {
+  command: utils.addDevPrefix(`!totd refresh count`),
+  action: async (msg, client) => {
+    if (msg.author.tag === adminTag) {
+      try {
+        await discordAPI.countBingoVotes(client);
+        msg.channel.send(`I've counted and resolved the current bingo votes!`);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.error(error);
+      }
+    }
+  }
+};
+
 const debug = {
   command: utils.addDevPrefix(`!totd debug`),
   action: async (msg, client) => {
@@ -232,5 +247,6 @@ module.exports = [
   enable,
   disable,
   bingo,
-  bingoVote
+  bingoVote,
+  bingoCount
 ];

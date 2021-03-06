@@ -157,7 +157,8 @@ const sendTOTDLeaderboard = async (client, channel) => {
 };
 
 const sendTOTDRatings = async (client, channel, yesterday) => {
-  console.log(`Sending current ratings to #${channel.name} in ${channel.guild.name}`);
+  const ratingString = yesterday ? `yesterday's verdict` : `current rating`;
+  console.log(`Sending ${ratingString} to #${channel.name} in ${channel.guild.name}`);
   const message = await getRatingMessage(yesterday);
   await channel.send(message);
 };
