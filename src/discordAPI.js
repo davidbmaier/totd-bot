@@ -213,8 +213,11 @@ const sendBingoVote = async (channel, bingoID) => {
 };
 
 const countBingoVotes = async (client) => {
+  console.log(`Counting outstanding bingo votes...`);
   const redisClient = await redisAPI.login();
   let board = await redisAPI.getBingoBoard(redisClient);
+
+  const updatedFields = [];
 
   for (let i = 0; i < board.length; i++) {
     const field = board[i];
@@ -244,6 +247,7 @@ const countBingoVotes = async (client) => {
         delete field.voteActive;
         delete field.voteMessageID;
         delete field.voteChannelID;
+        updatedFields.push(field.text);
       } else {
         field.voteActive = false;
         delete field.voteMessageID;
@@ -252,12 +256,18 @@ const countBingoVotes = async (client) => {
     }
   }
 
+  if (updatedFields.length > 0) {
+    console.log(`Vote check finished, newly checked fields:`, updatedFields);
+  } else {
+    console.log(`Vote check finished, no new bingo field checked`);
+  }
+
   await redisAPI.saveBingoBoard(redisClient, board);
   return redisAPI.logout(redisClient);
 };
 
 const archiveRatings = async () => {
-  console.log(`Archiving existing ratings and clearing current ones`);
+  console.log(`Archiving existing ratings and clearing current ones...`);
   const redisClient = await redisAPI.login();
   const ratings = await redisAPI.getTOTDRatings(redisClient);
 
