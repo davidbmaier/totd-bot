@@ -46,11 +46,6 @@ const bingoFields = [
   `Map by\nRexasaurus13`,
   `Map by priez`,
   `Map by\nbartsimpson94`,
-  `Map by\nNeoriionTM`,
-  `Map by OregoX`,
-  `Map by Pop-hiip`,
-  `Map by\nPeekabluu`,
-  `Map by\nRadiPiKan`,
   // times
   `Author time\nover a minute`,
   `Author time\nunder 30s`,

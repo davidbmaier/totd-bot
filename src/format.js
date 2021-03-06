@@ -392,8 +392,8 @@ const formatBingoBoard = async (fields) => {
 
   const embed = {
     embed: {
-      title: `Here's the TOTD bingo board for this week!`,
-      description: `This one is for week ${weekNumber} - I'll generate a new one next Monday.`,
+      title: `Here's the TOTD bingo board for week ${weekNumber}!`,
+      description: `If you think we should cross one of these off, you can start a vote using \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`.`,
       type: `rich`,
       files: [
         attachment
