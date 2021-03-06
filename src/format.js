@@ -369,7 +369,7 @@ const formatBingoBoard = async (fields) => {
         // (full height / spaces between text pieces) * piece index = offset for this specific piece
         const pieceOffset = (90 / (textPieces.length + 1)) * (i + 1);
 
-        const currentHeight = cellTop + pieceOffset - 4; // move height up 4 pixels to correct for the font's line-height
+        const currentHeight = cellTop + pieceOffset - 2; // move height up to correct for the font's line-height
         ctx.font = `18px ${fontName} medium`;
         ctx.textAlign = `center`;
         ctx.textBaseline = `middle`;
