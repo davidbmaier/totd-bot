@@ -134,6 +134,7 @@ const help = {
       \`${utils.addDevPrefix(`!totd leaderboard`)}\`  -  Display the current top 10 (and the time for top 100).\n \
       \`${utils.addDevPrefix(`!totd verdict`)}\`  -  Display yesterday's TOTD ratings.\n \
       \`${utils.addDevPrefix(`!totd bingo`)}\`  -  Display this week's bingo board.\n \
+      \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Starts a vote to cross off that bingo field.\n \
       \`${utils.addDevPrefix(`!totd enable`)}\`  -  Enables daily TOTD posts in this channel (admin only).\n \
       \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disables the daily posts again (admin only).\n \
       \`${utils.addDevPrefix(`!totd help`)}\`  -  You're looking at it.`;
