@@ -151,18 +151,14 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
     ];
 
     // try to find position 100 in the first 150
-    let position100 = fullLeaderboard.find((top) => top.position === 100);
+    let position100Number = 100;
+    let position100 = fullLeaderboard.find((top) => top.position === position100Number);
 
     // sometimes the position 100 can't be found, then we try the next couple positions
-    // TODO: clean this up and make it dynamic
-    if (!position100) {
-      position100 = fullLeaderboard.find((top) => top.position === 101);
-    }
-    if (!position100) {
-      position100 = fullLeaderboard.find((top) => top.position === 102);
-    }
-    if (!position100) {
-      position100 = fullLeaderboard.find((top) => top.position === 103);
+    while (!position100 && position100Number < 106) {
+      position100Number++;
+      console.log(`Couldn't find top 100 immediately, trying ${position100Number} next`);
+      position100 = fullLeaderboard.find((top) => top.position === position100Number);
     }
 
     records.push(position100);
