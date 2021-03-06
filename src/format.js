@@ -382,7 +382,7 @@ const formatBingoBoard = async (fields) => {
       ctx.textAlign = `end`;
       ctx.textBaseline = `top`;
       ctx.fillStyle = `#FFFFFF`;
-      ctx.fillText(fieldCount + 1, cellRight - 3, cellTop - 4); // move font right into the corner
+      ctx.fillText(fieldCount + 1, cellRight - 3, cellTop); // move font right into the corner
 
       fieldCount++;
     }
