@@ -106,7 +106,11 @@ const getBingoMessage = async (forceRefresh) => {
       // TODO: add weights so there's only max 3 map themes/3 author fields
       const randomPick = Math.floor(Math.random() * bingoFields.length);
       const pickedField = bingoFields.splice(randomPick, 1)[0];
-      pickedFields.push(pickedField);
+      pickedFields.push({
+        text: pickedField,
+        checked: false,
+        voteActive: false
+      });
     }
 
     board = pickedFields;
@@ -164,6 +168,93 @@ const sendBingoBoard = async (channel) => {
   await channel.send(message);
 };
 
+const sendBingoVote = async (channel, bingoID) => {
+  const redisClient = await redisAPI.login();
+  let board = await redisAPI.getBingoBoard(redisClient);
+  
+  // add free space to the center
+  board.splice(12, 0, {text: `Free space`, checked: false});
+  
+  if (bingoID < 1 || bingoID > 25) {
+    return await channel.send(`Hmm, that's not on the board. I only understand numbers from 1 to 25 I'm afraid.`);
+  } else if (bingoID === 13) {
+    return await channel.send(`You want to vote on the free space? Are you okay?`);
+  }
+
+  const field = board[bingoID - 1];
+  if (field.checked) {
+    return await channel.send(`Looks like that field is already checked off for this week.`);
+  } else if (field.voteActive) {
+    return await channel.send(`There's already a vote going on for that field, check again tomorrow.`);
+  }
+
+  const textWithoutBreaks = field.text.replace(/\n/g, ` `);
+  const voteMessage = await channel.send(
+    `Vote started: **${textWithoutBreaks}**\n` +
+    `Does that sound like today's track?\n` +
+    `Vote using the reactions below - I'll close the vote when the next TOTD comes out.`
+  );
+
+  const voteYes = utils.getEmojiMapping(`VoteYes`);
+  const voteNo = utils.getEmojiMapping(`VoteNo`);
+  voteMessage.react(voteYes);
+  voteMessage.react(voteNo);
+
+  board[bingoID - 1].voteActive = true;
+  board[bingoID - 1].voteMessageID = voteMessage.id;
+  board[bingoID - 1].voteChannelID = voteMessage.channel.id;
+  // remove free space so it doesn't get saved
+  board.splice(12, 1);
+
+  // save vote info to redis
+  await redisAPI.saveBingoBoard(redisClient, board);
+  return redisAPI.logout(redisClient);
+};
+
+const countBingoVotes = async (client) => {
+  const redisClient = await redisAPI.login();
+  let board = await redisAPI.getBingoBoard(redisClient);
+
+  for (let i = 0; i < board.length; i++) {
+    const field = board[i];
+    if (!field.checked && field.voteActive && field.voteMessageID && field.voteChannelID) {
+      // vote found, resolving it
+      const voteChannel = await client.channels.fetch(field.voteChannelID);
+      const voteMessage = await voteChannel.messages.fetch(field.voteMessageID);
+
+      const voteYes = utils.getEmojiMapping(`VoteYes`);
+      const voteNo = utils.getEmojiMapping(`VoteNo`);
+
+      let countYes = 0;
+      let countNo = 0;
+      
+      voteMessage.reactions.cache.forEach((reaction, reactionID) => {
+        // use count - 1 since the bot adds one initially
+        if (voteYes.includes(reactionID)) {
+          countYes = reaction.count - 1;
+        } else if (voteNo.includes(reactionID)) {
+          countNo = reaction.count - 1;
+        }
+        // if Yes and No both don't match, ignore the reaction
+      });
+
+      if (countYes > countNo) {
+        field.checked = true;
+        delete field.voteActive;
+        delete field.voteMessageID;
+        delete field.voteChannelID;
+      } else {
+        field.voteActive = false;
+        delete field.voteMessageID;
+        delete field.voteChannelID;
+      }
+    }
+  }
+
+  await redisAPI.saveBingoBoard(redisClient, board);
+  return redisAPI.logout(redisClient);
+};
+
 const archiveRatings = async () => {
   console.log(`Archiving existing ratings and clearing current ones`);
   const redisClient = await redisAPI.login();
@@ -182,6 +273,7 @@ const distributeTOTDMessages = async (client) => {
   const message = await getTOTDMessage(true);
 
   archiveRatings();
+  countBingoVotes(client);
 
   const redisClient = await redisAPI.login();
   const configs = await redisAPI.getAllConfigs(redisClient);
@@ -240,6 +332,8 @@ module.exports = {
   sendTOTDLeaderboard,
   sendTOTDRatings,
   sendBingoBoard,
+  sendBingoVote,
+  countBingoVotes,
   distributeTOTDMessages,
   updateTOTDReactionCount
 };

@@ -291,7 +291,7 @@ const formatRatingsMessage = (ratings, yesterday) => {
 
 const formatBingoBoard = async (fields) => {
   // add free space to the center
-  fields.splice(12, 0, `Free space`);
+  fields.splice(12, 0, {text: `Free space`, checked: true});
 
   Canvas.registerFont(path.resolve(`./src/fonts/Quicksand.ttf`), {family: `Quicksand`});
   const fontName = `Quicksand`;
@@ -311,11 +311,11 @@ const formatBingoBoard = async (fields) => {
   // get the current week number
   const date = new Date();
   date.setHours(0, 0, 0, 0);
-  // Thursday in current week decides the year.
+  // Thursday in current week decides the year
   date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-  // January 4 is always in week 1.
+  // January 4 is always in week 1
   const week1 = new Date(date.getFullYear(), 0, 4);
-  // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+  // adjust to Thursday in week 1 and count number of weeks from date to week 1
   const weekNumber =  1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
 
   // translate the weekNumber into one of the 18 background images
@@ -337,23 +337,52 @@ const formatBingoBoard = async (fields) => {
   let fieldCount = 0;
   for (let y = 0; y < 5; y++) {
     for (let x = 0; x < 5; x++) {
-      if (ctx.measureText(fields[fieldCount]).width > 140) {
-        console.log(`Bingo warning: Field is too long for one line:`, fields[fieldCount]);
+      if (ctx.measureText(fields[fieldCount].text || fields[fieldCount]).width > 140) {
+        console.log(`Bingo warning: Field is too long for one line:`, fields[fieldCount].text || fields[fieldCount]);
       }
 
-      const textPieces = fields[fieldCount].split(`\n`);
+      const textPieces = (fields[fieldCount].text || fields[fieldCount]).split(`\n`);
 
-      const horizontalCenter = (x * 162) + 82; // skip x cells incl their left border, then move to the cell center (incl the border)
-      const verticalCenter = (y * 92) + 47; // skip y cells incl their upper border, then move to the cell center (incl the border)
+      // skip x cells incl their left border, then move to the cell center (incl the border)
+      const horizontalCenter = (x * 162) + 82;
+      // skip y cells incl their upper border, then move to the cell center (incl the border)
+      const verticalCenter = (y * 92) + 47;
+      const cellRight = horizontalCenter + 80;
+      const cellLeft = horizontalCenter - 80;
+      const cellTop = verticalCenter - 45;
+      const cellBottom = verticalCenter + 45;
 
+      // add crosses to checked fields
+      if (fields[fieldCount].checked) {
+        ctx.strokeStyle = `#000000`;
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(cellLeft + 5, cellTop + 5); // top left
+        ctx.lineTo(cellRight - 5, cellBottom - 5); // bottom right
+        ctx.moveTo(cellRight - 5, cellTop + 5); // top right
+        ctx.lineTo(cellLeft + 5, cellBottom - 5); // bottom left
+        ctx.stroke();
+      }
+
+      // write field text
       for (let i = 0; i < textPieces.length; i++) {
-        const cellTop = verticalCenter - 45;
         // (full height / spaces between text pieces) * piece index = offset for this specific piece
         const pieceOffset = (90 / (textPieces.length + 1)) * (i + 1);
 
-        const currentHeight = cellTop + pieceOffset;
+        const currentHeight = cellTop + pieceOffset - 4; // move height up 4 pixels to correct for the font's line-height
+        ctx.font = `18px ${fontName} medium`;
+        ctx.textAlign = `center`;
+        ctx.textBaseline = `middle`;
+        ctx.fillStyle = `#FFFFFF`;
         ctx.fillText(textPieces[i], horizontalCenter, currentHeight);
       }
+
+      // write field numbers
+      ctx.font = `14px ${fontName} medium`;
+      ctx.textAlign = `end`;
+      ctx.textBaseline = `top`;
+      ctx.fillStyle = `#FFFFFF`;
+      ctx.fillText(fieldCount + 1, cellRight - 3, cellTop - 4); // move font right into the corner
 
       fieldCount++;
     }
