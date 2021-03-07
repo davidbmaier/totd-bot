@@ -289,7 +289,7 @@ const formatRatingsMessage = (ratings, yesterday) => {
   };
 };
 
-const formatBingoBoard = async (fields) => {
+const formatBingoBoard = async (fields, lastWeek) => {
   // add free space to the center
   fields.splice(12, 0, {text: `Free space`, checked: true});
 
@@ -309,7 +309,10 @@ const formatBingoBoard = async (fields) => {
   ctx.globalAlpha = 0.5;
 
   // get the current week number
-  const date = new Date();
+  let date = new Date();
+  if (lastWeek) {
+    date = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // subtract 7 days for last week
+  }
   date.setHours(0, 0, 0, 0);
   // Thursday in current week decides the year
   date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
@@ -390,10 +393,15 @@ const formatBingoBoard = async (fields) => {
 
   const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `bingo.png`);
 
+  const embedDescription = 
+    lastWeek
+      ? `This board is closed - use \`${utils.addDevPrefix(`!totd bingo`)}\` to see the current one.`
+      : `If you think we should cross one of these off, you can start a vote using \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`.`;
+
   const embed = {
     embed: {
       title: `Here's the TOTD bingo board for week ${weekNumber}!`,
-      description: `If you think we should cross one of these off, you can start a vote using \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`.`,
+      description: embedDescription,
       type: `rich`,
       files: [
         attachment

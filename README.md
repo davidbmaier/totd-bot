@@ -18,6 +18,7 @@ Use at your own risk - the bot is in development and may break from time to time
 - `!totd leaderboard` - Prints the current TOTD top 10 and the time needed for top 100 to the current channel.
 - `!totd verdict` - Prints yesterday's global ratings and a short verdict based on them.
 - `!totd bingo` - Prints this week's bingo board.
+- `!totd last bingo` - Prints last week's bingo board.
 - `!totd vote [1-25]` - Starts a vote on that bingo field. All ongoing votes are resolved when the next TOTD is released.
 - `!totd enable` - Stores the current channel to the list the daily scheduled TOTD post gets sent to. One channel per server. Admin only.
 - `!totd disable` - Removes the current channel from the list the scheduled TOTD post gets sent to. Admin only.
@@ -27,7 +28,10 @@ Debug (and bot admin) only:
 
 - `!totd refresh today` - Refreshes the internally cached TOTD information.
 - `!totd refresh leaderboard` - Refreshes the internally cached leaderboard information.
+- `!totd ratings` - Regenerates the current bingo board.
+- `!totd refresh ratings` - Prints the current global ratings and a short verdict based on them (admin-only since it's not resolved yet).
 - `!totd refresh bingo` - Regenerates the current bingo board.
+- `!totd refresh count` - Resolves the ongoing bingo field votes.
 
 ## Screenshots 📷
 

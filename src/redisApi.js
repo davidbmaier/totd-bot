@@ -258,9 +258,13 @@ const updateTOTDRatings = async (redisClient, emojiName, add) => {
   });
 };
 
-const getBingoBoard = async (redisClient) => {
+const getBingoBoard = async (redisClient, lastWeek) => {
   return new Promise((resolve, reject) => {
-    redisClient.get(`bingo`, (err, board) => {
+    let bingoEntry = `bingo`;
+    if (lastWeek) {
+      bingoEntry = `lastBingo`;
+    }
+    redisClient.get(bingoEntry, (err, board) => {
       if (err) {
         reject(err);
       } else {
@@ -274,9 +278,13 @@ const getBingoBoard = async (redisClient) => {
   });
 };
 
-const saveBingoBoard = async (redisClient, board) => {
+const saveBingoBoard = async (redisClient, board, lastWeek) => {
   return new Promise((resolve, reject) => {
-    redisClient.set(`bingo`, JSON.stringify(board), (err) => {
+    let bingoEntry = `bingo`;
+    if (lastWeek) {
+      bingoEntry = `lastBingo`;
+    }
+    redisClient.set(bingoEntry, JSON.stringify(board), (err) => {
       if (err) {
         reject(err);
       } else {

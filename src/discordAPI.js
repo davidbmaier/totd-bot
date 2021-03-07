@@ -94,35 +94,51 @@ const getRatingMessage = async (yesterday) => {
   }
 };
 
-const getBingoMessage = async (forceRefresh) => {
+const getBingoMessage = async (forceRefresh, lastWeek) => {
   const redisClient = await redisAPI.login();
-  let board = await redisAPI.getBingoBoard(redisClient);
+  let board = await redisAPI.getBingoBoard(redisClient, lastWeek);
   
-  if (!board || forceRefresh) {
-    console.log(`Regenerating bingo board...`);
-    const bingoFields = [...constants.bingoFields];
-    const pickedFields = [];
-    while (pickedFields.length < 24) {
-      // TODO: add weights so there's only max 3 map themes/3 author fields
-      const randomPick = Math.floor(Math.random() * bingoFields.length);
-      const pickedField = bingoFields.splice(randomPick, 1)[0];
-      pickedFields.push({
-        text: pickedField,
-        checked: false,
-        voteActive: false
-      });
+  if (lastWeek) {
+    if (board) {
+      console.log(`Using last week's board`);
+      redisAPI.logout(redisClient);
+      return await format.formatBingoBoard(board, lastWeek);
+    } else {
+      console.log(`Couldn't find last week's board`);
+      return `Hmm, I don't remember last week's board. Sorry about that!`;
+    }
+  } else {
+    if (!board || forceRefresh) {
+      if (board) {
+        console.log(`Archiving old bingo board...`);
+        await redisAPI.saveBingoBoard(redisClient, board, true);
+      }
+
+      console.log(`Regenerating bingo board...`);
+      const bingoFields = [...constants.bingoFields];
+      const pickedFields = [];
+      while (pickedFields.length < 24) {
+        // TODO: add weights so there's only max 3 map themes/3 author fields
+        const randomPick = Math.floor(Math.random() * bingoFields.length);
+        const pickedField = bingoFields.splice(randomPick, 1)[0];
+        pickedFields.push({
+          text: pickedField,
+          checked: false,
+          voteActive: false
+        });
+      }
+
+      board = pickedFields;
+
+      await redisAPI.saveBingoBoard(redisClient, board);
+      console.log(`Refreshed bingo board in Redis`);
+    } else {
+      console.log(`Using cached bingo board...`);
     }
 
-    board = pickedFields;
-
-    await redisAPI.saveBingoBoard(redisClient, board);
-    console.log(`Refreshed bingo board in Redis`);
-  } else {
-    console.log(`Using cached bingo board...`);
+    redisAPI.logout(redisClient);
+    return await format.formatBingoBoard(board);
   }
-
-  redisAPI.logout(redisClient);
-  return await format.formatBingoBoard(board);
 };
 
 const sendTOTDMessage = async (client, channel, message) => {
@@ -163,9 +179,10 @@ const sendTOTDRatings = async (client, channel, yesterday) => {
   await channel.send(message);
 };
 
-const sendBingoBoard = async (channel) => {
-  console.log(`Sending bingo board to #${channel.name} in ${channel.guild.name}`);
-  const message = await getBingoMessage();
+const sendBingoBoard = async (channel, lastWeek) => {
+  const bingoString = lastWeek ? `last week's` : `current`;
+  console.log(`Sending ${bingoString} bingo board to #${channel.name} in ${channel.guild.name}`);
+  const message = await getBingoMessage(false, lastWeek);
   await channel.send(message);
 };
 

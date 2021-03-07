@@ -31,21 +31,6 @@ const leaderboard = {
   }
 };
 
-// debug command to see the current ratings
-const ratings = {
-  command: utils.addDevPrefix(`!totd ratings`),
-  action: async (msg, client) => {
-    if (msg.author.tag === adminTag) { // admin only, verdict is public (for yesterday's track)
-      try {
-        await discordAPI.sendTOTDRatings(client, msg.channel);
-      } catch (error) {
-        discordAPI.sendErrorMessage(msg.channel);
-        console.log(error);
-      }
-    }
-  }
-};
-
 const verdict = {
   command: utils.addDevPrefix(`!totd verdict`),
   action: async (msg, client) => {
@@ -108,6 +93,18 @@ const bingo = {
   }
 };
 
+const lastBingo = {
+  command: utils.addDevPrefix(`!totd last bingo`),
+  action: async (msg) => {
+    try {
+      await discordAPI.sendBingoBoard(msg.channel, true);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
+    }
+  }
+};
+
 const bingoVote = {
   command: utils.addDevPrefix(`!totd vote`),
   action: async (msg) => {
@@ -134,12 +131,28 @@ const help = {
       \`${utils.addDevPrefix(`!totd leaderboard`)}\`  -  Display the current top 10 (and the time for top 100).\n \
       \`${utils.addDevPrefix(`!totd verdict`)}\`  -  Display yesterday's TOTD ratings.\n \
       \`${utils.addDevPrefix(`!totd bingo`)}\`  -  Display this week's bingo board.\n \
+      \`${utils.addDevPrefix(`!totd last bingo`)}\`  -  Display last week's bingo board.\n \
       \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Starts a vote to cross off that bingo field.\n \
       \`${utils.addDevPrefix(`!totd enable`)}\`  -  Enables daily TOTD posts in this channel (admin only).\n \
       \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disables the daily posts again (admin only).\n \
       \`${utils.addDevPrefix(`!totd help`)}\`  -  You're looking at it.`;
     const formattedMessage = format.formatHelpMessage(message);
     msg.channel.send(formattedMessage);
+  }
+};
+
+// debug command to see the current ratings
+const ratings = {
+  command: utils.addDevPrefix(`!totd ratings`),
+  action: async (msg, client) => {
+    if (msg.author.tag === adminTag) { // admin only, verdict is public (for yesterday's track)
+      try {
+        await discordAPI.sendTOTDRatings(client, msg.channel);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.log(error);
+      }
+    }
   }
 };
 
@@ -248,6 +261,7 @@ module.exports = [
   enable,
   disable,
   bingo,
+  lastBingo,
   bingoVote,
   bingoCount
 ];
