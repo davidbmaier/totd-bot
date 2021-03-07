@@ -37,6 +37,9 @@ const bingoFields = [
   `Reactor jump\nwith a zoop`,
   `Driving\nupside-down`,
   `Non-\nrespawnable\ncheckpoint`,
+  `Bug slide`,
+  `Speed slides`,
+  `Jump into\nthe finish`,
   // author
   `Author's\nfirst TOTD`,
   `More than one\nTOTD by\nthe same author`,
