@@ -208,7 +208,7 @@ const sendBingoVote = async (channel, bingoID) => {
 
   const textWithoutBreaks = field.text.replace(/\n/g, ` `);
   const voteMessage = await channel.send(
-    `Vote started: **${textWithoutBreaks}**\n` +
+    `Bingo vote started: **${textWithoutBreaks}**\n` +
     `Does that sound like today's track?\n` +
     `Vote using the reactions below - I'll close the vote when the next TOTD comes out.`
   );

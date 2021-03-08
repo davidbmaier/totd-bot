@@ -308,10 +308,10 @@ const formatBingoBoard = async (fields, lastWeek) => {
   // set alpha to .5 only for the background image
   ctx.globalAlpha = 0.5;
 
-  // get the current week number
-  let date = new Date();
+  // get the current week number (current time - 19hrs to offset the Monday TOTD)
+  let date = new Date(Date.now() - 19 * 60 * 60 * 1000);
   if (lastWeek) {
-    date = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // subtract 7 days for last week
+    date = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - (19 * 60 * 60 * 1000)); // subtract 7 days for last week, then 19hrs for the Monday TOTD
   }
   date.setHours(0, 0, 0, 0);
   // Thursday in current week decides the year

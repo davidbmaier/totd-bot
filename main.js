@@ -21,9 +21,9 @@ new cron(
   `Europe/Berlin`
 );
 
-// refresh bingo every week on Monday at 00:00:00
+// refresh bingo every week on Monday at 19:00:00
 new cron(
-  `00 00 00 * * 1`,
+  `00 00 19 * * 1`,
   async () => {
     await discordAPI.getBingoMessage(true);
   },
