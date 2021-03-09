@@ -1,5 +1,6 @@
 const Discord = require(`discord.js`);
 const Canvas = require(`canvas`);
+const luxon = require(`luxon`);
 const path = require(`path`);
 
 const utils = require(`./utils`);
@@ -308,18 +309,15 @@ const formatBingoBoard = async (fields, lastWeek) => {
   // set alpha to .5 only for the background image
   ctx.globalAlpha = 0.5;
 
-  // get the current week number (current time - 19hrs to offset the Monday TOTD)
-  let date = new Date(Date.now() - 19 * 60 * 60 * 1000);
+  // get the current week number (current time in Europe/Paris)
+  let date = luxon.DateTime.fromMillis(new Date().getTime(), { zone: `Europe/Paris` });
   if (lastWeek) {
-    date = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - (19 * 60 * 60 * 1000)); // subtract 7 days for last week, then 19hrs for the Monday TOTD
+    // subtract 7 days for last week
+    date = date.minus({ days: 7 });
   }
-  date.setHours(0, 0, 0, 0);
-  // Thursday in current week decides the year
-  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-  // January 4 is always in week 1
-  const week1 = new Date(date.getFullYear(), 0, 4);
-  // adjust to Thursday in week 1 and count number of weeks from date to week 1
-  const weekNumber =  1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+  // subtract 19hrs for the correct week (offset by the Monday TOTD)
+  date = date.minus({ hours: 19 });
+  const weekNumber = date.weekNumber;
 
   // translate the weekNumber into one of the 18 background images
   const backgroundNo = weekNumber % 18;

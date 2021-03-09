@@ -18,7 +18,7 @@ new cron(
   },
   null,
   true,
-  `Europe/Berlin`
+  `Europe/Paris`
 );
 
 // refresh bingo every week on Monday at 19:00:00
@@ -29,7 +29,7 @@ new cron(
   },
   null,
   true,
-  `Europe/Berlin`
+  `Europe/Paris`
 );
 
 client.on(`ready`, async () => {
