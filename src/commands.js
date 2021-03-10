@@ -108,18 +108,16 @@ const lastBingo = {
 const bingoVote = {
   command: utils.addDevPrefix(`!totd vote`),
   action: async (msg) => {
-    if (msg.author.tag === adminTag) {
-      try {
-        const bingoID = msg.content.split(` `)[2];
-        if (!bingoID || Number.isNaN(parseInt(bingoID))) {
-          msg.channel.send(`I didn't catch that - to vote on a bingo field, use \`!totd vote [1-25]\`.`);
-        } else {
-          await discordAPI.sendBingoVote(msg.channel, parseInt(bingoID));
-        }
-      } catch (error) {
-        discordAPI.sendErrorMessage(msg.channel);
-        console.error(error);
+    try {
+      const bingoID = msg.content.split(` `)[2];
+      if (!bingoID || Number.isNaN(parseInt(bingoID))) {
+        msg.channel.send(`I didn't catch that - to vote on a bingo field, use \`!totd vote [1-25]\`.`);
+      } else {
+        await discordAPI.sendBingoVote(msg.channel, parseInt(bingoID));
       }
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.error(error);
     }
   }
 };
