@@ -27,7 +27,7 @@ const bingoFields = [
   `Poor lighting`,
   `Night map`,
   `Map filled\nwith custom\nscenery items`,
-  `Map\nwithout any\ncustom items`,
+  `Only vanilla\nblocks\n(CPs aside)`,
   `Scenery\nin the middle\nof the road`,
   `Texture mod`,
   `Map outside\nof the stadium`,
@@ -40,6 +40,9 @@ const bingoFields = [
   `Bug slide`,
   `Speed slides`,
   `Jump into\nthe finish`,
+  `Narrow\nroads`,
+  `Poles on\nthe track`,
+  `Multi-lap\ntrack`,
   // author
   `Author's\nfirst TOTD`,
   `More than one\nTOTD by\nthe same author`,
@@ -54,7 +57,7 @@ const bingoFields = [
   `Author time\nunder 30s`,
   `Author medal\nthat's insanely\ndifficult`,
   `Free\nAuthor medal`,
-  `WR-level GPS`,
+  `Hunted GPS`,
   `Bronze-level\nGPS`,
   // technical things
   `Cup of the Day\nbreaks`,
