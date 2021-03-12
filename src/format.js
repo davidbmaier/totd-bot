@@ -324,10 +324,6 @@ const formatBingoBoard = async (fields, lastWeek) => {
   const background = await Canvas.loadImage(`./src/backgrounds/${backgroundNo}.jpg`);
   ctx.drawImage(background, 2, 2, canvas.width - 4, canvas.height - 4);
 
-  // draw a black rect in the center to highlight the free space (.5 alpha so it doesn't block the background)
-  ctx.fillStyle = `#000000`;
-  ctx.fillRect(326, 186, 160, 90);
-
   ctx.globalAlpha = 1;
 
   ctx.font = `18px ${fontName} medium`;
@@ -351,19 +347,15 @@ const formatBingoBoard = async (fields, lastWeek) => {
       const cellRight = horizontalCenter + 80;
       const cellLeft = horizontalCenter - 80;
       const cellTop = verticalCenter - 45;
-      const cellBottom = verticalCenter + 45;
 
-      // add crosses to checked fields
+      // add dark backgrounds to checked fields
       if (fields[fieldCount].checked) {
-        ctx.strokeStyle = `#000000`;
-        ctx.lineWidth = 5;
-        ctx.beginPath();
-        ctx.moveTo(cellLeft + 5, cellTop + 5); // top left
-        ctx.lineTo(cellRight - 5, cellBottom - 5); // bottom right
-        ctx.moveTo(cellRight - 5, cellTop + 5); // top right
-        ctx.lineTo(cellLeft + 5, cellBottom - 5); // bottom left
-        ctx.stroke();
+        ctx.globalAlpha = 0.65;
+        ctx.fillStyle = `#000000`;
+        ctx.fillRect(cellLeft, cellTop, 160, 90);
       }
+
+      ctx.globalAlpha = 1;
 
       // write field text
       for (let i = 0; i < textPieces.length; i++) {
@@ -409,6 +401,33 @@ const formatBingoBoard = async (fields, lastWeek) => {
       }
     }
   };
+
+  const checkBingoWin = () => {
+    for (let i = 0; i < 5; i++) {
+      // column checks
+      if (
+        // column checks (0+5, 1+5, 2+5, 3+5, 3+5)
+        (fields[i].checked && fields[i + 5].checked && fields[i + 10].checked && fields[i + 15].checked && fields[i + 20].checked)
+        // row checks (0-4, 5-9, 10-14, 15-19, 20-24)
+        || (fields[i * 5].checked && fields[i * 5 + 1].checked && fields[i * 5 + 2].checked && fields[i * 5 + 3].checked && fields[i * 5 + 4].checked)
+        // diagonal checks (0+6, 4+4)
+        || (fields[0].checked && fields[6].checked && fields[12].checked && fields[18].checked && fields[24].checked)
+        || (fields[4].checked && fields[8].checked && fields[12].checked && fields[16].checked && fields[20].checked)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  if (checkBingoWin()) {
+    embed.embed.fields = [
+      {
+        name: `:tada: Bingo! :tada:`,
+        value: `You've done it! Congrats! ${utils.getEmojiMapping(`Bingo`)}`
+      }
+    ];
+  }
 
   return embed;
 };
