@@ -21,9 +21,9 @@ new cron(
   `Europe/Paris`
 );
 
-// refresh bingo every week on Monday at 19:00:00
+// refresh bingo every week on Monday at 19:01:00 (just after the TOTD so the last votes make it in)
 new cron(
-  `00 00 19 * * 1`,
+  `00 01 19 * * 1`,
   async () => {
     await discordAPI.getBingoMessage(true);
   },

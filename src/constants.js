@@ -45,7 +45,7 @@ const bingoFields = [
   `Multi-lap\ntrack`,
   // author
   `Author's\nfirst TOTD`,
-  `More than one\nTOTD by\nthe same author`,
+  `Author already\nhad TOTD\nin the last 7 days`,
   `Map by a\nTMGL player`,
   `Map by\nEverios96`,
   `Map by htimh`,
