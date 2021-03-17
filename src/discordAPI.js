@@ -288,19 +288,21 @@ const archiveRatings = async () => {
   const redisClient = await redisAPI.login();
   const ratings = await redisAPI.getTOTDRatings(redisClient);
 
+  console.log(`Old ratings:`, ratings);
+
   if (ratings) {
     await redisAPI.saveLastTOTDVerdict(redisClient, ratings);
   }
   await redisAPI.clearTOTDRatings(redisClient);
 
-  redisAPI.logout(redisClient);
+  return await redisAPI.logout(redisClient);
 };
 
 const distributeTOTDMessages = async (client) => {
   console.log(`Broadcasting TOTD message to subscribed channels`);
   const message = await getTOTDMessage(true);
 
-  archiveRatings();
+  await archiveRatings();
   countBingoVotes(client);
 
   const redisClient = await redisAPI.login();
