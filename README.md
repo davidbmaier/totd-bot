@@ -28,10 +28,10 @@ Debug (and bot admin) only:
 
 - `!totd refresh today` - Refreshes the internally cached TOTD information.
 - `!totd refresh leaderboard` - Refreshes the internally cached leaderboard information.
-- `!totd ratings` - Regenerates the current bingo board.
 - `!totd refresh ratings` - Prints the current global ratings and a short verdict based on them (admin-only since it's not resolved yet).
 - `!totd refresh bingo` - Regenerates the current bingo board.
 - `!totd refresh count` - Resolves the ongoing bingo field votes.
+- `!totd ratings` - Regenerates the current bingo board.
 
 ## Screenshots 📷
 
@@ -54,8 +54,6 @@ Every commit on `main` triggers an update to the live version of the bot running
 
 ## Planned Features/TODOs 📋
 
-- Add `!totd votebingo` command to suggest a vote on a bingo field (yes/no reactions, resolve when the next TOTD rolls over - so there needs to be a persistent list of ongoing votes, remove the original author of the vote from the outcome).
-- Add support for crossing off stuff from the weekly bingo (needs to be persisted as well).
 - Find better voting emojis - the current ones are just screenshots from TMNF.
 - Add a short info message when joining a new server (if there's a reliable way to find the "main" channel).
 - More data (currently uses TM and TMX when available) - there's probably more interesting metadata the bot could display.
