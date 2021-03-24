@@ -75,7 +75,7 @@ const handleReaction = async (reaction, user, add) => {
 	}
 
   if (
-    reaction.message.author.id === client.user.id // check the message was sent by the bot
+    reaction.message.author && (reaction.message.author.id === client.user.id) // check the message was sent by the bot
     && user.id !== client.user.id // check the reaction was not sent by the bot
   ) {
     discordAPI.updateTOTDReactionCount(reaction, add);
