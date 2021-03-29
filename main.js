@@ -10,9 +10,9 @@ const utils = require(`./src/utils`);
 const discordToken = process.env.DISCORD_TOKEN;
   const deployMode = process.env.DEPLOY_MODE;
 
-// display the current totd every day at 19:00:30
+// display the current totd every day at 19:00:15
 new cron(
-  `30 00 19 * * *`,
+  `15 00 19 * * *`,
   async () => {
     await discordAPI.distributeTOTDMessages(client);
   },
@@ -21,9 +21,9 @@ new cron(
   `Europe/Paris`
 );
 
-// refresh bingo every week on Monday at 19:01:00 (just after the TOTD so the last votes make it in)
+// refresh bingo every week on Monday at 19:00:45 (just after the TOTD because that counts yesterday's bingo votes)
 new cron(
-  `00 01 19 * * 1`,
+  `45 00 19 * * 1`,
   async () => {
     await discordAPI.getBingoMessage(true);
   },
