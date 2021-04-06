@@ -19,7 +19,7 @@ const bingoFields = [
   `FullSpeed\nof the Day`,
   // map characteristics
   `Scenery\nof the Day`,
-  `Cut of the Day`,
+  `Cut/Reroute\nof the Day`,
   `Fog of the Day`,
   `Restart\nsimulator`,
   `Upside-down\ntrees`,
@@ -40,18 +40,16 @@ const bingoFields = [
   `Bug slide`,
   `Speed slides`,
   `Jump into\nthe finish`,
-  `Narrow\nroads`,
+  `Narrow\nblocks`,
   `Poles on\nthe track`,
   `Multi-lap\ntrack`,
+  `Horrible\ngears`,
   // author
   `Author's\nfirst TOTD`,
   `Author already\nhad TOTD\nin the last 7 days`,
   `Map by a\nTMGL player`,
-  `Map by\nEverios96`,
   `Map by htimh`,
-  `Map by\nRexasaurus13`,
   `Map by priez`,
-  `Map by\nbartsimpson94`,
   // times
   `Author time\nover a minute`,
   `Author time\nunder 30s`,
@@ -62,8 +60,7 @@ const bingoFields = [
   // technical things
   `Cup of the Day\nbreaks`,
   `Super-laggy\nmap`,
-  `Map with\nthe Openplanet\nsound bug`,
-  `Fake WR times\ndue to\ncheckpoint bug`
+  `Map with\nthe Openplanet\nsound bug`
 ];
 
 module.exports = {
