@@ -347,15 +347,27 @@ const formatBingoBoard = async (fields, lastWeek) => {
       const cellRight = horizontalCenter + 80;
       const cellLeft = horizontalCenter - 80;
       const cellTop = verticalCenter - 45;
+      const cellBottom = verticalCenter + 45;
 
-      // add dark backgrounds to checked fields
+      // add dark backgrounds and highlighted edges to checked fields
       if (fields[fieldCount].checked) {
         ctx.globalAlpha = 0.65;
         ctx.fillStyle = `#000000`;
         ctx.fillRect(cellLeft, cellTop, 160, 90);
+
+        ctx.strokeStyle = `#a4eb34`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(cellLeft, cellTop);
+        ctx.lineTo(cellRight, cellTop);
+        ctx.lineTo(cellRight, cellBottom);
+        ctx.lineTo(cellLeft, cellBottom);
+        ctx.lineTo(cellLeft, cellTop);
+        ctx.stroke();
       }
 
       ctx.globalAlpha = 1;
+      ctx.lineWidth = 1;
 
       // write field text
       for (let i = 0; i < textPieces.length; i++) {
@@ -447,7 +459,7 @@ const formatHelpMessage = (commands) => {
           name: `More Info`,
           value:
             `I've been developed by <@141627532335251456> - feel free to let him know if you like me (or when something broke). \
-            My code can be found [here](https://github.com/davidbmaier/todt-bot).`
+            My code can be found [here](https://github.com/davidbmaier/totd-bot).`
         }
       ]
     }
