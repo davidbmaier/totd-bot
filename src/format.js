@@ -386,7 +386,13 @@ const formatBingoBoard = async (fields, lastWeek) => {
       ctx.font = `14px ${fontName} medium`;
       ctx.textAlign = `end`;
       ctx.textBaseline = `top`;
-      ctx.fillStyle = `#FFFFFF`;
+      // color the field numbers if the field has been checked
+      if (fields[fieldCount].checked) {
+        ctx.fillStyle = `#a4eb34`;
+      } else {
+        ctx.fillStyle = `#FFFFFF`;
+      }
+      
       ctx.fillText(fieldCount + 1, cellRight - 3, cellTop); // move font right into the corner
 
       fieldCount++;
