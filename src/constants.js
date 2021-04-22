@@ -44,6 +44,7 @@ const bingoFields = [
   `Poles on\nthe track`,
   `Multi-lap\ntrack`,
   `Horrible\ngears`,
+  `Magnets`,
   // author
   `Author's\nfirst TOTD`,
   `Author already\nhad TOTD\nin the last 7 days`,
