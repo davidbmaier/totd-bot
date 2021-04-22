@@ -52,7 +52,9 @@ To run it, just run an `npm i` and an `npm start`. Make sure you've added a `.en
 
 Every commit on `main` triggers an update to the live version of the bot running on a Heroku dyno.
 
-## Planned Features/TODOs 📋
+## TODOs 📋
+
+I consider the bot to be pretty much finished, but if I ever get back to it, this is what I'd probably look at.
 
 - Find better voting emojis - the current ones are just screenshots from TMNF.
 - Add a short info message when joining a new server (if there's a reliable way to find the "main" channel).
