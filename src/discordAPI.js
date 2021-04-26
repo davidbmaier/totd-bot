@@ -332,8 +332,8 @@ const updateTOTDReactionCount = async (reaction, add) => {
   const currentTrackName = totdMessage?.embed?.fields.find((field) => field.name === `Name`)?.value;
   const reactionTrackName = reaction.message?.embeds[0]?.fields.find((field) => field.name === `Name`)?.value;
   console.log(`reaction debug:`);
-  console.log(`currently stored totd title`, currentTrackName);
-  console.log(`reaction message title`);
+  console.log(`stored totd title:      "${currentTrackName}"`);
+  console.log(`reaction message title: "${reactionTrackName}"`);
   if (currentTrackName === reactionTrackName) {
     const ratingEmojis = constants.ratingEmojis;
     for (let i = 0; i < ratingEmojis.length; i++) {
