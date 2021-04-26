@@ -1,18 +1,18 @@
 {
-  "name": "todt-bot",
+  "name": "totd-bot",
   "description": "Discord bot for displaying the daily Trackmania Track of the Day",
   "version": "0.1.0",
   "main": "main.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davidbmaier/todt-bot.git"
+    "url": "git+https://github.com/davidbmaier/totd-bot.git"
   },
   "author": "@davidbmaier",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/davidbmaier/todt-bot/issues"
+    "url": "https://github.com/davidbmaier/totd-bot/issues"
   },
-  "homepage": "https://github.com/davidbmaier/todt-bot#readme",
+  "homepage": "https://github.com/davidbmaier/totd-bot#readme",
   "keywords": [
     "trackmania",
     "discord",
