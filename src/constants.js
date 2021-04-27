@@ -15,7 +15,6 @@ const bingoFields = [
   `Dirt of the Day`,
   `Grass\nof the Day`,
   `RPG of the Day`,
-  `Dirt of the Day`,
   `FullSpeed\nof the Day`,
   // map characteristics
   `Scenery\nof the Day`,
