@@ -258,7 +258,7 @@ const formatRatingsMessage = (ratings, yesterday) => {
   } else if (averageRating < 1) {
     verdict += `An alright track, nothing special though.`;
   } else if (averageRating < 2) {
-    verdict += `Pretty good track today, but not quite perfect.`;
+    verdict += `Pretty good track, but not quite perfect.`;
   } else {
     verdict += `Absolutely fantastic track, definitely a highlight!`;
   }
