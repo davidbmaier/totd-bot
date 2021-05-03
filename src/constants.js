@@ -56,11 +56,7 @@ const bingoFields = [
   `Author medal\nthat's insanely\ndifficult`,
   `Free\nAuthor medal`,
   `Hunted GPS`,
-  `Bronze-level\nGPS`,
-  // technical things
-  `Cup of the Day\nbreaks`,
-  `Super-laggy\nmap`,
-  `Map with\nthe Openplanet\nsound bug`
+  `Bronze-level\nGPS`
 ];
 
 module.exports = {
