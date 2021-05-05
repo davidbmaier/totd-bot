@@ -142,7 +142,7 @@ const formatTOTDMessage = (totd) => {
         },
         {
           name: `Medal Times`,
-          value: `${bronze}\n${silver}\n${gold}\n${author}`,
+          value: `${author}\n${gold}\n${silver}\n${bronze}`,
           inline: true
         },
         {
