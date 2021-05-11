@@ -143,13 +143,20 @@ const help = {
 const ratings = {
   command: utils.addDevPrefix(`!totd ratings`),
   action: async (msg, client) => {
-    if (msg.author.tag === adminTag) { // admin only, verdict is public (for yesterday's track)
+    // admin only, verdict is public (for yesterday's track)
+    if (msg.author.tag === adminTag) {
       try {
         await discordAPI.sendTOTDRatings(client, msg.channel);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.log(error);
       }
+    } else {
+      msg.channel.send(
+        `Today's ratings are still being collected - you'll be able to see them tomorrow by using \`${utils.addDevPrefix(
+          `!totd verdict`
+        )}\`.`
+      );
     }
   }
 };
