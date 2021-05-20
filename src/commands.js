@@ -125,38 +125,30 @@ const bingoVote = {
 const help = {
   command: utils.addDevPrefix(`!totd help`),
   action: async (msg) => {
-    const message = `\`${utils.addDevPrefix(`!totd today`)}\`  -  Displays the current TOTD information.\n \
+    const message = `\`${utils.addDevPrefix(`!totd today`)}\`  -  Display the current TOTD information.\n \
       \`${utils.addDevPrefix(`!totd leaderboard`)}\`  -  Display the current top 10 (and the time for top 100).\n \
       \`${utils.addDevPrefix(`!totd verdict`)}\`  -  Display yesterday's TOTD ratings.\n \
+      \`${utils.addDevPrefix(`!totd ratings`)}\`  -  Display today's TOTD ratings.\n \
       \`${utils.addDevPrefix(`!totd bingo`)}\`  -  Display this week's bingo board.\n \
       \`${utils.addDevPrefix(`!totd last bingo`)}\`  -  Display last week's bingo board.\n \
-      \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Starts a vote to cross off that bingo field.\n \
-      \`${utils.addDevPrefix(`!totd enable`)}\`  -  Enables daily TOTD posts in this channel (admin only).\n \
-      \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disables the daily posts again (admin only).\n \
+      \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Start a vote to cross off that bingo field.\n \
+      \`${utils.addDevPrefix(`!totd enable`)}\`  -  Enable daily TOTD posts in this channel (admin only).\n \
+      \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disable the daily posts again (admin only).\n \
       \`${utils.addDevPrefix(`!totd help`)}\`  -  You're looking at it.`;
     const formattedMessage = format.formatHelpMessage(message);
     msg.channel.send(formattedMessage);
   }
 };
 
-// debug command to see the current ratings
+// command to see the current ratings
 const ratings = {
   command: utils.addDevPrefix(`!totd ratings`),
   action: async (msg, client) => {
-    // admin only, verdict is public (for yesterday's track)
-    if (msg.author.tag === adminTag) {
-      try {
-        await discordAPI.sendTOTDRatings(client, msg.channel);
-      } catch (error) {
-        discordAPI.sendErrorMessage(msg.channel);
-        console.log(error);
-      }
-    } else {
-      msg.channel.send(
-        `Today's ratings are still being collected - you'll be able to see them tomorrow by using \`${utils.addDevPrefix(
-          `!totd verdict`
-        )}\`.`
-      );
+    try {
+      await discordAPI.sendTOTDRatings(client, msg.channel);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
     }
   }
 };
