@@ -82,6 +82,48 @@ const removeConfig = async (redisClient, serverID) => {
   });
 };
 
+const addRole = async (redisClient, serverID, role) => {
+  let configs = await getConfigs(redisClient);
+  return new Promise((resolve, reject) => {
+    // set the config's roleName
+    for (let i = 0; i < configs.length; i++) {
+      if (configs[i].serverID === serverID){
+        configs[i].roleName = role;
+        break;
+      }
+    }
+    // save to redis
+    redisClient.set(`serverConfigs`, JSON.stringify(configs), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+const removeRole = async (redisClient, serverID) => {
+  let configs = await getConfigs(redisClient);
+  return new Promise((resolve, reject) => {
+    // remove the config's roleName
+    for (let i = 0; i < configs.length; i++) {
+      if (configs[i].serverID === serverID){
+        delete configs[i].roleName;
+        break;
+      }
+    }
+    // save to redis
+    redisClient.set(`serverConfigs`, JSON.stringify(configs), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
 const getAllConfigs = async (redisClient) => {
   const configs = await getConfigs(redisClient);
   return Promise.resolve(configs);
@@ -299,6 +341,8 @@ module.exports = {
   logout,
   addConfig,
   removeConfig,
+  addRole,
+  removeRole,
   getAllConfigs,
   saveCurrentTOTD,
   saveCurrentLeaderboard,

@@ -8,7 +8,18 @@ const commands = require(`./src/commands`);
 const utils = require(`./src/utils`);
 
 const discordToken = process.env.DISCORD_TOKEN;
-  const deployMode = process.env.DEPLOY_MODE;
+const deployMode = process.env.DEPLOY_MODE;
+
+// send out COTD pings every day at 18:50:00
+new cron(
+  `00 50 18 * * *`,
+  async () => {
+    await discordAPI.sendCOTDPings(client);
+  },
+  null,
+  true,
+  `Europe/Paris`
+);
 
 // display the current totd every day at 19:00:15
 new cron(
@@ -43,7 +54,7 @@ client.on(`ready`, async () => {
 
 client.on(`message`, async (msg) => {
   if (msg.guild && msg.content.startsWith(utils.addDevPrefix(`!totd`))) {
-    console.log(`Received message: ${msg.content} (${msg.channel.name} in ${msg.guild.name})`);
+    console.log(`Received message: ${msg.content} (#${msg.channel.name} in ${msg.guild.name})`);
 
     let matchedCommand;
     for (let i = 0; i < commands.length; i++) {

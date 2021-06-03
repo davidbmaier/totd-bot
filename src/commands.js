@@ -81,6 +81,56 @@ const disable = {
   }
 };
 
+const setRole = {
+  command: utils.addDevPrefix(`!totd set role`),
+  action: async (msg) => {
+    if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+      try {
+        const redisClient = await redisAPI.login();
+        const configs = await redisAPI.getAllConfigs(redisClient);
+        // check if this server already has daily posts set up
+        const matchingConfig = configs.find((config) => config.serverID === msg.guild.id);
+        if (matchingConfig) {
+          const role = msg.content.split(` `)[3];
+          if (role.startsWith(`<@&`)) {
+            await redisAPI.addRole(redisClient, msg.guild.id, role);
+            msg.channel.send(`Okay, from now on I'll ping that role ten minutes before the COTD starts.`);
+          } else {
+            msg.channel.send(`Sorry, I only understand roles that look like \`@role\` - and I obviously don't accept user IDs either.`);
+          }
+        } else {
+          msg.channel.send(`Sorry, you'll need to enable the daily posts first.`);
+        }
+        redisAPI.logout(redisClient);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.log(error);
+      }
+    } else {
+      msg.channel.send(`You don't have \`ADMINISTRATOR\` permissions, sorry.`);
+    }
+  }
+};
+
+const removeRole = {
+  command: utils.addDevPrefix(`!totd remove role`),
+  action: async (msg) => {
+    if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+      try {
+        const redisClient = await redisAPI.login();
+        await redisAPI.removeRole(redisClient, msg.guild.id);
+        redisAPI.logout(redisClient);
+        msg.channel.send(`Okay, I'll stop the COTD pings.`);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.log(error);
+      }
+    } else {
+      msg.channel.send(`You don't have \`ADMINISTRATOR\` permissions, sorry.`);
+    }
+  }
+};
+
 const bingo = {
   command: utils.addDevPrefix(`!totd bingo`),
   action: async (msg) => {
@@ -134,6 +184,8 @@ const help = {
       \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Start a vote to cross off that bingo field.\n \
       \`${utils.addDevPrefix(`!totd enable`)}\`  -  Enable daily TOTD posts in this channel (admin only).\n \
       \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disable the daily posts again (admin only).\n \
+      \`${utils.addDevPrefix(`!totd set role [@role]`)}\`  -  Enable pings ten minutes before COTD (admin only).\n \
+      \`${utils.addDevPrefix(`!totd remove role`)}\`  -  Disable daily pings again (admin only).\n \
       \`${utils.addDevPrefix(`!totd help`)}\`  -  You're looking at it.`;
     const formattedMessage = format.formatHelpMessage(message);
     msg.channel.send(formattedMessage);
@@ -232,10 +284,10 @@ const bingoCount = {
 
 const debug = {
   command: utils.addDevPrefix(`!totd debug`),
-  action: async (msg, client) => {
+  action: async (msg) => {
     if (msg.author.tag === adminTag) {
       try {
-        await discordAPI.distributeTOTDMessages(client);
+        msg.channel.send(`Debug me!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -257,6 +309,8 @@ module.exports = [
   verdict,
   enable,
   disable,
+  setRole,
+  removeRole,
   bingo,
   lastBingo,
   bingoVote,

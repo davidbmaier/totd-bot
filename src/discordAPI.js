@@ -323,6 +323,30 @@ const distributeTOTDMessages = async (client) => {
   });
 };
 
+const sendCOTDPings = async (client) => {
+  console.log(`Broadcasting COTD ping to subscribed servers with role config`);
+
+  const redisClient = await redisAPI.login();
+  const configs = await redisAPI.getAllConfigs(redisClient);
+  redisAPI.logout(redisClient);
+
+  configs.forEach(async (config) => {
+    if (config.roleName) {
+      try {
+        const channel = await client.channels.fetch(config.channelID);
+        console.log(`Pinging ${config.roleName} in #${channel.name} (${channel.guild.name})`);
+        channel.send(`${config.roleName} Today's Cup of the Day is about to begin! ${utils.getEmojiMapping(`COTDPing`)} Ten minutes to go!`);
+      } catch (error) {
+        if (error.message === `Missing Access`) {
+          console.log(`Can't access server, bot was probably kicked.`);
+        } else {
+          console.error(error);
+        }
+      }
+    }
+  });
+};
+
 const updateTOTDReactionCount = async (reaction, add) => {
   // check that the message really is the current TOTD
   const redisClient = await redisAPI.login();
@@ -365,5 +389,6 @@ module.exports = {
   sendBingoVote,
   countBingoVotes,
   distributeTOTDMessages,
+  sendCOTDPings,
   updateTOTDReactionCount
 };
