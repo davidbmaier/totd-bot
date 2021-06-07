@@ -6,8 +6,6 @@ This is a Discord bot for displaying the daily [Trackmania](https://www.trackman
 
 **Extra disclaimer:** This is just a pet project I'm working on for fun (and to learn a bit about Discord bots) - don't expect super-tidy code or great documentation. If you encounter any issues with it, either open an issue on Github or talk to me on Discord (tooInfinite#5113).
 
-Note that the bot is generally built to be generic enough to run anywhere - the only exception are custom emojis, so you'll need to change the mappings in `./emojiMapping.json` to point to emojis and their IDs that your bot will have access to.
-
 ## What can this bot do? 🤖
 
 **Public invite link:** [Click here!](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot)
@@ -43,6 +41,8 @@ Debug (and bot admin) only:
 ## Setup/Development 💻
 
 The bot is written in Node.js - so you'll need to install [Node](https://nodejs.org/en/), which automatically comes with NPM, the default package manager.
+
+Note that the bot is generally built to be generic enough to run anywhere - the only exception are custom emojis, so you'll need to change the mappings in `./emojiMapping.json` to point to emojis and their IDs that your bot will have access to.
 
 To run it, just run an `npm i` and an `npm start`. Make sure you've added a `.env` file (see the template for the format).
 
