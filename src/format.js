@@ -473,10 +473,25 @@ const formatHelpMessage = (commands) => {
   };
 };
 
+const formatInviteMessage = () => {
+  return {
+    embed: {
+      type: `rich`,
+      fields: [
+        {
+          name: `Want to invite me to your own server?`,
+          value: `Click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot)!`
+        }
+      ]
+    }
+  };
+};
+
 module.exports = {
   formatTOTDMessage,
   formatLeaderboardMessage,
   formatRatingsMessage,
   formatHelpMessage,
-  formatBingoBoard
+  formatBingoBoard,
+  formatInviteMessage
 };

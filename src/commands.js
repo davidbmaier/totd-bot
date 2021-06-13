@@ -194,6 +194,13 @@ const help = {
   }
 };
 
+const invite = {
+  command: utils.addDevPrefix(`!totd invite`),
+  action: async (msg) => {
+    msg.channel.send(format.formatInviteMessage());
+  }
+};
+
 // command to see the current ratings
 const ratings = {
   command: utils.addDevPrefix(`!totd ratings`),
@@ -300,6 +307,7 @@ const debug = {
 
 module.exports = [
   help,
+  invite,
   refresh,
   refreshLeaderboard,
   refreshRatings,
