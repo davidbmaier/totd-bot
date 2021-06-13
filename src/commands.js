@@ -175,18 +175,20 @@ const bingoVote = {
 const help = {
   command: utils.addDevPrefix(`!totd help`),
   action: async (msg) => {
-    const message = `\`${utils.addDevPrefix(`!totd today`)}\`  -  Display the current TOTD information.\n \
+    let message = `\`${utils.addDevPrefix(`!totd today`)}\`  -  Display the current TOTD information.\n \
       \`${utils.addDevPrefix(`!totd leaderboard`)}\`  -  Display the current top 10 (and the time for top 100).\n \
       \`${utils.addDevPrefix(`!totd verdict`)}\`  -  Display yesterday's TOTD ratings.\n \
       \`${utils.addDevPrefix(`!totd ratings`)}\`  -  Display today's TOTD ratings.\n \
       \`${utils.addDevPrefix(`!totd bingo`)}\`  -  Display this week's bingo board.\n \
       \`${utils.addDevPrefix(`!totd last bingo`)}\`  -  Display last week's bingo board.\n \
-      \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Start a vote to cross off that bingo field.\n \
-      \`${utils.addDevPrefix(`!totd enable`)}\`  -  Enable daily TOTD posts in this channel (admin only).\n \
+      \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Start a vote to cross off that bingo field.`;
+
+    if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+      message += `\n\`${utils.addDevPrefix(`!totd enable`)}\`  -  Enable daily TOTD posts in this channel (admin only).\n \
       \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disable the daily posts again (admin only).\n \
       \`${utils.addDevPrefix(`!totd set role [@role]`)}\`  -  Enable pings ten minutes before COTD (admin only).\n \
-      \`${utils.addDevPrefix(`!totd remove role`)}\`  -  Disable daily pings again (admin only).\n \
-      \`${utils.addDevPrefix(`!totd help`)}\`  -  You're looking at it.`;
+      \`${utils.addDevPrefix(`!totd remove role`)}\`  -  Disable daily pings again (admin only).`;
+    }
     const formattedMessage = format.formatHelpMessage(message);
     msg.channel.send(formattedMessage);
   }
