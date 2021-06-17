@@ -55,7 +55,9 @@ const getPlayerName = async (credentials, playerId) => {
 
 const getTMXInfo = async (mapUid) => {
   try {
-    const tmxResponse = await axios.get(`https://trackmania.exchange/api/tracks/get_track_info/multi/${mapUid}`);
+    const tmxResponse = await axios.get(`https://trackmania.exchange/api/tracks/get_track_info/multi/${mapUid}`, {
+      timeout: 10000 // timeout of 10s in case TMX is down
+    });
     if (tmxResponse.data.length === 1) {
       // get tags
       const tmxTagsResponse = await axios.get(`https://trackmania.exchange/api/tags/gettags`);
