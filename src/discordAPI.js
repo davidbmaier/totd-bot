@@ -323,19 +323,21 @@ const distributeTOTDMessages = async (client) => {
   });
 };
 
-const sendCOTDPings = async (client) => {
-  console.log(`Broadcasting COTD ping to subscribed servers with role config`);
+const sendCOTDPings = async (client, region) => {
+  console.log(`Broadcasting COTD ping to subscribed servers with role config for ${region || `default`} region`);
 
   const redisClient = await redisAPI.login();
   const configs = await redisAPI.getAllConfigs(redisClient);
   redisAPI.logout(redisClient);
 
+  const roleProp = region && region !== constants.cupRegions.europe ? `roleName${region}` : `roleName`;
+
   configs.forEach(async (config) => {
-    if (config.roleName) {
+    if (config[roleProp]) {
       try {
         const channel = await client.channels.fetch(config.channelID);
-        console.log(`Pinging ${config.roleName} in #${channel.name} (${channel.guild.name})`);
-        channel.send(`${config.roleName} Today's Cup of the Day is about to begin! ${utils.getEmojiMapping(`COTDPing`)} Ten minutes to go!`);
+        console.log(`Pinging ${config[roleProp]} in #${channel.name} (${channel.guild.name})`);
+        channel.send(`${config[roleProp]} The Cup of the Day is about to begin! ${utils.getEmojiMapping(`COTDPing`)} Ten minutes to go!`);
       } catch (error) {
         if (error.message === `Missing Access`) {
           console.log(`Can't access server, bot was probably kicked.`);

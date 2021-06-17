@@ -82,13 +82,18 @@ const removeConfig = async (redisClient, serverID) => {
   });
 };
 
-const addRole = async (redisClient, serverID, role) => {
+const addRole = async (redisClient, serverID, role, region) => {
   let configs = await getConfigs(redisClient);
   return new Promise((resolve, reject) => {
     // set the config's roleName
     for (let i = 0; i < configs.length; i++) {
-      if (configs[i].serverID === serverID){
-        configs[i].roleName = role;
+      if (configs[i].serverID === serverID) {
+        // main/Europe region is stored in roleName, others in roleNameAmerica and roleNameAsia
+        if (region && region !== constants.cupRegions.europe) {
+          configs[i][`roleName${region}`] = role;
+        } else {
+          configs[i].roleName = role;
+        }
         break;
       }
     }
@@ -103,13 +108,19 @@ const addRole = async (redisClient, serverID, role) => {
   });
 };
 
-const removeRole = async (redisClient, serverID) => {
+const removeRole = async (redisClient, serverID, region) => {
   let configs = await getConfigs(redisClient);
   return new Promise((resolve, reject) => {
     // remove the config's roleName
     for (let i = 0; i < configs.length; i++) {
       if (configs[i].serverID === serverID){
-        delete configs[i].roleName;
+        // main/Europe region is stored in roleName, others in roleNameAmerica and roleNameAsia
+        if (region && region !== constants.cupRegions.europe) {
+          delete configs[i][`roleName${region}`];
+        } else {
+          delete configs[i].roleName;
+        }
+        
         break;
       }
     }

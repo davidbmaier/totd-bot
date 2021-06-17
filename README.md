@@ -21,9 +21,11 @@ Use at your own risk - the bot is in development and may break from time to time
 - `!totd vote [1-25]` - Starts a vote on that bingo field. All ongoing votes are resolved when the next TOTD is released.
 - `!totd enable` - Stores the current channel to the list the daily scheduled TOTD post gets sent to. One channel per server. Admin only.
 - `!totd disable` - Removes the current channel from the list the scheduled TOTD post gets sent to. Admin only.
-- `!totd set role [@role]` - Adds the role to the list of roles it pings 10 minutes before COTD. Daily TOTD posts have to be set up already. Admin only.
-- `!totd remove role` - Removes the currently set role from the pings. Admin only.
+- `!totd set role [@role] [region]` - Adds the role to the list of roles it pings 10 minutes before COTD. Daily TOTD posts have to be set up already. Admin only.
+- `!totd remove role [region]` - Removes the currently set role from the pings. Admin only.
 - `!totd help` - Displays some info about the bot.
+
+Supported regions for pings are `Europe`, `America`, and `Asia` - one for each official COTD.
 
 Debug (and bot admin) only:
 

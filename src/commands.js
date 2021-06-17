@@ -4,6 +4,7 @@ const discordAPI = require(`./discordAPI`);
 const redisAPI = require(`./redisApi`);
 const format = require(`./format`);
 const utils = require(`./utils`);
+const constants = require(`./constants`);
 
 const adminTag = process.env.ADMIN_TAG;
 
@@ -93,8 +94,27 @@ const setRole = {
         if (matchingConfig) {
           const role = msg.content.split(` `)[3];
           if (role.startsWith(`<@&`)) {
-            await redisAPI.addRole(redisClient, msg.guild.id, role);
-            msg.channel.send(`Okay, from now on I'll ping that role ten minutes before the COTD starts.`);
+            const region = msg.content.split(` `)[4];
+            // valid regions: "Europe" (7pm), "America" (3am), "Asia" (11am)
+            if (region) {
+              const regions = constants.cupRegions;
+              if (
+                region === regions.europe
+                || region === regions.america
+                || region === regions.asia
+              ) {
+                await redisAPI.addRole(redisClient, msg.guild.id, role, region);
+                msg.channel.send(`Okay, from now on I'll ping that role ten minutes before the ${region} COTD starts.`);
+              } else {
+                const message1 = `Sorry, I only know three regions: \`${regions.europe}\`, \`${regions.america}\`, and \`${regions.asia}\` - `;
+                const message2 = `tell me to set up a role for a region by using \`${utils.addDevPrefix(`!totd set role @[role] [region]`)}\`.\n`;
+                const message3 = `If you just want to set up pings for the main Europe event, you can leave out the region.`;
+                msg.channel.send(`${message1}${message2}${message3}`);
+              }
+            } else {
+              await redisAPI.addRole(redisClient, msg.guild.id, role);
+              msg.channel.send(`Okay, from now on I'll ping that role ten minutes before the main COTD starts.`);
+            }
           } else {
             msg.channel.send(`Sorry, I only understand roles that look like \`@role\` - and I obviously don't accept user IDs either.`);
           }
@@ -118,9 +138,26 @@ const removeRole = {
     if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
       try {
         const redisClient = await redisAPI.login();
-        await redisAPI.removeRole(redisClient, msg.guild.id);
+        const region = msg.content.split(` `)[3];
+        if (region) {
+          const regions = constants.cupRegions;
+          if (
+            region === regions.europe
+            || region === regions.america
+            || region === regions.asia
+          ) {
+            await redisAPI.removeRole(redisClient, msg.guild.id, region);
+            msg.channel.send(`Okay, I'll stop the pings for the ${region} COTD.`);
+          } else {
+            const message1 = `Sorry, I only know three regions: \`${regions.europe}\`, \`${regions.america}\`, and \`${regions.asia}\`.\n`;
+            const message2 = `Tell me to remove a role for a region by using \`${utils.addDevPrefix(`!totd remove role [region]`)}\`.`;
+            msg.channel.send(`${message1}${message2}`);
+          }
+        } else {
+          await redisAPI.removeRole(redisClient, msg.guild.id);
+          msg.channel.send(`Okay, I'll stop the pings for the main COTD.`);
+        }
         redisAPI.logout(redisClient);
-        msg.channel.send(`Okay, I'll stop the COTD pings.`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.log(error);
@@ -183,13 +220,15 @@ const help = {
       \`${utils.addDevPrefix(`!totd last bingo`)}\`  -  Display last week's bingo board.\n \
       \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Start a vote to cross off that bingo field.`;
 
+    let adminMessage;
     if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
-      message += `\n\`${utils.addDevPrefix(`!totd enable`)}\`  -  Enable daily TOTD posts in this channel (admin only).\n \
-      \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disable the daily posts again (admin only).\n \
-      \`${utils.addDevPrefix(`!totd set role [@role]`)}\`  -  Enable pings ten minutes before COTD (admin only).\n \
-      \`${utils.addDevPrefix(`!totd remove role`)}\`  -  Disable daily pings again (admin only).`;
+      adminMessage = `\n\`${utils.addDevPrefix(`!totd enable`)}\`  -  Enable daily TOTD posts in this channel.\n \
+      \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disable the daily posts again.\n \
+      \`${utils.addDevPrefix(`!totd set role [@role] [region]`)}\`  -  Enable pings ten minutes before COTD.\n \
+      \`${utils.addDevPrefix(`!totd remove role [region]`)}\`  -  Disable daily pings again.\n\
+      (Supported regions: \`${constants.cupRegions.europe}\`, \`${constants.cupRegions.america}\`, and \`${constants.cupRegions.asia}\`)`;
     }
-    const formattedMessage = format.formatHelpMessage(message);
+    const formattedMessage = format.formatHelpMessage(message, adminMessage);
     msg.channel.send(formattedMessage);
   }
 };
