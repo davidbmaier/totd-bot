@@ -16,6 +16,7 @@ const bingoFields = [
   `Grass\nof the Day`,
   `RPG of the Day`,
   `FullSpeed\nof the Day`,
+  `Plastic\nof the Day`,
   // map characteristics
   `Scenery\nof the Day`,
   `Cut/Reroute\nof the Day`,
@@ -44,6 +45,8 @@ const bingoFields = [
   `Multi-lap\ntrack`,
   `Horrible\ngears`,
   `Magnets`,
+  `Moving items`,
+  `Water blocks`,
   // author
   `Author's\nfirst TOTD`,
   `Author already\nhad TOTD\nin the last 7 days`,
