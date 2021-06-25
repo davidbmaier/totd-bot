@@ -45,7 +45,7 @@ const bingoFields = [
   `Multi-lap\ntrack`,
   `Horrible\ngears`,
   `Magnets`,
-  `Moving items`,
+  `Moving items\non track`,
   `Water blocks`,
   // author
   `Author's\nfirst TOTD`,
