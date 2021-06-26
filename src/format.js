@@ -137,8 +137,9 @@ const formatTOTDMessage = (totd) => {
           inline: true
         },
         {
-          name: `Uploaded on`,
-          value: new Date(totd.timestamp).toLocaleDateString(`en-US`, { year: `numeric`, month: `long`, day: `numeric` }),
+          name: `Uploaded`,
+          // parse ISO 8601 to UNIX timestamp (since that's what Discord's formatting requires)
+          value: `<t:${Date.parse(totd.timestamp) / 1000}:R>`,
         },
         {
           name: `Medal Times`,
