@@ -46,7 +46,7 @@ const bingoFields = [
   `Horrible\ngears`,
   `Magnets`,
   `Moving items\non track`,
-  `Water blocks`,
+  `Water blocks\non track`,
   // author
   `Author's\nfirst TOTD`,
   `Author already\nhad TOTD\nin the last 7 days`,
