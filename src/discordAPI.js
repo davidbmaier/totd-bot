@@ -309,9 +309,10 @@ const distributeTOTDMessages = async (client) => {
       const channel = await client.channels.fetch(config.channelID);
       sendTOTDMessage(client, channel, message);
     } catch (error) {
-      if (error.message === `Missing Access`) {
-        console.log(`Can't access server, bot was probably kicked.`);
+      if (error.message === `Missing Access` || error.message === `Missing Permissions`) {
+        console.log(`Missing access or permissions, bot was probably kicked from server ${config.channelID}`);
       } else {
+        console.error(`Unexpected error during TOTD message distribution: ${error.message}`);
         console.error(error);
       }
     }
