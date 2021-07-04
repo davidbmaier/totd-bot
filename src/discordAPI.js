@@ -143,15 +143,20 @@ const getBingoMessage = async (forceRefresh, lastWeek) => {
 
 const sendTOTDMessage = async (client, channel, message) => {
   console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
-  const discordMessage = await channel.send(message);
-  // add rating emojis
-  const emojis = [];
-  for (let i = 0; i < constants.ratingEmojis.length; i++) {
-    emojis.push(utils.getEmojiMapping(constants.ratingEmojis[i]));
+  try {
+    const discordMessage = await channel.send(message);
+    // add rating emojis
+    const emojis = [];
+    for (let i = 0; i < constants.ratingEmojis.length; i++) {
+      emojis.push(utils.getEmojiMapping(constants.ratingEmojis[i]));
+    }
+    emojis.forEach(async (emoji) => {
+      await discordMessage.react(emoji);
+    });
+  } catch (error) {
+    console.log(`Couldn't send TOTD message to #${channel.name} in ${channel.guild.name}, throwing error`);
+    throw error;
   }
-  emojis.forEach(async (emoji) => {
-    await discordMessage.react(emoji);
-  });
 };
 
 const sendTOTDLeaderboard = async (client, channel) => {
@@ -310,7 +315,10 @@ const distributeTOTDMessages = async (client) => {
       sendTOTDMessage(client, channel, message);
     } catch (error) {
       if (error.message === `Missing Access` || error.message === `Missing Permissions`) {
-        console.log(`Missing access or permissions, bot was probably kicked from server ${config.channelID}`);
+        console.log(`Missing access or permissions, bot was probably kicked from server ${config.serverID} - removing config`);
+        const redisClientForRemoval = await redisAPI.login();
+        await redisAPI.removeConfig(redisClientForRemoval, config.serverID);
+        redisAPI.logout(redisClientForRemoval);
       } else {
         console.error(`Unexpected error during TOTD message distribution: ${error.message}`);
         console.error(error);
