@@ -142,8 +142,8 @@ const getBingoMessage = async (forceRefresh, lastWeek) => {
 };
 
 const sendTOTDMessage = async (client, channel, message) => {
-  console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
   try {
+    console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
     const discordMessage = await channel.send(message);
     // add rating emojis
     const emojis = [];
@@ -153,9 +153,10 @@ const sendTOTDMessage = async (client, channel, message) => {
     emojis.forEach(async (emoji) => {
       await discordMessage.react(emoji);
     });
+    return Promise.resolve();
   } catch (error) {
     console.log(`Couldn't send TOTD message to #${channel.name} in ${channel.guild.name}, throwing error`);
-    throw error;
+    return Promise.reject(error);
   }
 };
 
@@ -312,7 +313,7 @@ const distributeTOTDMessages = async (client) => {
   configs.forEach(async (config) => {
     try {
       const channel = await client.channels.fetch(config.channelID);
-      sendTOTDMessage(client, channel, message);
+      await sendTOTDMessage(client, channel, message);
     } catch (error) {
       if (error.message === `Missing Access` || error.message === `Missing Permissions`) {
         console.log(`Missing access or permissions, bot was probably kicked from server ${config.serverID} - removing config`);

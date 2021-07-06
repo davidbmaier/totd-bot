@@ -67,9 +67,19 @@ client.on(`message`, async (msg) => {
     if (matchedCommand) {
       await matchedCommand.action(msg, client);
     } else {
-      msg.channel.send(
-        `I don't know what to do, you might want to check \`${utils.addDevPrefix(`!totd help`)}\` to see what I can understand.`
-      );
+      try {
+        await msg.channel.send(
+          `I don't know what to do, you might want to check \`${utils.addDevPrefix(`!totd help`)}\` to see what I can understand.`
+        );
+      } catch (error) {
+        if (error.message === `Missing Permissions`) {
+          console.error(`Unable to send error message to channel #${msg.channel.name} in ${msg.guild.name}, no permissions`);
+        } else {
+          console.error(`Unexpected error while sending error message to channel #${msg.channel.name} in ${msg.guild.name}`);
+          console.error(error.message);
+        }
+      }
+      
     }
   }
 });
