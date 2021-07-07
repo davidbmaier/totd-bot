@@ -59,6 +59,7 @@ Every commit on `main` triggers an update to the live version of the bot running
 
 I consider the bot to be pretty much finished, but if I get back to it, this is what I'd probably look at.
 
+- Add better error handling for when the bot doesn't have permissions to post an error message - probably add a global method for it.
 - Add some server-specific ratings breakdown (i.e. store ratings per server so the ratings message can show both local and global ratings).
   - This might require some extra thought regarding scaling - since every new server increases the database size. It's not much, but I'd like to keep the footprint as minimal as possible (especially if the use case isn't really needed).
 - Find better voting emojis - the current ones are just screenshots from TMNF.
