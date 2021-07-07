@@ -301,17 +301,22 @@ const bingoCount = {
   }
 };
 
-const serverCount = {
+const serverInfo = {
   command: utils.addDevPrefix(`!totd servers`),
   action: async (msg, client) => {
     if (msg.author.tag === adminTag) {
       try {
-        let count = 0;
-        client.guilds.cache.forEach((guild) => {
-          count += 1;
-          console.log(`Server: ${guild.name} -  ID: ${guild.id}`);
+        const servers = [];
+        client.guilds.cache.forEach(async (guild) => {
+          servers.push(guild);
         });
-        await msg.channel.send(`I'm currently in ${count} servers and counting!`);
+        await msg.channel.send(`I'm currently in ${servers.length} servers and counting!`);
+
+        // fetch and log detailed infos asynchronously
+        servers.forEach(async (server) => {
+          const owner = await client.users.fetch(server.ownerID);
+          console.log(`Server: ${server.name} - Owner: ${JSON.stringify(owner.tag)} - ID: ${server.id}`);
+        });
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -354,5 +359,5 @@ module.exports = [
   lastBingo,
   bingoVote,
   bingoCount,
-  serverCount
+  serverInfo
 ];
