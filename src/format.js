@@ -320,8 +320,8 @@ const formatBingoBoard = async (fields, lastWeek) => {
   date = date.minus({ hours: 19 });
   const weekNumber = date.weekNumber;
 
-  // translate the weekNumber into one of the 18 background images
-  const backgroundNo = weekNumber % 18;
+  // translate the weekNumber into one of the 23 background images
+  const backgroundNo = weekNumber % 23;
   const background = await Canvas.loadImage(`./src/backgrounds/${backgroundNo}.jpg`);
   ctx.drawImage(background, 2, 2, canvas.width - 4, canvas.height - 4);
 
