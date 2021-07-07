@@ -32,6 +32,7 @@ Debug (and bot admin) only:
 - `!totd refresh ratings` - Prints the current global ratings and a short verdict based on them (admin-only since it's not resolved yet).
 - `!totd refresh bingo` - Regenerates the current bingo board.
 - `!totd refresh count` - Resolves the ongoing bingo field votes.
+- `!totd servers` - Prints the current number of servers the bot is in. Also logs the server details.
 
 ## Screenshots 📷
 

@@ -189,15 +189,25 @@ const help = {
       \`${utils.addDevPrefix(`!totd set role [@role]`)}\`  -  Enable pings ten minutes before COTD (admin only).\n \
       \`${utils.addDevPrefix(`!totd remove role`)}\`  -  Disable daily pings again (admin only).`;
     }
-    const formattedMessage = format.formatHelpMessage(message);
-    msg.channel.send(formattedMessage);
+    try {
+      const formattedMessage = format.formatHelpMessage(message);
+      await msg.channel.send(formattedMessage);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
+    }
   }
 };
 
 const invite = {
   command: utils.addDevPrefix(`!totd invite`),
   action: async (msg) => {
-    msg.channel.send(format.formatInviteMessage());
+    try {
+      await msg.channel.send(format.formatInviteMessage());
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
+    }
   }
 };
 
@@ -220,7 +230,7 @@ const refresh = {
     if (msg.author.tag === adminTag) {
       try {
         await discordAPI.getTOTDMessage(true);
-        msg.channel.send(`I've refreshed the current TOTD data!`);
+        await msg.channel.send(`I've refreshed the current TOTD data!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -235,7 +245,7 @@ const refreshLeaderboard = {
     if (msg.author.tag === adminTag) {
       try {
         await discordAPI.getTOTDLeaderboardMessage(true);
-        msg.channel.send(`I've refreshed the current leaderboard data!`);
+        await msg.channel.send(`I've refreshed the current leaderboard data!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -252,7 +262,7 @@ const refreshRatings = {
         const redisClient = await redisAPI.login();
         await redisAPI.clearTOTDRatings(redisClient);
         redisAPI.logout(redisClient);
-        msg.channel.send(`I've refreshed the current rating data!`);
+        await msg.channel.send(`I've refreshed the current rating data!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -267,7 +277,7 @@ const refreshBingo = {
     if (msg.author.tag === adminTag) {
       try {
         await discordAPI.getBingoMessage(true);
-        msg.channel.send(`I've refreshed the current bingo board!`);
+        await msg.channel.send(`I've refreshed the current bingo board!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -282,7 +292,26 @@ const bingoCount = {
     if (msg.author.tag === adminTag) {
       try {
         await discordAPI.countBingoVotes(client);
-        msg.channel.send(`I've counted and resolved the current bingo votes!`);
+        await msg.channel.send(`I've counted and resolved the current bingo votes!`);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.error(error);
+      }
+    }
+  }
+};
+
+const serverCount = {
+  command: utils.addDevPrefix(`!totd servers`),
+  action: async (msg, client) => {
+    if (msg.author.tag === adminTag) {
+      try {
+        let count = 0;
+        client.guilds.cache.forEach((guild) => {
+          count += 1;
+          console.log(`Server: ${guild.name} -  ID: ${guild.id}`);
+        });
+        await msg.channel.send(`I'm currently in ${count} servers and counting!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -296,7 +325,7 @@ const debug = {
   action: async (msg) => {
     if (msg.author.tag === adminTag) {
       try {
-        msg.channel.send(`Debug me!`);
+        await msg.channel.send(`Debug me!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -324,5 +353,6 @@ module.exports = [
   bingo,
   lastBingo,
   bingoVote,
-  bingoCount
+  bingoCount,
+  serverCount
 ];
