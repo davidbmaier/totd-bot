@@ -61,7 +61,8 @@ const bingoFields = [
   `Author medal\nthat's insanely\ndifficult`,
   `Free\nAuthor medal`,
   `Hunted GPS`,
-  `Bronze-level\nGPS`
+  `Bronze-level\nGPS`,
+  `No GPS`
 ];
 
 module.exports = {
