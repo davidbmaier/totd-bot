@@ -139,7 +139,7 @@ const formatTOTDMessage = (totd) => {
         {
           name: `Uploaded`,
           // parse ISO 8601 to UNIX timestamp (since that's what Discord's formatting requires)
-          value: `<t:${Date.parse(totd.timestamp) / 1000}:R>`,
+          value: `<t:${Math.trunc(Date.parse(totd.tmxTimestamp || totd.timestamp) / 1000)}:R>`,
         },
         {
           name: `Medal Times`,
