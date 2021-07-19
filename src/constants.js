@@ -47,6 +47,8 @@ const bingoFields = [
   `Magnets`,
   `Moving items\non track`,
   `Water blocks\non track`,
+  `Multiple\nroutes`,
+  `Missable\nCP`,
   // author
   `Author's\nfirst TOTD`,
   `Author already\nhad TOTD\nin the last 7 days`,
@@ -59,7 +61,8 @@ const bingoFields = [
   `Author medal\nthat's insanely\ndifficult`,
   `Free\nAuthor medal`,
   `Hunted GPS`,
-  `Bronze-level\nGPS`
+  `Bronze-level\nGPS`,
+  `No GPS`
 ];
 
 module.exports = {
