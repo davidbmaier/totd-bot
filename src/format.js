@@ -356,7 +356,24 @@ const formatBingoBoard = async (fields, lastWeek) => {
         ctx.fillStyle = `#000000`;
         ctx.fillRect(cellLeft, cellTop, 160, 90);
 
+        ctx.setLineDash([]);
         ctx.strokeStyle = `#a4eb34`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(cellLeft, cellTop);
+        ctx.lineTo(cellRight, cellTop);
+        ctx.lineTo(cellRight, cellBottom);
+        ctx.lineTo(cellLeft, cellBottom);
+        ctx.lineTo(cellLeft, cellTop);
+        ctx.stroke();
+        // add dashed edges to fields that are being voted on
+      } else if (fields[fieldCount].voteActive) {
+        ctx.globalAlpha = 0.65;
+        ctx.fillStyle = `#000000`;
+        ctx.fillRect(cellLeft, cellTop, 160, 90);
+
+        ctx.strokeStyle = `#ebe834`;
+        ctx.setLineDash([5, 5]);
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(cellLeft, cellTop);
