@@ -179,7 +179,6 @@ const saveCurrentTOTD = async (redisClient, totd) => {
 
 const getCurrentTOTD = async (redisClient) => {
   return new Promise((resolve, reject) => {
-    // save to redis
     redisClient.get(`totd`, (err, totd) => {
       if (err) {
         reject(err);

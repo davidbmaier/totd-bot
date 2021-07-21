@@ -4,6 +4,8 @@ const cron = require(`cron`).CronJob;
 require(`dotenv`).config();
 
 const discordAPI = require(`./src/discordAPI`);
+const redisAPI = require(`./src/redisApi`);
+const format = require(`./src/format`);
 const commands = require(`./src/commands`);
 const utils = require(`./src/utils`);
 
@@ -80,6 +82,17 @@ client.on(`message`, async (msg) => {
         }
       }
       
+    }
+  } else if (msg.mentions.has(client.user.id)) {
+    const redisClient = await redisAPI.login();
+    const adminConfig = await redisAPI.getAdminServer(redisClient);
+    redisAPI.logout(redisClient);
+
+    if (adminConfig?.channelID) {
+      console.log(`Proxying mention to admin server...`);
+      const adminChannel = await client.channels.fetch(adminConfig.channelID);
+      const proxyMessage = format.formatProxyMessage(msg);
+      adminChannel.send(proxyMessage);
     }
   }
 });

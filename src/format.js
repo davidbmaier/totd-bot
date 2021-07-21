@@ -505,11 +505,41 @@ const formatInviteMessage = () => {
   };
 };
 
+const formatProxyMessage = (message) => {
+  return {
+    embed: {
+      title: `I just got mentioned!`,
+      type: `rich`,
+      fields: [
+        {
+          name: `Author`,
+          value: message.author.tag,
+          inline: true
+        },
+        {
+          name: `Server`,
+          value: message.guild.name,
+          inline: true
+        },
+        {
+          name: `Content`,
+          value: message.content
+        },
+        {
+          name: `Link`,
+          value: `[Message](https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`
+        }
+      ]
+    }
+  };
+};
+
 module.exports = {
   formatTOTDMessage,
   formatLeaderboardMessage,
   formatRatingsMessage,
   formatHelpMessage,
   formatBingoBoard,
-  formatInviteMessage
+  formatInviteMessage,
+  formatProxyMessage
 };
