@@ -301,6 +301,40 @@ const bingoCount = {
   }
 };
 
+const setAdminServer = {
+  command: utils.addDevPrefix(`!totd set admin`),
+  action: async (msg) => {
+    if (msg.author.tag === adminTag) {
+      try {
+        const redisClient = await redisAPI.login();
+        await redisAPI.setAdminServer(redisClient, msg.guild.id, msg.channel.id);
+        redisAPI.logout(redisClient);
+        await msg.channel.send(`Alright, this is now the admin server!`);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.error(error);
+      }
+    }
+  }
+};
+
+const removeAdminServer = {
+  command: utils.addDevPrefix(`!totd remove admin`),
+  action: async (msg) => {
+    if (msg.author.tag === adminTag) {
+      try {
+        const redisClient = await redisAPI.login();
+        await redisAPI.setAdminServer(redisClient, null);
+        redisAPI.logout(redisClient);
+        await msg.channel.send(`I've removed the admin server configuration!`);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.error(error);
+      }
+    }
+  }
+};
+
 const serverInfo = {
   command: utils.addDevPrefix(`!totd servers`),
   action: async (msg, client) => {
@@ -359,5 +393,7 @@ module.exports = [
   lastBingo,
   bingoVote,
   bingoCount,
+  setAdminServer,
+  removeAdminServer,
   serverInfo
 ];

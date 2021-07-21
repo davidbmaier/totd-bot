@@ -284,7 +284,7 @@ const countBingoVotes = async (client) => {
   return redisAPI.logout(redisClient);
 };
 
-const archiveRatings = async () => {
+const archiveRatings = async (client) => {
   console.log(`Archiving existing ratings and clearing current ones...`);
   const redisClient = await redisAPI.login();
   const ratings = await redisAPI.getTOTDRatings(redisClient);
@@ -293,6 +293,14 @@ const archiveRatings = async () => {
 
   if (ratings) {
     await redisAPI.saveLastTOTDVerdict(redisClient, ratings);
+
+    // send ratings to admin server if it's been configured
+    const adminConfig = await redisAPI.getAdminServer(redisClient);
+    if (adminConfig?.channelID) {
+      console.log(`Sending verdict to admin server...`);
+      const adminChannel = await client.channels.fetch(adminConfig.channelID);
+      adminChannel.send(await getRatingMessage(true));
+    }
   }
   await redisAPI.clearTOTDRatings(redisClient);
 
@@ -303,7 +311,7 @@ const distributeTOTDMessages = async (client) => {
   console.log(`Broadcasting TOTD message to subscribed channels`);
   const message = await getTOTDMessage(true);
 
-  await archiveRatings();
+  await archiveRatings(client);
   countBingoVotes(client);
 
   const redisClient = await redisAPI.login();
@@ -395,5 +403,6 @@ module.exports = {
   countBingoVotes,
   distributeTOTDMessages,
   sendCOTDPings,
-  updateTOTDReactionCount
+  updateTOTDReactionCount,
+  archiveRatings
 };
