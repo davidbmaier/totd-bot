@@ -83,7 +83,7 @@ client.on(`message`, async (msg) => {
       }
       
     }
-  } else if (msg.mentions.has(client.user.id)) {
+  } else if (msg.mentions.has(client.user.id, {ignoreEveryone: true})) {
     const redisClient = await redisAPI.login();
     const adminConfig = await redisAPI.getAdminServer(redisClient);
     redisAPI.logout(redisClient);
