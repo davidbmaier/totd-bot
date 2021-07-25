@@ -35,7 +35,7 @@ const bingoFields = [
   `No-steer block`,
   `Slowmo block`,
   `Reactor jump\nwith a zoop`,
-  `Driving\nupside-down`,
+  `Driving\nupside-down\n(e.g. loopings)`,
   `Non-\nrespawnable\ncheckpoint`,
   `Bug slide`,
   `Speed slides`,
