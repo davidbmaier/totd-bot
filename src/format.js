@@ -471,7 +471,7 @@ const formatBingoBoard = async (fields, lastWeek) => {
 const formatHelpMessage = (commands) => {
   return {
     embed: {
-      title: `Hey, I'm the TOTD Bot!`,
+      title: `Hey, I'm the Track of the Day Bot!`,
       type: `rich`,
       description: `Here's what you can tell me to do:`,
       fields: [
