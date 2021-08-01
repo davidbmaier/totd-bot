@@ -482,7 +482,7 @@ const formatHelpMessage = (commands) => {
         {
           name: `More Info`,
           value:
-            `I've been developed by <@141627532335251456> - feel free to talk to him if you've got any feedback or ran into any issues with me. \
+            `I've been developed by tooInfinite#5113 (<@141627532335251456>) - feel free to talk to him if you've got any feedback or ran into any issues with me. \
             My code can be found [here](https://github.com/davidbmaier/totd-bot).\n\
             To invite me to your own server, click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot).`
         }
