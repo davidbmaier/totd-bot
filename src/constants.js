@@ -31,6 +31,7 @@ const bingoFields = [
   `Scenery\nin the middle\nof the road`,
   `Texture mod`,
   `Map outside\nof the stadium`,
+  `Engine-off\nblock`,
   `Fragile block`,
   `No-steer block`,
   `Slowmo block`,
