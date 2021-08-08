@@ -53,9 +53,6 @@ const bingoFields = [
   // author
   `Author's\nfirst TOTD`,
   `Author already\nhad TOTD\nin the last 7 days`,
-  `Map by a\nTMGL player`,
-  `Map by htimh`,
-  `Map by priez`,
   // times
   `Author time\nover a minute`,
   `Author time\nunder 30s`,
