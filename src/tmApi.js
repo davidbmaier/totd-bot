@@ -119,6 +119,7 @@ const getCurrentTOTD = async (credentials) => {
       currentTOTD.tmxAuthor = tmxInfo.Username;
       currentTOTD.tmxTrackId = tmxInfo.TrackID;
       currentTOTD.tmxTags = tmxInfo.Tags;
+      currentTOTD.tmxTimestamp = tmxInfo.UpdatedAt;
       if (tmxInfo.ImageLink) {
         currentTOTD.thumbnailUrl = tmxInfo.ImageLink;
       }

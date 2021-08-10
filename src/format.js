@@ -137,8 +137,9 @@ const formatTOTDMessage = (totd) => {
           inline: true
         },
         {
-          name: `Uploaded on`,
-          value: new Date(totd.timestamp).toLocaleDateString(`en-US`, { year: `numeric`, month: `long`, day: `numeric` }),
+          name: `Uploaded`,
+          // parse ISO 8601 to UNIX timestamp (since that's what Discord's formatting requires)
+          value: `<t:${Math.trunc(Date.parse(totd.tmxTimestamp || totd.timestamp) / 1000)}:R>`,
         },
         {
           name: `Medal Times`,
@@ -319,8 +320,8 @@ const formatBingoBoard = async (fields, lastWeek) => {
   date = date.minus({ hours: 19 });
   const weekNumber = date.weekNumber;
 
-  // translate the weekNumber into one of the 18 background images
-  const backgroundNo = weekNumber % 18;
+  // translate the weekNumber into one of the 23 background images
+  const backgroundNo = weekNumber % 23;
   const background = await Canvas.loadImage(`./src/backgrounds/${backgroundNo}.jpg`);
   ctx.drawImage(background, 2, 2, canvas.width - 4, canvas.height - 4);
 
@@ -355,7 +356,24 @@ const formatBingoBoard = async (fields, lastWeek) => {
         ctx.fillStyle = `#000000`;
         ctx.fillRect(cellLeft, cellTop, 160, 90);
 
+        ctx.setLineDash([]);
         ctx.strokeStyle = `#a4eb34`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(cellLeft, cellTop);
+        ctx.lineTo(cellRight, cellTop);
+        ctx.lineTo(cellRight, cellBottom);
+        ctx.lineTo(cellLeft, cellBottom);
+        ctx.lineTo(cellLeft, cellTop);
+        ctx.stroke();
+        // add dashed edges to fields that are being voted on
+      } else if (fields[fieldCount].voteActive) {
+        ctx.globalAlpha = 0.65;
+        ctx.fillStyle = `#000000`;
+        ctx.fillRect(cellLeft, cellTop, 160, 90);
+
+        ctx.strokeStyle = `#ebe834`;
+        ctx.setLineDash([5, 5]);
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(cellLeft, cellTop);
@@ -453,7 +471,7 @@ const formatBingoBoard = async (fields, lastWeek) => {
 const formatHelpMessage = (commands, adminCommands) => {
   const embed = {
     embed: {
-      title: `Hey, I'm the TOTD Bot!`,
+      title: `Hey, I'm the Track of the Day Bot!`,
       type: `rich`,
       description: `Here's what you can tell me to do:`,
       fields: [
@@ -464,7 +482,7 @@ const formatHelpMessage = (commands, adminCommands) => {
         {
           name: `More Info`,
           value:
-            `I've been developed by <@141627532335251456> - feel free to talk to him if you've got any feedback or ran into any issues with me. \
+            `I've been developed by tooInfinite#5113 (<@141627532335251456>) - feel free to talk to him if you've got any feedback or ran into any issues with me. \
             My code can be found [here](https://github.com/davidbmaier/totd-bot).\n\
             To invite me to your own server, click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot).`
         }
@@ -496,11 +514,41 @@ const formatInviteMessage = () => {
   };
 };
 
+const formatProxyMessage = (message) => {
+  return {
+    embed: {
+      title: `I just got mentioned!`,
+      type: `rich`,
+      fields: [
+        {
+          name: `Author`,
+          value: message.author.tag,
+          inline: true
+        },
+        {
+          name: `Server`,
+          value: message.guild.name,
+          inline: true
+        },
+        {
+          name: `Content`,
+          value: message.content
+        },
+        {
+          name: `Link`,
+          value: `[Message](https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`
+        }
+      ]
+    }
+  };
+};
+
 module.exports = {
   formatTOTDMessage,
   formatLeaderboardMessage,
   formatRatingsMessage,
   formatHelpMessage,
   formatBingoBoard,
-  formatInviteMessage
+  formatInviteMessage,
+  formatProxyMessage
 };

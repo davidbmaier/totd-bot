@@ -4,6 +4,8 @@ const cron = require(`cron`).CronJob;
 require(`dotenv`).config();
 
 const discordAPI = require(`./src/discordAPI`);
+const redisAPI = require(`./src/redisApi`);
+const format = require(`./src/format`);
 const commands = require(`./src/commands`);
 const utils = require(`./src/utils`);
 const constants = require(`./src/constants`);
@@ -90,9 +92,30 @@ client.on(`message`, async (msg) => {
     if (matchedCommand) {
       await matchedCommand.action(msg, client);
     } else {
-      msg.channel.send(
-        `I don't know what to do, you might want to check \`${utils.addDevPrefix(`!totd help`)}\` to see what I can understand.`
-      );
+      try {
+        await msg.channel.send(
+          `I don't know what to do, you might want to check \`${utils.addDevPrefix(`!totd help`)}\` to see what I can understand.`
+        );
+      } catch (error) {
+        if (error.message === `Missing Permissions`) {
+          console.error(`Unable to send error message to channel #${msg.channel.name} in ${msg.guild.name}, no permissions`);
+        } else {
+          console.error(`Unexpected error while sending error message to channel #${msg.channel.name} in ${msg.guild.name}`);
+          console.error(error.message);
+        }
+      }
+      
+    }
+  } else if (msg.mentions.has(client.user.id, {ignoreEveryone: true})) {
+    const redisClient = await redisAPI.login();
+    const adminConfig = await redisAPI.getAdminServer(redisClient);
+    redisAPI.logout(redisClient);
+
+    if (adminConfig?.channelID) {
+      console.log(`Proxying mention to admin server...`);
+      const adminChannel = await client.channels.fetch(adminConfig.channelID);
+      const proxyMessage = format.formatProxyMessage(msg);
+      adminChannel.send(proxyMessage);
     }
   }
 });

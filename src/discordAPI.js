@@ -142,16 +142,22 @@ const getBingoMessage = async (forceRefresh, lastWeek) => {
 };
 
 const sendTOTDMessage = async (client, channel, message) => {
-  console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
-  const discordMessage = await channel.send(message);
-  // add rating emojis
-  const emojis = [];
-  for (let i = 0; i < constants.ratingEmojis.length; i++) {
-    emojis.push(utils.getEmojiMapping(constants.ratingEmojis[i]));
+  try {
+    console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
+    const discordMessage = await channel.send(message);
+    // add rating emojis
+    const emojis = [];
+    for (let i = 0; i < constants.ratingEmojis.length; i++) {
+      emojis.push(utils.getEmojiMapping(constants.ratingEmojis[i]));
+    }
+    emojis.forEach(async (emoji) => {
+      await discordMessage.react(emoji);
+    });
+    return Promise.resolve();
+  } catch (error) {
+    console.log(`Couldn't send TOTD message to #${channel.name} in ${channel.guild.name}, throwing error`);
+    return Promise.reject(error);
   }
-  emojis.forEach(async (emoji) => {
-    await discordMessage.react(emoji);
-  });
 };
 
 const sendTOTDLeaderboard = async (client, channel) => {
@@ -160,12 +166,7 @@ const sendTOTDLeaderboard = async (client, channel) => {
   const leaderboardMessage = await getTOTDLeaderboardMessage();
   // if no records exist yet, it'll just be a string
   if (leaderboardMessage.date) {
-    const minutesAgo = utils.getMinutesAgo(new Date(leaderboardMessage.date * 1000));
-    if (minutesAgo < 1) {
-      leaderboardMessage.embed.description = `Last refreshed: Just now`;
-    } else {
-      leaderboardMessage.embed.description = `Last refreshed: ${minutesAgo} minutes ago`;
-    }
+    leaderboardMessage.embed.description = `Data from <t:${leaderboardMessage.date}:R>`;
   }
   
   console.log(`Sending current leaderboard to #${channel.name} in ${channel.guild.name}`);
@@ -283,7 +284,7 @@ const countBingoVotes = async (client) => {
   return redisAPI.logout(redisClient);
 };
 
-const archiveRatings = async () => {
+const archiveRatings = async (client) => {
   console.log(`Archiving existing ratings and clearing current ones...`);
   const redisClient = await redisAPI.login();
   const ratings = await redisAPI.getTOTDRatings(redisClient);
@@ -292,6 +293,14 @@ const archiveRatings = async () => {
 
   if (ratings) {
     await redisAPI.saveLastTOTDVerdict(redisClient, ratings);
+
+    // send ratings to admin server if it's been configured
+    const adminConfig = await redisAPI.getAdminServer(redisClient);
+    if (adminConfig?.channelID) {
+      console.log(`Sending verdict to admin server...`);
+      const adminChannel = await client.channels.fetch(adminConfig.channelID);
+      adminChannel.send(await getRatingMessage(true));
+    }
   }
   await redisAPI.clearTOTDRatings(redisClient);
 
@@ -302,7 +311,7 @@ const distributeTOTDMessages = async (client) => {
   console.log(`Broadcasting TOTD message to subscribed channels`);
   const message = await getTOTDMessage(true);
 
-  await archiveRatings();
+  await archiveRatings(client);
   countBingoVotes(client);
 
   const redisClient = await redisAPI.login();
@@ -312,11 +321,15 @@ const distributeTOTDMessages = async (client) => {
   configs.forEach(async (config) => {
     try {
       const channel = await client.channels.fetch(config.channelID);
-      sendTOTDMessage(client, channel, message);
+      await sendTOTDMessage(client, channel, message);
     } catch (error) {
-      if (error.message === `Missing Access`) {
-        console.log(`Can't access server, bot was probably kicked.`);
+      if (error.message === `Missing Access` || error.message === `Missing Permissions`) {
+        console.log(`Missing access or permissions, bot was probably kicked from server ${config.serverID} - removing config`);
+        const redisClientForRemoval = await redisAPI.login();
+        await redisAPI.removeConfig(redisClientForRemoval, config.serverID);
+        redisAPI.logout(redisClientForRemoval);
       } else {
+        console.error(`Unexpected error during TOTD message distribution: ${error.message}`);
         console.error(error);
       }
     }
@@ -392,5 +405,6 @@ module.exports = {
   countBingoVotes,
   distributeTOTDMessages,
   sendCOTDPings,
-  updateTOTDReactionCount
+  updateTOTDReactionCount,
+  archiveRatings
 };
