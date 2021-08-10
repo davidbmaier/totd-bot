@@ -8,15 +8,38 @@ const redisAPI = require(`./src/redisApi`);
 const format = require(`./src/format`);
 const commands = require(`./src/commands`);
 const utils = require(`./src/utils`);
+const constants = require(`./src/constants`);
 
 const discordToken = process.env.DISCORD_TOKEN;
 const deployMode = process.env.DEPLOY_MODE;
 
-// send out COTD pings every day at 18:50:00
+// COTD pings for 7pm (Europe)
 new cron(
   `00 50 18 * * *`,
   async () => {
-    await discordAPI.sendCOTDPings(client);
+    await discordAPI.sendCOTDPings(client, constants.cupRegions.europe);
+  },
+  null,
+  true,
+  `Europe/Paris`
+);
+
+// COTD pings for 3am (America)
+new cron(
+  `00 50 02 * * *`,
+  async () => {
+    await discordAPI.sendCOTDPings(client, constants.cupRegions.america);
+  },
+  null,
+  true,
+  `Europe/Paris`
+);
+
+// COTD pings for 11am (Asia)
+new cron(
+  `00 50 10 * * *`,
+  async () => {
+    await discordAPI.sendCOTDPings(client, constants.cupRegions.asia);
   },
   null,
   true,

@@ -468,8 +468,8 @@ const formatBingoBoard = async (fields, lastWeek) => {
   return embed;
 };
 
-const formatHelpMessage = (commands) => {
-  return {
+const formatHelpMessage = (commands, adminCommands) => {
+  const embed = {
     embed: {
       title: `Hey, I'm the Track of the Day Bot!`,
       type: `rich`,
@@ -489,6 +489,15 @@ const formatHelpMessage = (commands) => {
       ]
     }
   };
+
+  if (adminCommands) {
+    embed.embed.fields.splice(1, 0, {
+      name: `Admin commands`,
+      value: adminCommands
+    });
+  }
+
+  return embed;
 };
 
 const formatInviteMessage = () => {
