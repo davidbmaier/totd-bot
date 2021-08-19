@@ -33,7 +33,7 @@ const leaderboard = {
 };
 
 const verdict = {
-  command: utils.addDevPrefix(`!totd verdict`),
+  command: [utils.addDevPrefix(`!totd verdict`), utils.addDevPrefix(`!totd yesterday`)],
   action: async (msg, client) => {
     try {
       await discordAPI.sendTOTDRatings(client, msg.channel, true);
@@ -252,7 +252,7 @@ const invite = {
 
 // command to see the current ratings
 const ratings = {
-  command: utils.addDevPrefix(`!totd ratings`),
+  command: [utils.addDevPrefix(`!totd ratings`), utils.addDevPrefix(`!totd rating`)],
   action: async (msg, client) => {
     try {
       await discordAPI.sendTOTDRatings(client, msg.channel);

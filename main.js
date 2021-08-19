@@ -81,13 +81,17 @@ client.on(`message`, async (msg) => {
   if (msg.guild && msg.content.startsWith(utils.addDevPrefix(`!totd`))) {
     console.log(`Received message: ${msg.content} (#${msg.channel.name} in ${msg.guild.name})`);
 
-    let matchedCommand;
-    for (let i = 0; i < commands.length; i++) {
-      if (msg.content.startsWith(commands[i].command)) {
-        matchedCommand = commands[i];
-        break;
+    const matchedCommand = commands.find((command) => {
+      let aliases = [];
+      if (Array.isArray(command.command)) {
+        aliases = command.command;
+      } else {
+        aliases = [command.command];
       }
-    }
+
+      const matchedAlias = aliases.find((alias) => msg.content.toLowerCase().startsWith(alias.toLowerCase()));
+      return !!matchedAlias;
+    });
 
     if (matchedCommand) {
       await matchedCommand.action(msg, client);
