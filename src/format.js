@@ -215,34 +215,47 @@ const formatLeaderboardMessage = (totd, records, date) => {
 
 const formatRatingsMessage = (ratings, yesterday) => {
   let formattedRatings = ``;
-  let totalVotes = 0;
-  let weightedVotes = 0;
+  let totalPositive = 0;
+  let totalNegative = 0;
+  let weightedPositive = 0;
+  let weightedNegative = 0;
   let averageRating;
+  let averagePositive;
+  let averageNegative;
 
   for (const item in ratings) {
     const rating = ratings[item];
     // add it to the front since the ratings go from --- to +++
     formattedRatings = `${utils.getEmojiMapping(item)} - ${rating}\n${formattedRatings}`;
-    totalVotes += rating;
 
     if (item.includes(`Plus`)) {
       const weight = (item.match(/Plus/g) || []).length;
-      weightedVotes += weight * rating;
+      weightedPositive += weight * rating;
+      totalPositive += rating;
     } else {
       const weight = (item.match(/Minus/g) || []).length;
-      weightedVotes -= weight * rating;
+      weightedNegative += weight * rating;
+      totalNegative += rating;
     }
   }
+
+  const weightedVotes = weightedPositive - weightedNegative;
+  const totalVotes = totalPositive + totalNegative;
 
   formattedRatings.slice(0, -2); // remove the last line break
 
   let verdict = `Total ratings: ${totalVotes}\n`;
   if (totalVotes > 0) {
     averageRating = Math.round(weightedVotes / totalVotes * 10) / 10;
+    averagePositive = Math.round(weightedPositive / totalPositive * 10) / 10;
+    averageNegative = Math.round(weightedNegative / totalNegative * 10) / 10;
     verdict += `Average rating: ${averageRating}\n`;
   }
 
   verdict += `\n`;
+
+  // provisional check for how controversial the votes are (may need some adjustment down the road)
+  const checkForControversialVotes = () => averagePositive > 2 && averageNegative > 2;
   
   if (totalVotes === 0) {
     if (yesterday) {
@@ -250,14 +263,16 @@ const formatRatingsMessage = (ratings, yesterday) => {
     } else {
       verdict += `Looks like I don't have any votes yet...`;
     }
+  } else if (checkForControversialVotes() && -0.5 <= averageRating && averageRating < 0.5) {
+    verdict += `A bit of a controversial one - let's agree on *interesting*.`;
   } else if (averageRating < -2) {
-    verdict += `Looks like it was an absolute nightmare of a track!`;
+    verdict += `Looks like an absolute nightmare of a track!`;
   } else if (averageRating < -1) {
     verdict += `Best to just forget about this one, huh?`;
   } else if (averageRating < 0) {
     verdict += `Not exactly a good track, but it could have been worse.`;
   } else if (averageRating < 1) {
-    verdict += `An alright track, nothing special though.`;
+    verdict += `An alright track, but fairly mediocre.`;
   } else if (averageRating < 2) {
     verdict += `Pretty good track, but not quite perfect.`;
   } else {
