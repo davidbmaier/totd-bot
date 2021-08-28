@@ -219,9 +219,12 @@ const formatRatingsMessage = (ratings, yesterday) => {
   let totalNegative = 0;
   let weightedPositive = 0;
   let weightedNegative = 0;
+  let karmaPositive = 0;
+  let karmaNegative = 0;
   let averageRating;
   let averagePositive;
   let averageNegative;
+  let averageKarma;
 
   for (const item in ratings) {
     const rating = ratings[item];
@@ -231,16 +234,21 @@ const formatRatingsMessage = (ratings, yesterday) => {
     if (item.includes(`Plus`)) {
       const weight = (item.match(/Plus/g) || []).length;
       weightedPositive += weight * rating;
+      // 60 / 80 / 100
+      karmaPositive += (60 + (weight - 1) * 20) * rating;
       totalPositive += rating;
     } else {
       const weight = (item.match(/Minus/g) || []).length;
       weightedNegative += weight * rating;
+      // 0 / 20 / 40
+      karmaNegative += (60 - weight * 20) * rating;
       totalNegative += rating;
     }
   }
 
   const weightedVotes = weightedPositive - weightedNegative;
   const totalVotes = totalPositive + totalNegative;
+  const totalKarma = karmaPositive + karmaNegative;
 
   formattedRatings.slice(0, -2); // remove the last line break
 
@@ -250,6 +258,8 @@ const formatRatingsMessage = (ratings, yesterday) => {
     averagePositive = Math.round(weightedPositive / totalPositive * 10) / 10;
     averageNegative = Math.round(weightedNegative / totalNegative * 10) / 10;
     verdict += `Average rating: ${averageRating}\n`;
+    averageKarma = Math.round(totalKarma / totalVotes * 10) / 10;
+    verdict += `Average karma: ${averageKarma}\n`;
   }
 
   verdict += `\n`;
