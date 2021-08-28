@@ -8,11 +8,11 @@ const getTOTDMessage = async (forceRefresh) => {
   if (!forceRefresh) {
     console.log(`Using cached TOTD...`);
     const redisClient = await redisAPI.login();
-    const totdMessage = await redisAPI.getCurrentTOTD(redisClient);
+    const totd = await redisAPI.getCurrentTOTD(redisClient);
     redisAPI.logout(redisClient);
 
-    if (totdMessage) {
-      return totdMessage;
+    if (totd) {
+      return format.formatTOTDMessage(totd);
     }
     // if there is no message yet, refresh
     console.log(`No cached TOTD exists yet, falling back to refresh`);
@@ -26,9 +26,9 @@ const getTOTDMessage = async (forceRefresh) => {
   // also refresh the leaderboard
   getTOTDLeaderboardMessage(true);
 
-  // save fresh message to redis
+  // save fresh TOTD to redis
   const redisClient = await redisAPI.login();
-  await redisAPI.saveCurrentTOTD(redisClient, formattedMessage);
+  await redisAPI.saveCurrentTOTD(redisClient, totd);
   redisAPI.logout(redisClient);
 
   console.log(`Refreshed TOTD in Redis`);
@@ -365,10 +365,10 @@ const sendCOTDPings = async (client, region) => {
 const updateTOTDReactionCount = async (reaction, add) => {
   // check that the message really is the current TOTD
   const redisClient = await redisAPI.login();
-  const totdMessage = await redisAPI.getCurrentTOTD(redisClient);
+  const totd = await redisAPI.getCurrentTOTD(redisClient);
 
   // it's possible there is no message in the redis cache, but that's a rare edge case (in which reactions won't be recorded)
-  const currentTrackName = totdMessage?.embed?.fields.find((field) => field.name === `Name`)?.value.trim();
+  const currentTrackName = totd.tmxName || utils.removeNameFormatting(totd.name);
   const reactionTrackName = reaction.message?.embeds[0]?.fields.find((field) => field.name === `Name`)?.value.trim();
   if (currentTrackName === reactionTrackName) {
     const ratingEmojis = constants.ratingEmojis;

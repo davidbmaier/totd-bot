@@ -19,22 +19,6 @@ const formatTime = (time) => {
   return `${mins}:${secs}.${millisecs}`;
 };
 
-const removeNameFormatting = (text) => {
-  // this should take care of all the possible options, see https://doc.maniaplanet.com/client/text-formatting for reference
-  let cleanedText = text.replace(/\$[0-9a-fA-F]{3}/g, ``);
-  cleanedText = cleanedText.replace(`$w`, ``);
-  cleanedText = cleanedText.replace(`$n`, ``);
-  cleanedText = cleanedText.replace(`$o`, ``);
-  cleanedText = cleanedText.replace(`$b`, ``);
-  cleanedText = cleanedText.replace(`$i`, ``);
-  cleanedText = cleanedText.replace(`$t`, ``);
-  cleanedText = cleanedText.replace(`$s`, ``);
-  cleanedText = cleanedText.replace(`$g`, ``);
-  cleanedText = cleanedText.replace(`$z`, ``);
-  cleanedText = cleanedText.replace(`$$`, ``);
-  return cleanedText;
-};
-
 const formatTOTDMessage = (totd) => {
   // assemble title
   const today = new Date();
@@ -83,7 +67,7 @@ const formatTOTDMessage = (totd) => {
   if (totd.tmxName) {
     trackName = totd.tmxName;
   } else {
-    trackName = removeNameFormatting(totd.name);
+    trackName = utils.removeNameFormatting(totd.name);
   }
   let trackAuthor = totd.author;
   if (totd.authorName) {

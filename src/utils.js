@@ -65,10 +65,27 @@ const getEmojiMapping = (emojiName) => {
   return mapping[emojiName] || ``;
 };
 
+const removeNameFormatting = (text) => {
+  // this should take care of all the possible options, see https://doc.maniaplanet.com/client/text-formatting for reference
+  let cleanedText = text.replace(/\$[0-9a-fA-F]{3}/g, ``);
+  cleanedText = cleanedText.replace(`$w`, ``);
+  cleanedText = cleanedText.replace(`$n`, ``);
+  cleanedText = cleanedText.replace(`$o`, ``);
+  cleanedText = cleanedText.replace(`$b`, ``);
+  cleanedText = cleanedText.replace(`$i`, ``);
+  cleanedText = cleanedText.replace(`$t`, ``);
+  cleanedText = cleanedText.replace(`$s`, ``);
+  cleanedText = cleanedText.replace(`$g`, ``);
+  cleanedText = cleanedText.replace(`$z`, ``);
+  cleanedText = cleanedText.replace(`$$`, ``);
+  return cleanedText;
+};
+
 module.exports = {
   addDevPrefix,
   downloadThumbnail,
   convertToUNIXSeconds,
   getMinutesAgo,
-  getEmojiMapping
+  getEmojiMapping,
+  removeNameFormatting
 };
