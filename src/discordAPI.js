@@ -285,15 +285,14 @@ const countBingoVotes = async (client) => {
   return redisAPI.logout(redisClient);
 };
 
-const processRatingRankings = async (redisClient, ratings) => {
+const processRatingRankings = async (redisClient, ratings, oldTOTD) => {
   try {
     console.log(`Updating rating rankings...`);
-    const totd = await redisAPI.getCurrentTOTD(redisClient);
     const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
     const allTime = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.allTime);
 
-    const updatedMonthly = rating.updateRanking(ratings, monthly, constants.ratingRankingType.monthly, totd);
-    const updatedAllTime = rating.updateRanking(ratings, allTime, constants.ratingRankingType.allTime, totd);
+    const updatedMonthly = rating.updateRanking(ratings, monthly, constants.ratingRankingType.monthly, oldTOTD);
+    const updatedAllTime = rating.updateRanking(ratings, allTime, constants.ratingRankingType.allTime, oldTOTD);
 
     await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, updatedMonthly);
     await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.allTime, updatedAllTime);
@@ -302,7 +301,7 @@ const processRatingRankings = async (redisClient, ratings) => {
   }
 };
 
-const archiveRatings = async (client) => {
+const archiveRatings = async (client, oldTOTD) => {
   console.log(`Archiving existing ratings and clearing current ones...`);
   const redisClient = await redisAPI.login();
   const ratings = await redisAPI.getTOTDRatings(redisClient);
@@ -311,7 +310,7 @@ const archiveRatings = async (client) => {
 
   if (ratings) {
     await redisAPI.saveLastTOTDVerdict(redisClient, ratings);
-    await processRatingRankings(redisClient, ratings);
+    await processRatingRankings(redisClient, ratings, oldTOTD);
     
     // if it's the 1st of the month, archive monthly rating rankings
     const today = new Date();
@@ -336,13 +335,16 @@ const archiveRatings = async (client) => {
 };
 
 const distributeTOTDMessages = async (client) => {
+  // get cached TOTD for ratings
+  const redisClient = await redisAPI.login();
+  const oldTOTD = await redisAPI.getCurrentTOTD(redisClient);
+
   console.log(`Broadcasting TOTD message to subscribed channels`);
   const message = await getTOTDMessage(true);
 
-  await archiveRatings(client);
+  await archiveRatings(client, oldTOTD);
   countBingoVotes(client);
 
-  const redisClient = await redisAPI.login();
   const configs = await redisAPI.getAllConfigs(redisClient);
   redisAPI.logout(redisClient);
 
