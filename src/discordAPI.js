@@ -3,6 +3,7 @@ const format = require(`./format`);
 const redisAPI = require(`./redisApi`);
 const utils = require(`./utils`);
 const constants = require(`./constants`);
+const rating = require(`./rating`);
 
 const getTOTDMessage = async (forceRefresh) => {
   if (!forceRefresh) {
@@ -284,6 +285,23 @@ const countBingoVotes = async (client) => {
   return redisAPI.logout(redisClient);
 };
 
+const processRatingRankings = async (redisClient, ratings) => {
+  try {
+    console.log(`Updating rating rankings...`);
+    const totd = await redisAPI.getCurrentTOTD(redisClient);
+    const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
+    const allTime = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.allTime);
+
+    const updatedMonthly = rating.updateRanking(ratings, monthly, constants.ratingRankingType.monthly, totd);
+    const updatedAllTime = rating.updateRanking(ratings, allTime, constants.ratingRankingType.allTime, totd);
+
+    await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, updatedMonthly);
+    await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.allTime, updatedAllTime);
+  } catch (error) {
+    console.log(`Rating processing failed:`, error);
+  }
+};
+
 const archiveRatings = async (client) => {
   console.log(`Archiving existing ratings and clearing current ones...`);
   const redisClient = await redisAPI.login();
@@ -293,6 +311,16 @@ const archiveRatings = async (client) => {
 
   if (ratings) {
     await redisAPI.saveLastTOTDVerdict(redisClient, ratings);
+    await processRatingRankings(redisClient, ratings);
+    
+    // if it's the 1st of the month, archive monthly rating rankings
+    const today = new Date();
+    if (today.getDate() === 1) {
+      console.log(`Archiving monthly rating ranking and resetting the active one...`);
+      const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
+      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.lastMonthly, monthly);
+      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, {top: [], bottom: []});
+    }
 
     // send ratings to admin server if it's been configured
     const adminConfig = await redisAPI.getAdminServer(redisClient);

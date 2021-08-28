@@ -13,6 +13,12 @@ const cupRegions = {
   asia: `Asia`
 };
 
+const ratingRankingType = {
+  lastMonthly: `lastMonthly`,
+  monthly: `monthly`,
+  allTime: `allTime`
+};
+
 const bingoFields = [
   // map styles
   `Tech of the Day`,
@@ -72,5 +78,6 @@ const bingoFields = [
 module.exports = {
   ratingEmojis,
   cupRegions,
-  bingoFields
+  bingoFields,
+  ratingRankingType
 };

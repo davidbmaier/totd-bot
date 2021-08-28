@@ -4,6 +4,7 @@ const luxon = require(`luxon`);
 const path = require(`path`);
 
 const utils = require(`./utils`);
+const rating = require(`./rating`);
 
 const formatTime = (time) => {
   const millisecs = time.substr(-3);
@@ -21,6 +22,7 @@ const formatTime = (time) => {
 
 const formatTOTDMessage = (totd) => {
   // assemble title
+  // TODO: use correct date, not simply today
   const today = new Date();
   const month = today.getMonth();
   const day = today.getDate();
@@ -199,75 +201,43 @@ const formatLeaderboardMessage = (totd, records, date) => {
 
 const formatRatingsMessage = (ratings, yesterday) => {
   let formattedRatings = ``;
-  let totalPositive = 0;
-  let totalNegative = 0;
-  let weightedPositive = 0;
-  let weightedNegative = 0;
-  let karmaPositive = 0;
-  let karmaNegative = 0;
-  let averageRating;
-  let averagePositive;
-  let averageNegative;
-  let averageKarma;
 
   for (const item in ratings) {
     const rating = ratings[item];
     // add it to the front since the ratings go from --- to +++
     formattedRatings = `${utils.getEmojiMapping(item)} - ${rating}\n${formattedRatings}`;
-
-    if (item.includes(`Plus`)) {
-      const weight = (item.match(/Plus/g) || []).length;
-      weightedPositive += weight * rating;
-      // 60 / 80 / 100
-      karmaPositive += (60 + (weight - 1) * 20) * rating;
-      totalPositive += rating;
-    } else {
-      const weight = (item.match(/Minus/g) || []).length;
-      weightedNegative += weight * rating;
-      // 0 / 20 / 40
-      karmaNegative += (60 - weight * 20) * rating;
-      totalNegative += rating;
-    }
   }
 
-  const weightedVotes = weightedPositive - weightedNegative;
-  const totalVotes = totalPositive + totalNegative;
-  const totalKarma = karmaPositive + karmaNegative;
+  const stats = rating.calculateRatingStats(ratings);
 
-  formattedRatings.slice(0, -2); // remove the last line break
-
-  let verdict = `Total ratings: ${totalVotes}\n`;
-  if (totalVotes > 0) {
-    averageRating = Math.round(weightedVotes / totalVotes * 10) / 10;
-    averagePositive = Math.round(weightedPositive / totalPositive * 10) / 10;
-    averageNegative = Math.round(weightedNegative / totalNegative * 10) / 10;
-    verdict += `Average rating: ${averageRating}\n`;
-    averageKarma = Math.round(totalKarma / totalVotes * 10) / 10;
-    verdict += `Average karma: ${averageKarma}\n`;
+  let verdict = `Total ratings: ${stats.totalVotes}\n`;
+  if (stats.totalVotes > 0) {
+    verdict += `Average rating: ${stats.averageRating}\n`;
+    verdict += `Average karma: ${stats.averageKarma}\n`;
   }
 
   verdict += `\n`;
 
   // provisional check for how controversial the votes are (may need some adjustment down the road)
-  const checkForControversialVotes = () => averagePositive > 2 && averageNegative > 2;
+  const checkForControversialVotes = () => stats.averagePositive > 2 && stats.averageNegative > 2;
   
-  if (totalVotes === 0) {
+  if (stats.totalVotes === 0) {
     if (yesterday) {
        verdict += `Looks like I didn't get any votes yesterday...`;
     } else {
       verdict += `Looks like I don't have any votes yet...`;
     }
-  } else if (checkForControversialVotes() && -0.5 <= averageRating && averageRating < 0.5) {
+  } else if (checkForControversialVotes() && -0.5 <= stats.averageRating && stats.averageRating < 0.5) {
     verdict += `A bit of a controversial one - let's agree on *interesting*.`;
-  } else if (averageRating < -2) {
+  } else if (stats.averageRating < -2) {
     verdict += `Looks like an absolute nightmare of a track!`;
-  } else if (averageRating < -1) {
+  } else if (stats.averageRating < -1) {
     verdict += `Best to just forget about this one, huh?`;
-  } else if (averageRating < 0) {
+  } else if (stats.averageRating < 0) {
     verdict += `Not exactly a good track, but it could have been worse.`;
-  } else if (averageRating < 1) {
+  } else if (stats.averageRating < 1) {
     verdict += `An alright track, but fairly mediocre.`;
-  } else if (averageRating < 2) {
+  } else if (stats.averageRating < 2) {
     verdict += `Pretty good track, but not quite perfect.`;
   } else {
     verdict += `Absolutely fantastic track, definitely a highlight!`;

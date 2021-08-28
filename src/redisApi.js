@@ -272,6 +272,46 @@ const saveLastTOTDVerdict = async (redisClient, verdict) => {
   });
 };
 
+const getRatingRankings = async (redisClient, type) => {
+  return new Promise((resolve, reject) => {
+    // default is monthlyRatings, only use allTimeRatings if requested
+    let key = `${constants.ratingRankingType.monthly}Ratings`;
+    if (type === constants.ratingRankingType.allTime) {
+      key = `${type}Ratings`;
+    }
+
+    redisClient.get(key, (err, ratings) => {
+      if (err) {
+        reject(err);
+      } else {
+        try {
+            const parsedRatings = JSON.parse(ratings);
+            resolve(parsedRatings);
+          } catch (error) {
+            reject(`Unable to parse monthly ratings JSON`);
+          }
+      }
+    });
+  });
+};
+
+const saveRatingRankings = async (redisClient, type, ratings) => {
+  return new Promise((resolve, reject) => {
+    // default is monthlyRatings, only use allTimeRatings if requested
+    let key = `${constants.ratingRankingType.monthly}Ratings`;
+    if (type === constants.ratingRankingType.allTime) {
+      key = `${type}Ratings`;
+    }
+    redisClient.set(key, JSON.stringify(ratings), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
 const getTOTDRatings = async (redisClient) => {
   return new Promise((resolve, reject) => {
     redisClient.get(`ratings`, async (err, ratings) => {
@@ -398,6 +438,8 @@ module.exports = {
   clearCurrentLeaderboard,
   getLastTOTDVerdict,
   saveLastTOTDVerdict,
+  getRatingRankings,
+  saveRatingRankings,
   getTOTDRatings,
   clearTOTDRatings,
   updateTOTDRatings,

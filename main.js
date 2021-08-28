@@ -75,6 +75,25 @@ client.on(`ready`, async () => {
   if (deployMode === `prod`) {
     await discordAPI.getTOTDMessage(true);
   }
+
+  // check if monthly and all-time ratings exist, otherwise initialize them
+  const redisClient = await redisAPI.login();
+  try {
+    const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
+    const allTime = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.allTime);
+    if (!monthly) {
+      console.log(`Initializing monthly rating rankings...`);
+      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, {top: [], bottom: []});
+    }
+    if (!allTime) {
+      console.log(`Initializing all-time rating rankings...`);
+      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.allTime, {top: [], bottom: []});
+    }
+  } catch (error) {
+    console.log(`Unexpected error during monthly/all-time initialization:`, error);
+  } finally {
+    redisAPI.logout(redisClient);
+  }
 });
 
 client.on(`message`, async (msg) => {
