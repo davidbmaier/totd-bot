@@ -46,9 +46,9 @@ new cron(
   `Europe/Paris`
 );
 
-// display the current totd every day at 19:00:15
+// display the current totd every day at 19:00:10
 new cron(
-  `15 00 19 * * *`,
+  `10 00 19 * * *`,
   async () => {
     await discordAPI.distributeTOTDMessages(client);
   },
@@ -57,9 +57,9 @@ new cron(
   `Europe/Paris`
 );
 
-// refresh bingo every week on Monday at 19:00:45 (just after the TOTD because that counts yesterday's bingo votes)
+// refresh bingo every week on Monday at 19:00:30 (just after the TOTD because that counts yesterday's bingo votes)
 new cron(
-  `45 00 19 * * 1`,
+  `30 00 19 * * 1`,
   async () => {
     await discordAPI.getBingoMessage(true);
   },
