@@ -399,7 +399,8 @@ const updateTOTDReactionCount = async (reaction, add) => {
 
   // it's possible there is no message in the redis cache, but that's a rare edge case (in which reactions won't be recorded)
   const currentTrackName = totd.tmxName || utils.removeNameFormatting(totd.name);
-  const reactionTrackName = reaction.message?.embeds[0]?.fields.find((field) => field.name === `Name`)?.value.trim();
+  // remove name formatting for the real one as well to make sure there's no accidental mismatch after a broken format was hotfixed
+  const reactionTrackName = utils.removeNameFormatting(reaction.message?.embeds[0]?.fields.find((field) => field.name === `Name`)?.value.trim());
   if (currentTrackName === reactionTrackName) {
     const ratingEmojis = constants.ratingEmojis;
     for (let i = 0; i < ratingEmojis.length; i++) {
