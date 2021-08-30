@@ -75,6 +75,7 @@ const removeNameFormatting = (text) => {
   cleanedText = cleanedText.replace(`$i`, ``);
   cleanedText = cleanedText.replace(`$t`, ``);
   cleanedText = cleanedText.replace(`$s`, ``);
+  cleanedText = cleanedText.replace(`$S`, ``);
   cleanedText = cleanedText.replace(`$g`, ``);
   cleanedText = cleanedText.replace(`$z`, ``);
   cleanedText = cleanedText.replace(`$$`, ``);
