@@ -98,7 +98,7 @@ const getRatingMessage = async (yesterday) => {
 const getBingoMessage = async (forceRefresh, lastWeek) => {
   const redisClient = await redisAPI.login();
   let board = await redisAPI.getBingoBoard(redisClient, lastWeek);
-  
+
   if (lastWeek) {
     if (board) {
       console.log(`Using last week's board`);
@@ -119,7 +119,6 @@ const getBingoMessage = async (forceRefresh, lastWeek) => {
       const bingoFields = [...constants.bingoFields];
       const pickedFields = [];
       while (pickedFields.length < 24) {
-        // TODO: add weights so there's only max 3 map themes/3 author fields
         const randomPick = Math.floor(Math.random() * bingoFields.length);
         const pickedField = bingoFields.splice(randomPick, 1)[0];
         pickedFields.push({
@@ -169,7 +168,7 @@ const sendTOTDLeaderboard = async (client, channel) => {
   if (leaderboardMessage.date) {
     leaderboardMessage.embed.description = `Data from <t:${leaderboardMessage.date}:R>`;
   }
-  
+
   console.log(`Sending current leaderboard to #${channel.name} in ${channel.guild.name}`);
   discordMessage.edit(leaderboardMessage);
 };
@@ -191,10 +190,10 @@ const sendBingoBoard = async (channel, lastWeek) => {
 const sendBingoVote = async (channel, bingoID) => {
   const redisClient = await redisAPI.login();
   let board = await redisAPI.getBingoBoard(redisClient);
-  
+
   // add free space to the center
   board.splice(12, 0, {text: `Free space`, checked: false});
-  
+
   if (bingoID < 1 || bingoID > 25) {
     return await channel.send(`Hmm, that's not on the board. I only understand numbers from 1 to 25 I'm afraid.`);
   } else if (bingoID === 13) {
@@ -250,7 +249,7 @@ const countBingoVotes = async (client) => {
 
       let countYes = 0;
       let countNo = 0;
-      
+
       voteMessage.reactions.cache.forEach((reaction, reactionID) => {
         // use count - 1 since the bot adds one initially
         if (voteYes.includes(reactionID)) {
@@ -311,12 +310,13 @@ const archiveRatings = async (client, oldTOTD) => {
   if (ratings) {
     await redisAPI.saveLastTOTDVerdict(redisClient, ratings);
     await processRatingRankings(redisClient, ratings, oldTOTD);
-    
+
     // if it's the 1st of the month, archive monthly rating rankings
     const today = new Date();
     if (today.getDate() === 1) {
       console.log(`Archiving monthly rating ranking and resetting the active one...`);
       const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
+      console.log(`Last monthly ratings:`, monthly);
       await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.lastMonthly, monthly);
       await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, {top: [], bottom: []});
     }
