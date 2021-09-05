@@ -64,7 +64,6 @@ I consider the bot to be pretty much finished, but if I get back to it, this is 
 - Add better error handling for when the bot doesn't have permissions to post an error message - probably add a global method for it.
 - Add some server-specific ratings breakdown (i.e. store ratings per server so the ratings message can show both local and global ratings).
   - This might require some extra thought regarding scaling - since every new server increases the database size. It's not much, but I'd like to keep the footprint as minimal as possible (especially if the use case isn't really needed).
-- Find better voting emojis - the current ones are just screenshots from TMNF.
 - Add a short info message when joining a new server (if there's a reliable way to find the "main" channel).
 - More data (currently uses TM and TMX when available) - there's probably more interesting metadata the bot could display.
   - How many TOTDs did the author have before?
@@ -77,6 +76,7 @@ I consider the bot to be pretty much finished, but if I get back to it, this is 
 
 Thanks go to:
 
+- Juice#7454 for the improved voting emojis.
 - The [TMX](https://trackmania.exchange/) team for their platform and well-documented API.
 - Miss ([@codecat](https://github.com/codecat)) for her work on [trackmania.io](https://trackmania.io).
 - [@breeku](https://github.com/breeku) for creating [a neat wrapper](https://github.com/breeku/trackmania-api-node) around a bunch of reverse-engineered Nadeo APIs (let's hope they don't break).
