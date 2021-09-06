@@ -104,7 +104,10 @@ const formatTOTDMessage = (totd) => {
           name: `Links`,
           value: links
         }
-      ]
+      ],
+      footer: {
+        text: totd.mapUid
+      }
     }
   };
 

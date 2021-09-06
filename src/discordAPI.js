@@ -398,13 +398,12 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
   const redisClient = await redisAPI.login();
   const totd = await redisAPI.getCurrentTOTD(redisClient);
 
-  // it's possible there is no message in the redis cache, but that's a rare edge case (in which reactions won't be recorded)
-  const currentTrackName = totd.tmxName?.toLowerCase() || utils.removeNameFormatting(totd.name);
-  // remove name formatting for the real one as well to make sure there's no accidental mismatch after a broken format was hotfixed
-  const reactionTrackName = utils.removeNameFormatting(
-    reaction.message?.embeds[0]?.fields.find((field) => field.name === `Name`)?.value.trim()
+  // use the mapUid to check if this is the current TOTD
+  const currentMapUid = totd.mapUid;
+  const reactionMapUid = utils.removeNameFormatting(
+    reaction.message?.embeds[0]?.footer?.text?.trim()
   );
-  if (currentTrackName.toLowerCase() === reactionTrackName.toLowerCase()) {
+  if (currentMapUid === reactionMapUid) {
     const ratingEmojis = constants.ratingEmojis;
     for (let i = 0; i < ratingEmojis.length; i++) {
       const ratingIdentifier = utils.getEmojiMapping(ratingEmojis[i]);
