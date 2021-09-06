@@ -263,6 +263,39 @@ const ratings = {
   }
 };
 
+const rankings = {
+  command: utils.addDevPrefix(`!totd rankings`),
+  action: async (msg) => {
+    try {
+      const timeframe = msg.content.substr(utils.addDevPrefix(`!totd rankings`).length).trim();
+      const validTimeframes = [
+        {label: `month`, value: constants.ratingRankingType.monthly},
+        {label: `this month`, value: constants.ratingRankingType.monthly},
+        {label: `last month`, value: constants.ratingRankingType.lastMonthly},
+        {label: `all-time`, value: constants.ratingRankingType.allTime},
+        {label: `all time`, value: constants.ratingRankingType.allTime}
+      ];
+      let matchingTimeframe = validTimeframes[0]; // monthly is default
+
+      validTimeframes.forEach((validTimeframe) => {
+        if (timeframe.startsWith(validTimeframe.label.toLowerCase())) {
+          matchingTimeframe = validTimeframe;
+        }
+      });
+
+      const redisClient = await redisAPI.login();
+      const rankings = await redisAPI.getRatingRankings(redisClient, matchingTimeframe.value);
+      redisAPI.logout(redisClient);
+
+      const rankingMessage = format.formatRankingMessage(rankings, matchingTimeframe);
+      await msg.channel.send(rankingMessage);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
+    }
+  }
+};
+
 const refresh = {
   command: utils.addDevPrefix(`!totd refresh today`),
   action: async (msg) => {
@@ -423,6 +456,7 @@ module.exports = [
   today,
   leaderboard,
   ratings,
+  rankings,
   verdict,
   enable,
   disable,

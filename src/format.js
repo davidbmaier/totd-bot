@@ -5,6 +5,7 @@ const path = require(`path`);
 
 const utils = require(`./utils`);
 const rating = require(`./rating`);
+const constants = require(`./constants`);
 
 const formatTime = (time) => {
   const millisecs = time.substr(-3);
@@ -191,7 +192,7 @@ const formatRatingsMessage = (ratings, yesterday) => {
 
   // provisional check for how controversial the votes are (may need some adjustment down the road)
   const checkForControversialVotes = () => stats.averagePositive > 2 && stats.averageNegative > 2;
-  
+
   if (stats.totalVotes === 0) {
     if (yesterday) {
        verdict += `Looks like I didn't get any votes yesterday...`;
@@ -216,7 +217,7 @@ const formatRatingsMessage = (ratings, yesterday) => {
 
   return {
     embed: {
-      title: 
+      title:
         yesterday
           ? `Here are yesterday's TOTD ratings!`
           : `Here are today's TOTD ratings!`,
@@ -239,6 +240,89 @@ const formatRatingsMessage = (ratings, yesterday) => {
       ]
     }
   };
+};
+
+const resolveRatingToEmoji = (rating) => {
+  const mappings = [
+    { value: 2.5, emoji: utils.getEmojiMapping(`PlusPlusPlus`) },
+    { value: 1.5, emoji: utils.getEmojiMapping(`PlusPlus`) },
+    { value: 0, emoji: utils.getEmojiMapping(`Plus`) },
+    { value: -1.5, emoji: utils.getEmojiMapping(`Minus`) },
+    { value: -2.5, emoji: utils.getEmojiMapping(`MinusMinus`) },
+    { value: -3, emoji: utils.getEmojiMapping(`MinusMinusMinus`) },
+  ];
+
+  for (let i = 0; i < mappings.length; i++) {
+    const mapping = mappings[i];
+    if (rating >= mapping.value) {
+      return mapping.emoji;
+    }
+  }
+};
+
+const formatRankingMessage = (rankings, timeframe) => {
+  // if top and bottom are empty, return a basic placeholder
+  if (rankings?.top.length === 0 || rankings?.bottom.length === 0) {
+    return `It seems I don't have any data for the timeframe "${timeframe.label}", sorry!`;
+  }
+
+  const formatRankingRows = (rankingItems) => {
+    let section = ``;
+    rankingItems.forEach((rankingItem) => {
+      // resolve rating to emoji
+      const rating = `${resolveRatingToEmoji(rankingItem.averageRating)} (${rankingItem.averageRating})`;
+      const date = rankingItem.date ? `${rankingItem.date} ` : ``;
+
+      // ++ (rating) date - mapName (mapAuthor)
+      const row = `${rating} ${date}- ${rankingItem.mapName} (${rankingItem.mapAuthor})\n`;
+      section += row;
+    });
+    return section;
+  };
+
+  let titleTimeframe = `this month`;
+  if (timeframe.value === constants.ratingRankingType.lastMonthly) {
+    titleTimeframe = `last month`;
+  } else if (timeframe.value === constants.ratingRankingType.allTime) {
+    titleTimeframe = `all time`;
+  }
+
+  const embed = {
+    content: ``,
+    embed: {
+      // set title based on the type
+      title: `Here are the TOTD rankings for ${titleTimeframe}!`,
+      type: `rich`,
+      fields: [
+        {
+          name: `Top ${rankings.top.length}`,
+          value: formatRankingRows(rankings.top),
+        },
+        {
+          name: `Bottom ${rankings.bottom.length}`,
+          value: formatRankingRows(rankings.bottom),
+        }
+      ]
+    }
+  };
+
+  // add disclaimer to description that month isn't over yet
+  if (timeframe.value === constants.ratingRankingType.monthly) {
+    const description1 = `The month isn't over yet, so these aren't final -`;
+    const description2 = `check \`${utils.addDevPrefix(`!totd rankings last month`)}\` when it's over to see the final rankings!`;
+    embed.embed.description = `${description1} ${description2}`;
+  }
+
+  // for allTime add disclaimer to footer
+  if (timeframe.value === constants.ratingRankingType.allTime) {
+    const footer1 = `This ranking only displays data starting from July 2021 - earlier bot ratings were not representative enough.`;
+    const footer2 = `So don't take this too seriously if it's missing your favorite track!`;
+    embed.embed.footer = {
+      text: `${footer1} ${footer2}`
+    };
+  }
+
+  return embed;
 };
 
 const formatBingoBoard = async (fields, lastWeek) => {
@@ -496,6 +580,7 @@ const formatProxyMessage = (message) => {
 module.exports = {
   formatTOTDMessage,
   formatLeaderboardMessage,
+  formatRankingMessage,
   formatRatingsMessage,
   formatHelpMessage,
   formatBingoBoard,

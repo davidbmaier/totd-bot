@@ -57,12 +57,12 @@ const insertRatingIntoRanking = (ranking, type, totd) => {
     bottomMax = 5;
   }
 
-  // TODO: also add the date when that gets tracked in the TOTD data
   const rankingData = {
     averageRating: totd.averageRating,
     mapName: totd.tmxName || utils.removeNameFormatting(totd.name),
     mapAuthor: totd.authorName,
-    mapUId: totd.mapUid
+    mapUId: totd.mapUid,
+    date: `${totd.month} ${utils.formatDay(totd.day)}`
   };
 
   // go through top array - insert map if rating is higher than existing one
