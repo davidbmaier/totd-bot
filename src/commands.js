@@ -264,34 +264,38 @@ const ratings = {
 };
 
 const rankings = {
-  command: utils.addDevPrefix(`!totd rankings`),
+  command: [utils.addDevPrefix(`!totd rankings`), utils.addDevPrefix(`!totd ranking`)],
   action: async (msg) => {
-    try {
-      const timeframe = msg.content.substr(utils.addDevPrefix(`!totd rankings`).length).trim();
-      const validTimeframes = [
-        {label: `month`, value: constants.ratingRankingType.monthly},
-        {label: `this month`, value: constants.ratingRankingType.monthly},
-        {label: `last month`, value: constants.ratingRankingType.lastMonthly},
-        {label: `all-time`, value: constants.ratingRankingType.allTime},
-        {label: `all time`, value: constants.ratingRankingType.allTime}
-      ];
-      let matchingTimeframe = validTimeframes[0]; // monthly is default
+    // temporarily disable this until the prod data has been manually updated
+    if (msg.author.tag === adminTag) {
+      try {
+        // use the length of the longer command (cause the extra character is just a space that doesn't get trimmed)
+        const timeframe = msg.content.substr(utils.addDevPrefix(`!totd rankings`).length).trim();
+        const validTimeframes = [
+          {label: `month`, value: constants.ratingRankingType.monthly},
+          {label: `this month`, value: constants.ratingRankingType.monthly},
+          {label: `last month`, value: constants.ratingRankingType.lastMonthly},
+          {label: `all-time`, value: constants.ratingRankingType.allTime},
+          {label: `all time`, value: constants.ratingRankingType.allTime}
+        ];
+        let matchingTimeframe = validTimeframes[0]; // monthly is default
 
-      validTimeframes.forEach((validTimeframe) => {
-        if (timeframe.startsWith(validTimeframe.label.toLowerCase())) {
-          matchingTimeframe = validTimeframe;
-        }
-      });
+        validTimeframes.forEach((validTimeframe) => {
+          if (timeframe.startsWith(validTimeframe.label.toLowerCase())) {
+            matchingTimeframe = validTimeframe;
+          }
+        });
 
-      const redisClient = await redisAPI.login();
-      const rankings = await redisAPI.getRatingRankings(redisClient, matchingTimeframe.value);
-      redisAPI.logout(redisClient);
+        const redisClient = await redisAPI.login();
+        const rankings = await redisAPI.getRatingRankings(redisClient, matchingTimeframe.value);
+        redisAPI.logout(redisClient);
 
-      const rankingMessage = format.formatRankingMessage(rankings, matchingTimeframe);
-      await msg.channel.send(rankingMessage);
-    } catch (error) {
-      discordAPI.sendErrorMessage(msg.channel);
-      console.log(error);
+        const rankingMessage = format.formatRankingMessage(rankings, matchingTimeframe);
+        await msg.channel.send(rankingMessage);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.log(error);
+      }
     }
   }
 };
