@@ -112,6 +112,23 @@ const getCurrentTOTD = async (credentials) => {
 
     currentTOTD.authorName = await getPlayerName(credentials, currentTOTD.author);
 
+    // get the current hour in Paris
+    const currentHour = new Date().toLocaleString(`en-US`, {hour: `2-digit`, hour12: false, timeZone: `Europe/Paris`});
+
+    let totdDate;
+    if (currentHour < 19) {
+      // if it's yesterday's TOTD we need to know what yesterday's date was in Paris
+      totdDate = new Date();
+      totdDate.setHours(totdDate.getHours() - 19);
+    } else {
+      // use the current date in Paris
+      totdDate = new Date();
+    }
+
+    currentTOTD.day = totdDate.toLocaleString(`en-US`, {day: `numeric`, timeZone: `Europe/Paris`});
+    currentTOTD.month = totdDate.toLocaleString(`en-US`, {month: `long`, timeZone: `Europe/Paris`});
+    currentTOTD.year = totdDate.toLocaleString(`en-US`, {year: `numeric`, timeZone: `Europe/Paris`});
+
     const tmxInfo = await getTMXInfo(currentTOTD.mapUid);
 
     if (tmxInfo) {

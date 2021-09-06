@@ -82,11 +82,24 @@ const removeNameFormatting = (text = ``) => {
   return cleanedText;
 };
 
+const formatDay = (dayNum) => {
+  if (dayNum === 1 || dayNum === 21 || dayNum === 31) {
+    return `${dayNum}st`;
+  } else if (dayNum === 2 || dayNum === 22) {
+    return `${dayNum}nd`;
+  } else if (dayNum === 3 || dayNum === 23) {
+    return `${dayNum}rd`;
+  } else {
+    return `${dayNum}th`;
+  }
+};
+
 module.exports = {
   addDevPrefix,
   downloadThumbnail,
   convertToUNIXSeconds,
   getMinutesAgo,
   getEmojiMapping,
-  removeNameFormatting
+  removeNameFormatting,
+  formatDay
 };

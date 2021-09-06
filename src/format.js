@@ -22,38 +22,6 @@ const formatTime = (time) => {
 
 const formatTOTDMessage = (totd) => {
   // assemble title
-  // TODO: use correct date, not simply today
-  const today = new Date();
-  const month = today.getMonth();
-  const day = today.getDate();
-
-  const monthNames = [
-    `January`,
-    `February`,
-    `March`,
-    `April`,
-    `May`,
-    `June`,
-    `July`,
-    `August`,
-    `September`,
-    `October`,
-    `November`,
-    `December`
-  ];
-
-  const formatDay = (dayNum) => {
-    if (dayNum === 1 || dayNum === 21 || dayNum === 31) {
-      return `${dayNum}st`;
-    } else if (dayNum === 2 || dayNum === 22) {
-      return `${dayNum}nd`;
-    } else if (dayNum === 3 || dayNum === 23) {
-      return `${dayNum}rd`;
-    } else {
-      return `${dayNum}th`;
-    }
-  };
-
   let trackLabel = `Track`;
   if (totd.tmxTags && totd.tmxTags.includes(`Scenery`)) {
     trackLabel = `Scenery`;
@@ -62,7 +30,7 @@ const formatTOTDMessage = (totd) => {
     trackLabel = `Nascar`;
   }
 
-  const title = `**Here's the ${monthNames[month]} ${formatDay(day)} ${trackLabel} of the Day!**`;
+  const title = `**Here's the ${totd.month} ${utils.formatDay(totd.day)} ${trackLabel} of the Day!**`;
 
   // assemble track info
   let trackName = totd.name;
