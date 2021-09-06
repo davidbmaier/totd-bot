@@ -393,7 +393,7 @@ const sendCOTDPings = async (client, region) => {
   });
 };
 
-const updateTOTDReactionCount = async (reaction, add) => {
+const updateTOTDReactionCount = async (reaction, add, user) => {
   // check that the message really is the current TOTD
   const redisClient = await redisAPI.login();
   const totd = await redisAPI.getCurrentTOTD(redisClient);
@@ -410,7 +410,8 @@ const updateTOTDReactionCount = async (reaction, add) => {
       const ratingIdentifier = utils.getEmojiMapping(ratingEmojis[i]);
 
       if (ratingIdentifier.includes(reaction.emoji.identifier)) {
-        console.log(`Detected rating reaction in #${reaction.message.channel.name} (${reaction.message.channel.guild.name}), updating current ratings`);
+        const emojiInfo = `[${user.tag} ${add ? `added` : `removed`} ${reaction.emoji.name}]`;
+        console.log(`Rating reaction in #${reaction.message.channel.name} (${reaction.message.channel.guild.name}) ${emojiInfo}`);
         await redisAPI.updateTOTDRatings(redisClient, ratingEmojis[i], add);
         break;
       }
