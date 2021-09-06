@@ -297,11 +297,7 @@ const getRatingRankings = async (redisClient, type) => {
 
 const saveRatingRankings = async (redisClient, type, ratings) => {
   return new Promise((resolve, reject) => {
-    // default is monthlyRatings, only use allTimeRatings if requested
-    let key = `${constants.ratingRankingType.monthly}Ratings`;
-    if (type === constants.ratingRankingType.allTime) {
-      key = `${type}Ratings`;
-    }
+    let key = `${type}Ratings`;
     redisClient.set(key, JSON.stringify(ratings), (err) => {
       if (err) {
         reject(err);

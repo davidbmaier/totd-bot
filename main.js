@@ -70,7 +70,7 @@ new cron(
 
 client.on(`ready`, async () => {
   console.log(`Ready as ${client.user.tag}!`);
-  
+
   // in production, refresh TOTD to make sure there is a thumbnail in the images for cached messages
   if (deployMode === `prod`) {
     await discordAPI.getTOTDMessage(true);
@@ -80,10 +80,15 @@ client.on(`ready`, async () => {
   const redisClient = await redisAPI.login();
   try {
     const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
+    const lastMonthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.lastMonthly);
     const allTime = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.allTime);
     if (!monthly) {
       console.log(`Initializing monthly rating rankings...`);
       await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, {top: [], bottom: []});
+    }
+    if (!lastMonthly) {
+      console.log(`Initializing last monthly rating rankings...`);
+      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.lastMonthly, {top: [], bottom: []});
     }
     if (!allTime) {
       console.log(`Initializing all-time rating rankings...`);
@@ -127,7 +132,6 @@ client.on(`message`, async (msg) => {
           console.error(error.message);
         }
       }
-      
     }
   } else if (msg.mentions.has(client.user.id, {ignoreEveryone: true})) {
     const redisClient = await redisAPI.login();

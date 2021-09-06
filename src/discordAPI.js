@@ -309,7 +309,6 @@ const archiveRatings = async (client, oldTOTD) => {
 
   if (ratings) {
     await redisAPI.saveLastTOTDVerdict(redisClient, ratings);
-    await processRatingRankings(redisClient, ratings, oldTOTD);
 
     // if it's the 1st of the month, archive monthly rating rankings
     const today = new Date();
@@ -320,6 +319,8 @@ const archiveRatings = async (client, oldTOTD) => {
       await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.lastMonthly, monthly);
       await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, {top: [], bottom: []});
     }
+
+    await processRatingRankings(redisClient, ratings, oldTOTD);
 
     // send ratings to admin server if it's been configured
     const adminConfig = await redisAPI.getAdminServer(redisClient);
