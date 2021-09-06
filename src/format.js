@@ -272,9 +272,10 @@ const formatRankingMessage = (rankings, timeframe) => {
       // resolve rating to emoji
       const rating = `${resolveRatingToEmoji(rankingItem.averageRating)} (${rankingItem.averageRating})`;
       const date = rankingItem.date ? `${rankingItem.date} ` : ``;
+      const mapLink = `https://trackmania.io/#/leaderboard/${rankingItem.mapUId}`;
 
       // ++ (rating) date - mapName (mapAuthor)
-      const row = `${rating} ${date}- ${rankingItem.mapName} (${rankingItem.mapAuthor})\n`;
+      const row = `${rating} ${date}- [${rankingItem.mapName}](${mapLink}) (${rankingItem.mapAuthor})\n`;
       section += row;
     });
     return section;
