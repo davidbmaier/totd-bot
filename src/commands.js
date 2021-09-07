@@ -216,6 +216,8 @@ const help = {
       \`${utils.addDevPrefix(`!totd leaderboard`)}\`  -  Display the current top 10 (and the time for top 100).\n \
       \`${utils.addDevPrefix(`!totd verdict`)}\`  -  Display yesterday's TOTD ratings.\n \
       \`${utils.addDevPrefix(`!totd ratings`)}\`  -  Display today's TOTD ratings.\n \
+      \`${utils.addDevPrefix(`!totd rankings [time frame]`)}\`  -  Display TOTD rankings based on bot ratings.\n \
+      (Supported time frames: \`this month\`, \`last month\`, and \`all time\`)\n \
       \`${utils.addDevPrefix(`!totd bingo`)}\`  -  Display this week's bingo board.\n \
       \`${utils.addDevPrefix(`!totd last bingo`)}\`  -  Display last week's bingo board.\n \
       \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Start a vote to cross off that bingo field.`;
@@ -266,36 +268,33 @@ const ratings = {
 const rankings = {
   command: [utils.addDevPrefix(`!totd rankings`), utils.addDevPrefix(`!totd ranking`)],
   action: async (msg) => {
-    // temporarily disable this until the prod data has been manually updated
-    if (msg.author.tag === adminTag) {
-      try {
-        // use the length of the longer command (cause the extra character is just a space that doesn't get trimmed)
-        const timeframe = msg.content.substr(utils.addDevPrefix(`!totd rankings`).length).trim();
-        const validTimeframes = [
-          {label: `month`, value: constants.ratingRankingType.monthly},
-          {label: `this month`, value: constants.ratingRankingType.monthly},
-          {label: `last month`, value: constants.ratingRankingType.lastMonthly},
-          {label: `all-time`, value: constants.ratingRankingType.allTime},
-          {label: `all time`, value: constants.ratingRankingType.allTime}
-        ];
-        let matchingTimeframe = validTimeframes[0]; // monthly is default
+    try {
+      // use the length of the longer command (cause the extra character is just a space that doesn't get trimmed)
+      const timeframe = msg.content.substr(utils.addDevPrefix(`!totd rankings`).length).trim();
+      const validTimeframes = [
+        {label: `month`, value: constants.ratingRankingType.monthly},
+        {label: `this month`, value: constants.ratingRankingType.monthly},
+        {label: `last month`, value: constants.ratingRankingType.lastMonthly},
+        {label: `all-time`, value: constants.ratingRankingType.allTime},
+        {label: `all time`, value: constants.ratingRankingType.allTime}
+      ];
+      let matchingTimeframe = validTimeframes[0]; // monthly is default
 
-        validTimeframes.forEach((validTimeframe) => {
-          if (timeframe.startsWith(validTimeframe.label.toLowerCase())) {
-            matchingTimeframe = validTimeframe;
-          }
-        });
+      validTimeframes.forEach((validTimeframe) => {
+        if (timeframe.startsWith(validTimeframe.label.toLowerCase())) {
+          matchingTimeframe = validTimeframe;
+        }
+      });
 
-        const redisClient = await redisAPI.login();
-        const rankings = await redisAPI.getRatingRankings(redisClient, matchingTimeframe.value);
-        redisAPI.logout(redisClient);
+      const redisClient = await redisAPI.login();
+      const rankings = await redisAPI.getRatingRankings(redisClient, matchingTimeframe.value);
+      redisAPI.logout(redisClient);
 
-        const rankingMessage = format.formatRankingMessage(rankings, matchingTimeframe);
-        await msg.channel.send(rankingMessage);
-      } catch (error) {
-        discordAPI.sendErrorMessage(msg.channel);
-        console.log(error);
-      }
+      const rankingMessage = format.formatRankingMessage(rankings, matchingTimeframe);
+      await msg.channel.send(rankingMessage);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
     }
   }
 };

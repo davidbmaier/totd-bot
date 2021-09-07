@@ -16,16 +16,15 @@ Use at your own risk - the bot is in development and may break from time to time
 - `!totd leaderboard` - Prints the current TOTD top 10 and the time needed for top 100 to the current channel.
 - `!totd verdict` - Prints yesterday's global ratings and a short verdict based on them.
 - `!totd ratings` - Prints today's global ratings.
+- `!totd rankings [time frame]` - Prints the TOTD rankings for the given time frame. Supported time frames are `this month`, `last month`, and `all time`.
 - `!totd bingo` - Prints this week's bingo board.
 - `!totd last bingo` - Prints last week's bingo board.
 - `!totd vote [1-25]` - Starts a vote on that bingo field. All ongoing votes are resolved when the next TOTD is released.
 - `!totd enable` - Stores the current channel to the list the daily scheduled TOTD post gets sent to. One channel per server. Admin only.
 - `!totd disable` - Removes the current channel from the list the scheduled TOTD post gets sent to. Admin only.
-- `!totd set role [@role] [region]` - Adds the role to the list of roles it pings 10 minutes before COTD. Daily TOTD posts have to be set up already. Admin only.
+- `!totd set role [@role] [region]` - Adds the role to the list of roles it pings 10 minutes before COTD. Daily TOTD posts have to be set up already. Supported regions for pings are `Europe`, `America`, and `Asia` - one for each official COTD. Admin only.
 - `!totd remove role [region]` - Removes the currently set role from the pings. Admin only.
 - `!totd help` - Displays some info about the bot.
-
-Supported regions for pings are `Europe`, `America`, and `Asia` - one for each official COTD.
 
 Debug (and bot admin) only:
 
