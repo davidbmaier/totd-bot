@@ -271,11 +271,20 @@ const formatRankingMessage = (rankings, timeframe) => {
     rankingItems.forEach((rankingItem) => {
       // resolve rating to emoji
       const rating = `${resolveRatingToEmoji(rankingItem.averageRating)} (${rankingItem.averageRating})`;
-      const date = rankingItem.date ? `${rankingItem.date} ` : ``;
+      let date = ``;
+      if (rankingItem.date) {
+        if (timeframe.value === constants.ratingRankingType.allTime) {
+          date = `${rankingItem.date} `;
+        } else {
+          date += `${rankingItem.date.slice(0, -5)} `;
+        }
+      }
       const mapLink = `https://trackmania.io/#/leaderboard/${rankingItem.mapUId}`;
+      // escape Discord formatting characters
+      const authorName = rankingItem.mapAuthor.replace(/[_>*~|`]/g, `\\$&`);
 
       // ++ (rating) date - mapName (mapAuthor)
-      const row = `${rating} ${date}- [${rankingItem.mapName}](${mapLink}) (${rankingItem.mapAuthor})\n`;
+      const row = `${rating} ${date}- [${rankingItem.mapName}](${mapLink}) (${authorName})\n`;
       section += row;
     });
     return section;
@@ -297,7 +306,7 @@ const formatRankingMessage = (rankings, timeframe) => {
       fields: [
         {
           name: `Top ${rankings.top.length}`,
-          value: formatRankingRows(rankings.top),
+          value: formatRankingRows(rankings.top.slice(0, 5)),
         },
         {
           name: `Bottom ${rankings.bottom.length}`,
@@ -306,6 +315,14 @@ const formatRankingMessage = (rankings, timeframe) => {
       ]
     }
   };
+
+  if (rankings.top.length > 5) {
+    embed.embed.fields[0].name = `Top ${rankings.top.length} (1-5)`;
+    embed.embed.fields.splice(1, 0, {
+      name: `Top ${rankings.top.length} (5-${rankings.top.length})`,
+      value: formatRankingRows(rankings.top.slice(5, rankings.top.length)),
+    },);
+  }
 
   // add disclaimer to description that month isn't over yet
   if (timeframe.value === constants.ratingRankingType.monthly) {
