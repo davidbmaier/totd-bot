@@ -62,7 +62,7 @@ const insertRatingIntoRanking = (ranking, type, totd) => {
     mapName: totd.tmxName || utils.removeNameFormatting(totd.name),
     mapAuthor: totd.authorName,
     mapUId: totd.mapUid,
-    date: `${totd.month} ${utils.formatDay(totd.day)}`
+    date: `${totd.month} ${utils.formatDay(totd.day)} ${totd.year}`
   };
 
   // go through top array - insert map if rating is higher than existing one
