@@ -85,11 +85,11 @@ const insertRatingIntoRanking = (ranking, type, totd) => {
     updatedRanking.top = updatedRanking.top.slice(0, topMax);
   }
 
-  // go through bottom array - insert map if rating is lower than existing one
+  // go through bottom array - insert map if rating is higher than existing one
   let bottomInserted = false;
   for (let i = 0; i < updatedRanking.bottom.length; i++) {
     const bottomItem = updatedRanking.bottom[i];
-    if (totd.averageRating < bottomItem.averageRating) {
+    if (totd.averageRating > bottomItem.averageRating) {
       updatedRanking.bottom.splice(i, 0, rankingData);
       bottomInserted = true;
       break;
@@ -100,9 +100,9 @@ const insertRatingIntoRanking = (ranking, type, totd) => {
     updatedRanking.bottom.push(rankingData);
   }
 
-  // cut off excess rankings beyond the max
+  // cut off excess rankings beyond the max (from the front since ratings get lower)
   if (updatedRanking.bottom.length > bottomMax) {
-    updatedRanking.bottom = updatedRanking.bottom.slice(0, bottomMax);
+    updatedRanking.bottom = updatedRanking.bottom.slice(-bottomMax);
   }
 
   return updatedRanking;
