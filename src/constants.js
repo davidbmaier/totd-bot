@@ -70,8 +70,6 @@ const bingoFields = [
   `Author time\nunder 30s`,
   `Author medal\nthat's insanely\ndifficult`,
   `Free\nAuthor medal`,
-  `Hunted GPS`,
-  `Bronze-level\nGPS`,
   `No GPS`
 ];
 
