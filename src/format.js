@@ -319,7 +319,7 @@ const formatRankingMessage = (rankings, timeframe) => {
   if (rankings.top.length > 5) {
     embed.embed.fields[0].name = `Top ${rankings.top.length} (1-5)`;
     embed.embed.fields.splice(1, 0, {
-      name: `Top ${rankings.top.length} (5-${rankings.top.length})`,
+      name: `Top ${rankings.top.length} (6-${rankings.top.length})`,
       value: formatRankingRows(rankings.top.slice(5, rankings.top.length)),
     },);
   }
