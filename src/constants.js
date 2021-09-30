@@ -22,6 +22,7 @@ const ratingRankingType = {
 const bingoFields = [
   // map styles
   `Tech of the Day`,
+  `SpeedTech\nof the Day`,
   `Nascar\nof the Day`,
   `Ice of the Day`,
   `Dirt of the Day`,
