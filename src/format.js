@@ -263,7 +263,7 @@ const resolveRatingToEmoji = (rating) => {
 const formatRankingMessage = (rankings, timeframe) => {
   // if top and bottom are empty, return a basic placeholder
   if (rankings?.top.length === 0 || rankings?.bottom.length === 0) {
-    return `It seems I don't have any data for the timeframe "${timeframe.label}", sorry!`;
+    return `It seems I don't have any data for the timeframe "${timeframe.label}" yet, sorry!`;
   }
 
   const formatRankingRows = (rankingItems) => {
