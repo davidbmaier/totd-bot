@@ -82,7 +82,8 @@ const removeNameFormatting = (text = ``) => {
   return cleanedText;
 };
 
-const formatDay = (dayNum) => {
+const formatDay = (day) => {
+  const dayNum = parseInt(day);
   if (dayNum === 1 || dayNum === 21 || dayNum === 31) {
     return `${dayNum}st`;
   } else if (dayNum === 2 || dayNum === 22) {
