@@ -137,6 +137,10 @@ const getCurrentTOTD = async (credentials) => {
       currentTOTD.tmxTrackId = tmxInfo.TrackID;
       currentTOTD.tmxTags = tmxInfo.Tags;
       currentTOTD.tmxTimestamp = tmxInfo.UpdatedAt;
+      if (!currentTOTD.tmxTimestamp.includes(`+`)) {
+        // if there's no timezone information, assume UTC
+        currentTOTD.tmxTimestamp = `${currentTOTD.tmxTimestamp}+00:00`;
+      }
       if (tmxInfo.ImageLink) {
         currentTOTD.thumbnailUrl = tmxInfo.ImageLink;
       }
@@ -203,7 +207,6 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
     }
 
     return records;
-    
   } catch (e) {
     console.log(`getTOTDLeaderboard error:`);
     console.log(e);

@@ -92,11 +92,6 @@ const formatTOTDMessage = (totd) => {
           inline: true
         },
         {
-          name: `Uploaded`,
-          // parse ISO 8601 to UNIX timestamp (since that's what Discord's formatting requires)
-          value: `<t:${Math.trunc(Date.parse(totd.tmxTimestamp || totd.timestamp) / 1000)}:R>`,
-        },
-        {
           name: `Medal Times`,
           value: `${author}\n${gold}\n${silver}\n${bronze}`,
           inline: true
@@ -112,12 +107,28 @@ const formatTOTDMessage = (totd) => {
     }
   };
 
-  if (styles) {
-    embed.embed.fields.splice(4, 0, {
-      name: `Styles (according to TMX)`,
-      value: styles,
-      inline: true
+  // always add the Nadeo timestamp
+  embed.embed.fields.splice(2, 0, {
+      name: `Last uploaded to Nadeo servers`,
+      // parse ISO 8601 to UNIX timestamp (since that's what Discord's formatting requires)
+      value: `<t:${Math.trunc(Date.parse(totd.timestamp) / 1000)}:R>`,
     });
+
+  if (totd.tmxTimestamp) {
+    // if TMX timestamp exists, add that as well (along with styles if they're available)
+    embed.embed.fields.splice(3, 0, {
+      name: `Uploaded to TMX`,
+      // parse ISO 8601 to UNIX timestamp (since that's what Discord's formatting requires)
+      value: `<t:${Math.trunc(Date.parse(totd.tmxTimestamp) / 1000)}:R>`,
+    });
+
+    if (styles) {
+      embed.embed.fields.splice(5, 0, {
+        name: `Styles (according to TMX)`,
+        value: styles,
+        inline: true
+      });
+    }
   }
 
   return embed;
