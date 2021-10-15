@@ -241,32 +241,43 @@ const countBingoVotes = async (client) => {
     const field = board[i];
     if (!field.checked && field.voteActive && field.voteMessageID && field.voteChannelID) {
       // vote found, resolving it
-      const voteChannel = await client.channels.fetch(field.voteChannelID);
-      const voteMessage = await voteChannel.messages.fetch(field.voteMessageID);
-
-      const voteYes = utils.getEmojiMapping(`VoteYes`);
-      const voteNo = utils.getEmojiMapping(`VoteNo`);
-
-      let countYes = 0;
-      let countNo = 0;
-
-      voteMessage.reactions.cache.forEach((reaction, reactionID) => {
-        // use count - 1 since the bot adds one initially
-        if (voteYes.includes(reactionID)) {
-          countYes = reaction.count - 1;
-        } else if (voteNo.includes(reactionID)) {
-          countNo = reaction.count - 1;
+      let voteMessage;
+      try {
+        const voteChannel = await client.channels.fetch(field.voteChannelID);
+        voteMessage = await voteChannel.messages.fetch(field.voteMessageID);
+        if (!voteMessage) {
+          throw new Error(`Message not found`);
         }
-        // if Yes and No both don't match, ignore the reaction
-      });
 
-      if (countYes > countNo) {
-        field.checked = true;
-        delete field.voteActive;
-        delete field.voteMessageID;
-        delete field.voteChannelID;
-        updatedFields.push(field.text);
-      } else {
+        const voteYes = utils.getEmojiMapping(`VoteYes`);
+        const voteNo = utils.getEmojiMapping(`VoteNo`);
+
+        let countYes = 0;
+        let countNo = 0;
+        voteMessage.reactions.cache.forEach((reaction, reactionID) => {
+          // use count - 1 since the bot adds one initially
+          if (voteYes.includes(reactionID)) {
+            countYes = reaction.count - 1;
+          } else if (voteNo.includes(reactionID)) {
+            countNo = reaction.count - 1;
+          }
+          // if Yes and No both don't match, ignore the reaction
+        });
+
+        if (countYes > countNo) {
+          field.checked = true;
+          delete field.voteActive;
+          delete field.voteMessageID;
+          delete field.voteChannelID;
+          updatedFields.push(field.text);
+        } else {
+          field.voteActive = false;
+          delete field.voteMessageID;
+          delete field.voteChannelID;
+        }
+      } catch (error) {
+        console.log(`Caught error fetching votes for field ${field.text}:`, error);
+        // if message or channel can't be found, just remove the active vote
         field.voteActive = false;
         delete field.voteMessageID;
         delete field.voteChannelID;
