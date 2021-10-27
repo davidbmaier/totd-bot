@@ -365,7 +365,7 @@ const distributeTOTDMessages = async (client) => {
       const channel = await client.channels.fetch(config.channelID);
       await sendTOTDMessage(client, channel, message);
     } catch (error) {
-      if (error.message === `Missing Access` || error.message === `Missing Permissions`) {
+      if (error.message === `Missing Access` || error.message === `Missing Permissions` || error.message === `Unknown Channel`) {
         console.log(`Missing access or permissions, bot was probably kicked from server ${config.serverID} - removing config`);
         const redisClientForRemoval = await redisAPI.login();
         await redisAPI.removeConfig(redisClientForRemoval, config.serverID);
