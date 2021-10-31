@@ -363,7 +363,7 @@ const updateTOTDRatings = async (redisClient, emojiName, add) => {
             rating[emojiName] = 0;
           }
         }
-        
+
         redisClient.set(`ratings`, JSON.stringify(rating), (setErr) => {
           if (setErr) {
             reject(setErr);

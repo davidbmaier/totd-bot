@@ -164,10 +164,6 @@ const sendTOTDLeaderboard = async (client, channel) => {
   const discordMessage = await channel.send(`Fetching current leaderboard, give me a second... ${utils.getEmojiMapping(`Loading`)}`);
 
   const leaderboardMessage = await getTOTDLeaderboardMessage();
-  // if no records exist yet, it'll just be a string
-  if (leaderboardMessage.date) {
-    leaderboardMessage.embed.description = `Data from <t:${leaderboardMessage.date}:R>`;
-  }
 
   console.log(`Sending current leaderboard to #${channel.name} in ${channel.guild.name}`);
   discordMessage.edit(leaderboardMessage);

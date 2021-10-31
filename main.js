@@ -1,5 +1,12 @@
 const Discord = require(`discord.js`);
-const client = new Discord.Client({ partials: [`MESSAGE`, `CHANNEL`, `REACTION`] });
+const client = new Discord.Client({
+  partials: [`MESSAGE`, `CHANNEL`, `REACTION`],
+  intents: [
+    Discord.Intents.FLAGS.GUILDS, // for join and leave events
+    Discord.Intents.FLAGS.GUILD_MESSAGES, // for receiving commands through messages
+    Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS // for receiving rating reactions
+  ]
+});
 const cron = require(`cron`).CronJob;
 require(`dotenv`).config();
 
@@ -101,7 +108,7 @@ client.on(`ready`, async () => {
   }
 });
 
-client.on(`message`, async (msg) => {
+client.on(`messageCreate`, async (msg) => {
   if (msg.guild && msg.content.startsWith(utils.addDevPrefix(`!totd`))) {
     console.log(`Received message: ${msg.content} (#${msg.channel.name} in ${msg.guild.name})`);
 

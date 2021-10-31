@@ -47,7 +47,7 @@ const verdict = {
 const enable = {
   command: utils.addDevPrefix(`!totd enable`),
   action: async (msg) => {
-    if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+    if (msg.member.permissions.has(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
       try {
         const redisClient = await redisAPI.login();
         await redisAPI.addConfig(redisClient, msg.guild.id, msg.channel.id);
@@ -66,7 +66,7 @@ const enable = {
 const disable = {
   command: utils.addDevPrefix(`!totd disable`),
   action: async (msg) => {
-    if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+    if (msg.member.permissions.has(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
       try {
         const redisClient = await redisAPI.login();
         await redisAPI.removeConfig(redisClient, msg.guild.id);
@@ -85,7 +85,7 @@ const disable = {
 const setRole = {
   command: utils.addDevPrefix(`!totd set role`),
   action: async (msg) => {
-    if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+    if (msg.member.permissions.has(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
       try {
         const redisClient = await redisAPI.login();
         const configs = await redisAPI.getAllConfigs(redisClient);
@@ -135,7 +135,7 @@ const setRole = {
 const removeRole = {
   command: utils.addDevPrefix(`!totd remove role`),
   action: async (msg) => {
-    if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+    if (msg.member.permissions.has(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
       try {
         const redisClient = await redisAPI.login();
         const region = msg.content.split(` `)[3];
@@ -223,7 +223,7 @@ const help = {
       \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Start a vote to cross off that bingo field.`;
 
     let adminMessage;
-    if (msg.member.hasPermission(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+    if (msg.member.permissions.has(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
       adminMessage = `\n\`${utils.addDevPrefix(`!totd enable`)}\`  -  Enable daily TOTD posts in this channel.\n \
       \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disable the daily posts again.\n \
       \`${utils.addDevPrefix(`!totd set role [@role] [region]`)}\`  -  Enable pings ten minutes before COTD.\n \
@@ -423,7 +423,7 @@ const serverInfo = {
 
         // fetch and log detailed infos asynchronously
         servers.forEach(async (server) => {
-          const owner = await client.users.fetch(server.ownerID);
+          const owner = await client.users.fetch(server.ownerId); // don't use fetchOwner since we need the owner user, not the guild member
           console.log(`Server: ${server.name} - Owner: ${JSON.stringify(owner.tag)} - ID: ${server.id}`);
         });
       } catch (error) {
