@@ -5,7 +5,8 @@ const client = new Discord.Client({
     Discord.Intents.FLAGS.GUILDS, // for join and leave events
     Discord.Intents.FLAGS.GUILD_MESSAGES, // for receiving commands through messages
     Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS // for receiving rating reactions
-  ]
+  ],
+  retryLimit: 3 // prevent random 500s from failing requests immediately
 });
 const cron = require(`cron`).CronJob;
 require(`dotenv`).config();
