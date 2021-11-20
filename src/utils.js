@@ -34,6 +34,7 @@ const removeNameFormatting = (text = ``) => {
   let cleanedText = text.replace(/\$[0-9a-fA-F]{3}/g, ``);
   cleanedText = cleanedText.replace(`$w`, ``);
   cleanedText = cleanedText.replace(`$n`, ``);
+  cleanedText = cleanedText.replace(`$m`, ``);
   cleanedText = cleanedText.replace(`$o`, ``);
   cleanedText = cleanedText.replace(`$b`, ``);
   cleanedText = cleanedText.replace(`$i`, ``);
