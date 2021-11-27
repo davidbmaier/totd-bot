@@ -68,47 +68,41 @@ const formatTOTDMessage = (totd) => {
 
   const scoreNote = `React to this message to rate the TOTD!`;
 
-  const attachment = new Discord.MessageAttachment(totd.thumbnailUrl, `thumbnail.jpg`);
   const embed = {
-    embed: {
-      title: title,
-      type: `rich`,
-      files: [
-        attachment
-      ],
-      image: {
-        url: `attachment://thumbnail.jpg`
+    title: title,
+    type: `rich`,
+    image: {
+      url: totd.thumbnailUrl
+    },
+    description: scoreNote,
+    fields: [
+      {
+        name: `Name`,
+        value: trackName,
+        inline: true
       },
-      description: scoreNote,
-      fields: [
-        {
-          name: `Name`,
-          value: trackName,
-          inline: true
-        },
-        {
-          name: `Author`,
-          value: trackAuthor,
-          inline: true
-        },
-        {
-          name: `Medal Times`,
-          value: `${author}\n${gold}\n${silver}\n${bronze}`,
-          inline: true
-        },
-        {
-          name: `Links`,
-          value: links
-        }
-      ],
-      footer: {
-        text: totd.mapUid
+      {
+        name: `Author`,
+        value: trackAuthor,
+        inline: true
+      },
+      {
+        name: `Medal Times`,
+        value: `${author}\n${gold}\n${silver}\n${bronze}`,
+        inline: true
+      },
+      {
+        name: `Links`,
+        value: links
       }
+    ],
+    footer: {
+      text: totd.mapUid
     }
   };
 
   // always add the Nadeo timestamp
-  embed.embed.fields.splice(2, 0, {
+  embed.fields.splice(2, 0, {
       name: `Last uploaded to Nadeo servers`,
       // parse ISO 8601 to UNIX timestamp (since that's what Discord's formatting requires)
       value: `<t:${Math.trunc(Date.parse(totd.timestamp) / 1000)}:R>`,
@@ -116,14 +110,14 @@ const formatTOTDMessage = (totd) => {
 
   if (totd.tmxTimestamp) {
     // if TMX timestamp exists, add that as well (along with styles if they're available)
-    embed.embed.fields.splice(3, 0, {
+    embed.fields.splice(3, 0, {
       name: `Uploaded to TMX`,
       // parse ISO 8601 to UNIX timestamp (since that's what Discord's formatting requires)
       value: `<t:${Math.trunc(Date.parse(totd.tmxTimestamp) / 1000)}:R>`,
     });
 
     if (styles) {
-      embed.embed.fields.splice(5, 0, {
+      embed.fields.splice(5, 0, {
         name: `Styles (according to TMX)`,
         value: styles,
         inline: true
@@ -131,7 +125,7 @@ const formatTOTDMessage = (totd) => {
     }
   }
 
-  return embed;
+  return {embeds: [embed]};
 };
 
 const formatLeaderboardMessage = (totd, records, date) => {
@@ -153,11 +147,11 @@ const formatLeaderboardMessage = (totd, records, date) => {
 
   topTenField += `\n\`\`\``;
 
-  const embed = {
-    date: date,
-    content: ``,
-    embed: {
+  return {
+    content: null, // remove placeholder content during load
+    embeds:[{
       title: `Here's today's TOTD leaderboard!`,
+      description: `Data from <t:${date}:R>`,
       type: `rich`,
       fields: [
         {
@@ -176,10 +170,8 @@ const formatLeaderboardMessage = (totd, records, date) => {
       footer: {
         text: `The top 100 time is not exact - it might be slightly off by one or two positions.`
       }
-    }
+    }]
   };
-
-  return embed;
 };
 
 const formatRatingsMessage = (ratings, yesterday) => {
@@ -227,7 +219,7 @@ const formatRatingsMessage = (ratings, yesterday) => {
   }
 
   return {
-    embed: {
+    embeds: [{
       title:
         yesterday
           ? `Here are yesterday's TOTD ratings!`
@@ -249,7 +241,7 @@ const formatRatingsMessage = (ratings, yesterday) => {
           inline: true
         }
       ]
-    }
+    }]
   };
 };
 
@@ -309,27 +301,24 @@ const formatRankingMessage = (rankings, timeframe) => {
   }
 
   const embed = {
-    content: ``,
-    embed: {
-      // set title based on the type
-      title: `Here are the TOTD rankings for ${titleTimeframe}!`,
-      type: `rich`,
-      fields: [
-        {
-          name: `Top ${rankings.top.length}`,
-          value: formatRankingRows(rankings.top.slice(0, 5)),
-        },
-        {
-          name: `Bottom ${rankings.bottom.length}`,
-          value: formatRankingRows(rankings.bottom),
-        }
-      ]
-    }
+    // set title based on the type
+    title: `Here are the TOTD rankings for ${titleTimeframe}!`,
+    type: `rich`,
+    fields: [
+      {
+        name: `Top ${rankings.top.length}`,
+        value: formatRankingRows(rankings.top.slice(0, 5)),
+      },
+      {
+        name: `Bottom ${rankings.bottom.length}`,
+        value: formatRankingRows(rankings.bottom),
+      }
+    ]
   };
 
   if (rankings.top.length > 5) {
-    embed.embed.fields[0].name = `Top ${rankings.top.length} (1-5)`;
-    embed.embed.fields.splice(1, 0, {
+    embed.fields[0].name = `Top ${rankings.top.length} (1-5)`;
+    embed.fields.splice(1, 0, {
       name: `Top ${rankings.top.length} (6-${rankings.top.length})`,
       value: formatRankingRows(rankings.top.slice(5, rankings.top.length)),
     },);
@@ -339,19 +328,19 @@ const formatRankingMessage = (rankings, timeframe) => {
   if (timeframe.value === constants.ratingRankingType.monthly) {
     const description1 = `The month isn't over yet, so these aren't final -`;
     const description2 = `check \`${utils.addDevPrefix(`!totd rankings last month`)}\` when it's over to see the final rankings!`;
-    embed.embed.description = `${description1} ${description2}`;
+    embed.description = `${description1} ${description2}`;
   }
 
   // for allTime add disclaimer to footer
   if (timeframe.value === constants.ratingRankingType.allTime) {
     const footer1 = `This ranking only displays data starting from July 2021 - earlier bot ratings were not representative enough.`;
     const footer2 = `So don't take this too seriously if it's missing your favorite track!`;
-    embed.embed.footer = {
+    embed.footer = {
       text: `${footer1} ${footer2}`
     };
   }
 
-  return embed;
+  return {embeds: [embed]};
 };
 
 const formatBingoBoard = async (fields, lastWeek) => {
@@ -473,7 +462,7 @@ const formatBingoBoard = async (fields, lastWeek) => {
       } else {
         ctx.fillStyle = `#FFFFFF`;
       }
-      
+
       ctx.fillText(fieldCount + 1, cellRight - 3, cellTop); // move font right into the corner
 
       fieldCount++;
@@ -488,16 +477,11 @@ const formatBingoBoard = async (fields, lastWeek) => {
       : `If you think we should cross one of these off, you can start a vote using \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`.`;
 
   const embed = {
-    embed: {
-      title: `Here's the TOTD bingo board for week ${weekNumber}!`,
-      description: embedDescription,
-      type: `rich`,
-      files: [
-        attachment
-      ],
-      image: {
-        url: `attachment://bingo.png`
-      }
+    title: `Here's the TOTD bingo board for week ${weekNumber}!`,
+    description: embedDescription,
+    type: `rich`,
+    image: {
+      url: `attachment://bingo.png`
     }
   };
 
@@ -520,7 +504,7 @@ const formatBingoBoard = async (fields, lastWeek) => {
   };
 
   if (checkBingoWin()) {
-    embed.embed.fields = [
+    embed.fields = [
       {
         name: `:tada: Bingo! :tada:`,
         value: `You've done it! Congrats! ${utils.getEmojiMapping(`Bingo`)}`
@@ -528,44 +512,42 @@ const formatBingoBoard = async (fields, lastWeek) => {
     ];
   }
 
-  return embed;
+  return {embeds: [embed], files: [attachment]};
 };
 
 const formatHelpMessage = (commands, adminCommands) => {
   const embed = {
-    embed: {
-      title: `Hey, I'm the Track of the Day Bot!`,
-      type: `rich`,
-      description: `Here's what you can tell me to do:`,
-      fields: [
-        {
-          name: `Commands`,
-          value: commands
-        },
-        {
-          name: `More Info`,
-          value:
-            `I've been developed by tooInfinite#5113 (<@141627532335251456>) - feel free to talk to him if you've got any feedback or ran into any issues with me. \
-            My code can be found [here](https://github.com/davidbmaier/totd-bot).\n\
-            To invite me to your own server, click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot).`
-        }
-      ]
-    }
+    title: `Hey, I'm the Track of the Day Bot!`,
+    type: `rich`,
+    description: `Here's what you can tell me to do:`,
+    fields: [
+      {
+        name: `Commands`,
+        value: commands
+      },
+      {
+        name: `More Info`,
+        value:
+          `I've been developed by tooInfinite#5113 (<@141627532335251456>) - feel free to talk to him if you've got any feedback or ran into any issues with me. \
+          My code can be found [here](https://github.com/davidbmaier/totd-bot).\n\
+          To invite me to your own server, click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot).`
+      }
+    ]
   };
 
   if (adminCommands) {
-    embed.embed.fields.splice(1, 0, {
+    embed.fields.splice(1, 0, {
       name: `Admin commands`,
       value: adminCommands
     });
   }
 
-  return embed;
+  return {embeds: [embed]};
 };
 
 const formatInviteMessage = () => {
   return {
-    embed: {
+    embeds: [{
       type: `rich`,
       fields: [
         {
@@ -573,13 +555,13 @@ const formatInviteMessage = () => {
           value: `Click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot)!`
         }
       ]
-    }
+    }]
   };
 };
 
 const formatProxyMessage = (message) => {
   return {
-    embed: {
+    embeds: [{
       title: `I just got mentioned!`,
       type: `rich`,
       fields: [
@@ -602,7 +584,7 @@ const formatProxyMessage = (message) => {
           value: `[Message](https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`
         }
       ]
-    }
+    }]
   };
 };
 

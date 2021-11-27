@@ -1,6 +1,4 @@
 require(`dotenv`).config();
-const axios = require(`axios`);
-const fs = require(`fs`);
 
 const deployMode = process.env.DEPLOY_MODE;
 
@@ -24,40 +22,6 @@ const getMinutesAgo = (date) => {
   var interval = seconds / 31536000;
   interval = seconds / 60;
   return Math.floor(interval);
-};
-
-const downloadThumbnail = (url, fileName) => {
-  // create folder first
-  try {
-    fs.readdirSync(`./images`);
-  } catch (error) {
-    if (error.code === `ENOENT`) {
-      fs.mkdirSync(`./images`);
-    }
-  }
-
-  const writer = fs.createWriteStream(`./images/${fileName}`);
-
-  return axios({
-    method: `get`,
-    url: url,
-    responseType: `stream`,
-  }).then(response => {
-    return new Promise((resolve, reject) => {
-      response.data.pipe(writer);
-      let error;
-      writer.on(`error`, err => {
-        error = err;
-        writer.close();
-        reject(err);
-      });
-      writer.on(`close`, () => {
-        if (!error) {
-          resolve(`./images/${fileName}`);
-        }
-      });
-    });
-  });
 };
 
 const getEmojiMapping = (emojiName) => {
@@ -98,7 +62,6 @@ const formatDay = (day) => {
 
 module.exports = {
   addDevPrefix,
-  downloadThumbnail,
   convertToUNIXSeconds,
   getMinutesAgo,
   getEmojiMapping,

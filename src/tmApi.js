@@ -11,8 +11,6 @@ const {
 require(`dotenv`).config();
 const axios = require(`axios`);
 
-const utils = require(`./utils`);
-
 const uplayLogin = Buffer.from(process.env.USER_LOGIN).toString(`base64`);
 
 const loginToTM = async () => {
@@ -145,8 +143,6 @@ const getCurrentTOTD = async (credentials) => {
         currentTOTD.thumbnailUrl = tmxInfo.ImageLink;
       }
     }
-
-    currentTOTD.thumbnailUrl = await utils.downloadThumbnail(currentTOTD.thumbnailUrl, `thumbnail.jpg`);
 
     return currentTOTD;
   } catch (e) {
