@@ -170,7 +170,8 @@ const formatLeaderboardMessage = (totd, records, date) => {
       footer: {
         text: `The top 100 time is not exact - it might be slightly off by one or two positions.`
       }
-    }]
+    }],
+    date: date // used for caching
   };
 };
 
