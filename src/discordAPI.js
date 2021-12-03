@@ -44,6 +44,7 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
   if (
     forceRefresh
     || !cachedleaderBoardMessage
+    || !cachedleaderBoardMessage.date
     || cachedleaderBoardMessage.date < utils.convertToUNIXSeconds(new Date()) - 600
   ) {
     // if cached message does not exist or is older than ten minutes, refresh
