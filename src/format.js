@@ -101,6 +101,21 @@ const formatTOTDMessage = (totd) => {
     }
   };
 
+  let thumbnailAttachment;
+
+  if (totd.thumbnailUrl.includes(`trackmania.exchange`)) {
+    // TMX images get embedded automatically
+    embed.image = {
+      url: totd.thumbnailUrl
+    };
+  } else {
+    // Nadeo images need to be uploaded as attachments (somehow they don't embed normally)
+    thumbnailAttachment = new Discord.MessageAttachment(totd.thumbnailUrl, `totd.png`);
+    embed.image = {
+      url: `attachment://totd.png`
+    };
+  }
+
   // always add the Nadeo timestamp
   embed.fields.splice(2, 0, {
       name: `Last uploaded to Nadeo servers`,
@@ -125,7 +140,16 @@ const formatTOTDMessage = (totd) => {
     }
   }
 
-  return {embeds: [embed]};
+  const messageObject = {
+    embeds: [embed]
+  };
+
+  // to attach the Nadeo image, it needs to be sent along as a file
+  if (thumbnailAttachment) {
+    messageObject.files = [thumbnailAttachment];
+  }
+
+  return messageObject;
 };
 
 const formatLeaderboardMessage = (totd, records, date) => {
