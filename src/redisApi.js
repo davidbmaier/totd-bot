@@ -200,6 +200,31 @@ const getCurrentTOTD = async (redisClient) => {
   });
 };
 
+const savePreviousTOTD = async (redisClient, totd) => {
+  return new Promise((resolve, reject) => {
+    // save to redis
+    redisClient.set(`totdYesterday`, JSON.stringify(totd), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+const getPreviousTOTD = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(`totdYesterday`, (err, totd) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(totd) || undefined);
+      }
+    });
+  });
+};
+
 const saveCurrentLeaderboard = async (redisClient, leaderboard) => {
   return new Promise((resolve, reject) => {
     // save to redis
@@ -435,5 +460,7 @@ module.exports = {
   clearTOTDRatings,
   updateTOTDRatings,
   getBingoBoard,
-  saveBingoBoard
+  saveBingoBoard,
+  savePreviousTOTD,
+  getPreviousTOTD
 };

@@ -29,6 +29,13 @@ const getTOTDMessage = async (forceRefresh) => {
 
   // save fresh TOTD to redis
   const redisClient = await redisAPI.login();
+  const oldTOTD = await redisAPI.getCurrentTOTD(redisClient);
+  if (oldTOTD.mapUid !== totd.mapUid) {
+    // oldTOTD was a different map, so save that as yesterday's TOTD in Redis
+    // note it could have been an earlier one if the bot was done for more than a day
+    console.log(`Currently stored TOTD has different mapUid, storing that as yesterday's TOTD`);
+    await redisAPI.savePreviousTOTD(redisClient, oldTOTD);
+  }
   await redisAPI.saveCurrentTOTD(redisClient, totd);
   redisAPI.logout(redisClient);
 
@@ -75,22 +82,25 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
     return formattedMessage;
   } else {
     console.log(`Using cached leaderboard...`);
-    return cachedleaderBoardMessage;  
+    return cachedleaderBoardMessage;
   }
 };
 
 const getRatingMessage = async (yesterday) => {
   const redisClient = await redisAPI.login();
   let ratings;
+  let map;
   if (yesterday) {
     ratings = await redisAPI.getLastTOTDVerdict(redisClient);
+    map = await redisAPI.getPreviousTOTD(redisClient);
   } else {
     ratings = await redisAPI.getTOTDRatings(redisClient);
+    map = await redisAPI.getCurrentTOTD(redisClient);
   }
   redisAPI.logout(redisClient);
 
   if (ratings) {
-    return format.formatRatingsMessage(ratings, yesterday);
+    return format.formatRatingsMessage(ratings, yesterday, map);
   } else {
     return `Hmm, I don't seem to remember yesterday's track. Sorry about that!`;
   }

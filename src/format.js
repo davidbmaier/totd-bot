@@ -199,7 +199,7 @@ const formatLeaderboardMessage = (totd, records, date) => {
   };
 };
 
-const formatRatingsMessage = (ratings, yesterday) => {
+const formatRatingsMessage = (ratings, yesterday, map) => {
   let formattedRatings = ``;
 
   for (const item in ratings) {
@@ -243,6 +243,11 @@ const formatRatingsMessage = (ratings, yesterday) => {
     verdict += `Absolutely fantastic track, definitely a highlight!`;
   }
 
+  let description = ``;
+  if (map?.name) {
+    description = `**${utils.removeNameFormatting(map.name)}** by **${map.authorName}**`;
+  }
+
   return {
     embeds: [{
       title:
@@ -250,10 +255,7 @@ const formatRatingsMessage = (ratings, yesterday) => {
           ? `Here are yesterday's TOTD ratings!`
           : `Here are today's TOTD ratings!`,
       type: `rich`,
-      description:
-        yesterday
-          ? `These ratings aren't just from here - I collect feedback from a bunch of other servers as well!`
-          : `This track is still being voted on, so take these numbers with a grain of salt.`,
+      description: description,
       fields: [
         {
           name: `Ratings`,
@@ -265,7 +267,12 @@ const formatRatingsMessage = (ratings, yesterday) => {
           value: verdict,
           inline: true
         }
-      ]
+      ],
+      footer: {
+        text: yesterday
+          ? `These ratings aren't just from here - I collect feedback from a bunch of other servers as well!`
+          : `This track is still being voted on, so take these numbers with a grain of salt.`
+      }
     }]
   };
 };
