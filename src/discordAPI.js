@@ -5,6 +5,8 @@ const utils = require(`./utils`);
 const constants = require(`./constants`);
 const rating = require(`./rating`);
 
+const errorMessage = `Oops, something went wrong here - please talk to <@141627532335251456> and let him know that didn't work.`;
+
 const getTOTDMessage = async (forceRefresh) => {
   if (!forceRefresh) {
     console.log(`Using cached TOTD...`);
@@ -87,22 +89,27 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
 };
 
 const getRatingMessage = async (yesterday) => {
-  const redisClient = await redisAPI.login();
-  let ratings;
-  let map;
-  if (yesterday) {
-    ratings = await redisAPI.getLastTOTDVerdict(redisClient);
-    map = await redisAPI.getPreviousTOTD(redisClient);
-  } else {
-    ratings = await redisAPI.getTOTDRatings(redisClient);
-    map = await redisAPI.getCurrentTOTD(redisClient);
-  }
-  redisAPI.logout(redisClient);
+  try {
+    const redisClient = await redisAPI.login();
+    let ratings;
+    let map;
+    if (yesterday) {
+      ratings = await redisAPI.getLastTOTDVerdict(redisClient);
+      map = await redisAPI.getPreviousTOTD(redisClient);
+    } else {
+      ratings = await redisAPI.getTOTDRatings(redisClient);
+      map = await redisAPI.getCurrentTOTD(redisClient);
+    }
+    redisAPI.logout(redisClient);
 
-  if (ratings) {
-    return format.formatRatingsMessage(ratings, yesterday, map);
-  } else {
-    return `Hmm, I don't seem to remember yesterday's track. Sorry about that!`;
+    if (ratings) {
+      return format.formatRatingsMessage(ratings, yesterday, map);
+    } else {
+      return `Hmm, I don't seem to remember yesterday's track. Sorry about that!`;
+    }
+  } catch (err) {
+    console.log(`Error while getting rating message:`, err);
+    return errorMessage;
   }
 };
 
@@ -441,7 +448,7 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
 };
 
 const sendErrorMessage = (channel) => {
-  channel.send(`Oops, something went wrong here - please talk to <@141627532335251456> and let him know that didn't work.`);
+  channel.send(errorMessage);
 };
 
 module.exports = {
