@@ -416,10 +416,12 @@ const serverInfo = {
     if (msg.author.tag === adminTag) {
       try {
         const servers = [];
+        let memberCount = 0;
         client.guilds.cache.forEach(async (guild) => {
           servers.push(guild);
+          memberCount += guild.memberCount;
         });
-        await msg.channel.send(`I'm currently in ${servers.length} servers and counting!`);
+        await msg.channel.send(`I'm currently in ${servers.length} servers and counting - reaching an audience of ${memberCount}!`);
 
         // fetch and log detailed infos asynchronously
         servers.forEach(async (server) => {
