@@ -68,11 +68,13 @@ const formatTOTDMessage = (totd) => {
 
   const scoreNote = `React to this message to rate the TOTD!`;
 
+  const thumbnailAttachment = new Discord.MessageAttachment(totd.thumbnailUrl, `totd.png`);
+
   const embed = {
     title: title,
     type: `rich`,
     image: {
-      url: totd.thumbnailUrl
+      url: `attachment://totd.png`
     },
     description: scoreNote,
     fields: [
@@ -100,21 +102,6 @@ const formatTOTDMessage = (totd) => {
       text: totd.mapUid
     }
   };
-
-  let thumbnailAttachment;
-
-  if (totd.thumbnailUrl.includes(`trackmania.exchange`)) {
-    // TMX images get embedded automatically
-    embed.image = {
-      url: totd.thumbnailUrl
-    };
-  } else {
-    // Nadeo images need to be uploaded as attachments (somehow they don't embed normally)
-    thumbnailAttachment = new Discord.MessageAttachment(totd.thumbnailUrl, `totd.png`);
-    embed.image = {
-      url: `attachment://totd.png`
-    };
-  }
 
   // always add the Nadeo timestamp
   embed.fields.splice(2, 0, {
@@ -144,7 +131,7 @@ const formatTOTDMessage = (totd) => {
     embeds: [embed]
   };
 
-  // to attach the Nadeo image, it needs to be sent along as a file
+  // to attach the image, it needs to be sent along as a file
   if (thumbnailAttachment) {
     messageObject.files = [thumbnailAttachment];
   }
