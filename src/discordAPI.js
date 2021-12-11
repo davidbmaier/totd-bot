@@ -369,6 +369,7 @@ const distributeTOTDMessages = async (client) => {
   const message = await getTOTDMessage(true);
 
   await archiveRatings(client, oldTOTD);
+  await redisAPI.clearIndividualRatings(redisClient);
   countBingoVotes(client);
 
   const configs = await redisAPI.getAllConfigs(redisClient);
@@ -434,9 +435,17 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
       const ratingIdentifier = utils.getEmojiMapping(ratingEmojis[i]);
 
       if (ratingIdentifier.includes(reaction.emoji.identifier)) {
+        // check if this is a valid rating (i.e. not a duplicate from this user)
+        const valid = await redisAPI.updateIndividualRatings(redisClient, reaction.emoji.name, add, user.id);
         const emojiInfo = `[${user.tag} ${add ? `added` : `removed`} ${reaction.emoji.name}]`;
-        console.log(`Rating reaction in #${reaction.message.channel.name} (${reaction.message.channel.guild.name}) ${emojiInfo}`);
-        await redisAPI.updateTOTDRatings(redisClient, ratingEmojis[i], add);
+        if (valid) {
+          // update the reaction count
+          console.log(`Rating reaction in #${reaction.message.channel.name} (${reaction.message.channel.guild.name}) ${emojiInfo}`);
+          await redisAPI.updateTOTDRatings(redisClient, ratingEmojis[i], add);
+        } else {
+          console.log(`Rating reaction in #${reaction.message.channel.name} (${reaction.message.channel.guild.name}) ${emojiInfo} [duplicate]`);
+        }
+
         break;
       }
     }

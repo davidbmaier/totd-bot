@@ -401,6 +401,88 @@ const updateTOTDRatings = async (redisClient, emojiName, add) => {
   });
 };
 
+const clearIndividualRatings = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    redisClient.set(`individualRatings`, JSON.stringify([]), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve([]);
+      }
+    });
+  });
+};
+
+const getIndividualRatings = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(`individualRatings`, async (err, individualRatings) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (individualRatings) {
+          try {
+            const parsedRatings = JSON.parse(individualRatings);
+            resolve(parsedRatings);
+          } catch (error) {
+            reject(`Unable to parse individual ratings JSON`);
+          }
+        } else {
+          return await clearIndividualRatings(redisClient);
+        }
+      }
+    });
+  });
+};
+
+// return value determines if the update was valid
+const updateIndividualRatings = async (redisClient, emojiName, add, user) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(`individualRatings`, async (getErr, individualRatings) => {
+      if (getErr) {
+        reject(getErr);
+      } else {
+        if (!individualRatings) {
+          individualRatings = await clearIndividualRatings(redisClient);
+        } else {
+          try {
+            individualRatings = JSON.parse(individualRatings);
+          } catch (error) {
+            return reject(`Unable to parse individual ratings JSON`);
+          }
+        }
+
+        // check if this user has already voted with this emoji
+        const existingRating = individualRatings.find((rating) => rating.user === user && rating.vote === emojiName);
+
+        if (existingRating && add) {
+          // can't add the same vote again
+          return resolve(false);
+        } else if (existingRating && !add) {
+          // removing the existing rating
+          const index = individualRatings.indexOf(existingRating);
+          individualRatings.splice(index, 1);
+        } else if (!existingRating && add) {
+          // adding a new rating
+          individualRatings.push({
+            user,
+            vote: emojiName,
+          });
+        } else if (!existingRating && !add) {
+          // can't remove a rating that doesn't exist, no-op
+        }
+
+        redisClient.set(`individualRatings`, JSON.stringify(individualRatings), (setErr) => {
+          if (setErr) {
+            reject(setErr);
+          } else {
+            resolve(true);
+          }
+        });
+      }
+    });
+  });
+};
+
 const getBingoBoard = async (redisClient, lastWeek) => {
   return new Promise((resolve, reject) => {
     let bingoEntry = `bingo`;
@@ -459,6 +541,9 @@ module.exports = {
   getTOTDRatings,
   clearTOTDRatings,
   updateTOTDRatings,
+  clearIndividualRatings,
+  getIndividualRatings,
+  updateIndividualRatings,
   getBingoBoard,
   saveBingoBoard,
   savePreviousTOTD,
