@@ -47,6 +47,7 @@ const bingoFields = [
   `Driving\nupside-down\n(e.g. loopings)`,
   `Speed slides`,
   `Jump into\nthe finish`,
+  `Risky\nfinish`,
   `Narrow\nblocks`,
   `Poles on\nthe track`,
   `Multi-lap\ntrack`,
@@ -59,6 +60,7 @@ const bingoFields = [
   // author
   `Author's\nfirst TOTD`,
   `Author already\nhad TOTD\nin the last 7 days`,
+  `Multiple\nauthors`,
   // times
   `Author time\nover a minute`,
   `Author time\nunder 30s`,
