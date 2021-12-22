@@ -141,7 +141,10 @@ const formatTOTDMessage = (totd) => {
 
 const formatLeaderboardMessage = (totd, records, date) => {
   const topTen = records.slice(0, 10);
-  const top100 = records[10];
+  let top50Exists = true;
+  if (records.length <= 10) {
+    top50Exists = false;
+  }
 
   const times = topTen.map((top) => formatTime(top.score.toString()));
   const positions = topTen.map((top) => top.position);
@@ -158,7 +161,7 @@ const formatLeaderboardMessage = (totd, records, date) => {
 
   topTenField += `\n\`\`\``;
 
-  return {
+  const formattedMessage = {
     content: null, // remove placeholder content during load
     embeds:[{
       title: `Here's today's TOTD leaderboard!`,
@@ -170,20 +173,25 @@ const formatLeaderboardMessage = (totd, records, date) => {
           value: topTenField
         },
         {
-          name: `Top 100`,
-          value: `To get top 100, you need to drive at least a **${formatTime(top100.score.toString())}**.`
-        },
-        {
           name: `Links`,
-          value: `Full leaderboards on [TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})`
+          value: `More detailed leaderboards on [TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})`
         }
       ],
       footer: {
-        text: `The top 100 time is not exact - it might be slightly off by one or two positions.`
+        text: `The top 50 time is not exact - it might be slightly off by one or two positions.`
       }
     }],
     date: date // used for caching
   };
+
+  if (top50Exists) {
+    formattedMessage.embeds[0].fields.splice(1, 0, {
+      name: `Top 50`,
+      value: `To get top 50, you need to drive at least a **${formatTime(records[10].score.toString())}**.`
+    });
+  }
+
+  return formattedMessage;
 };
 
 const formatRatingsMessage = (ratings, yesterday, map) => {

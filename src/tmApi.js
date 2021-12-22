@@ -6,7 +6,6 @@ const {
   getTOTDs,
   getProfiles,
   getProfilesById,
-  getLeaderboardsAroundScore
 } = require(`trackmania-api-node`);
 require(`dotenv`).config();
 const axios = require(`axios`);
@@ -153,52 +152,34 @@ const getCurrentTOTD = async (credentials) => {
 
 const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
   try {
-    const leaderboard = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, 0);
-    // if there aren't at least 50 records, return null
-    if (!leaderboard.tops[0].top[50]) {
-      console.log(`Can't find at least 50 records, stopping`);
-      return null;
-    }
-    const records = leaderboard.tops[0].top.slice(1, 11);
+    const headers = {
+      'Content-Type': `application/json`,
+      'Ubi-AppId': `86263886-327a-4328-ac69-527f0d20a237`,
+      'Ubi-RequestedPlatformType': `uplay`,
+      'Authorization': `nadeo_v1 t=${credentials.level2}`
+    };
 
-    const extendedLeaderboard1 = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, leaderboard.tops[0].top[50].score);
-    const extendedLeaderboard2 = await getLeaderboardsAroundScore(credentials.level2, seasonUid, mapUid, extendedLeaderboard1.tops[0].top[50].score);
+    const route = `https://live-services.trackmania.nadeo.live/api/token/leaderboard/group/${seasonUid}/map/${mapUid}/top?length=50&onlyWorld=true`;
+    const response = await axios.get(route, {
+      headers,
+    });
 
-    const fullLeaderboard = [
-      ...leaderboard.tops[0].top.slice(1),
-      ...extendedLeaderboard1.tops[0].top.slice(1),
-      ...extendedLeaderboard2.tops[0].top.slice(1)
-    ];
+    const leaderboard = response?.data;
+    const records = leaderboard.tops[0].top.slice(0, 10); // get top 10 records
 
-    // try to find position 100 in the first 150
-    let position100Number = 100;
-    let position100 = fullLeaderboard.find((top) => top.position === position100Number);
-
-    // sometimes the position 100 can't be found, then we try the next couple positions
-    while (!position100 && position100Number < 106) {
-      position100Number++;
-      console.log(`Couldn't find top 100 immediately, trying ${position100Number} next`);
-      position100 = fullLeaderboard.find((top) => top.position === position100Number);
-    }
-
-    records.push(position100);
-
-    // if we can't find top 100 in the records, the leaderboard is still updating too fast - so we just stop and recommend waiting a bit
-    // this checks if the last element is undefined
-    if (!records[records.length - 1]) {
-      console.log(`Can't find top 100, stopping`);
-      return null;
+    const top50 = leaderboard.tops[0].top.find((top) => top.position === 50);
+    if (top50) {
+      records.push(top50);
     }
 
     for (let i = 0; i < records.length; i++) {
       records[i].playerName = await getPlayerName(credentials, records[i].accountId);
 
-      if (i !== records.length - 1) {
-        // adjust top 10 positions
-        records[i].position = i + 1;
-      } else {
-        // set top 100 position (even if it's not exactly top 100)
-        records[i].position = 100;
+      records[i].position = i + 1;
+
+      // if we have 50 records, make sure the last position value is correct
+      if (top50 && i === records.length - 1) {
+        records[i].position = `50`;
       }
     }
 
