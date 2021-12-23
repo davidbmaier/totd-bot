@@ -167,15 +167,34 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
     const leaderboard = baseResponse?.data;
     const records = leaderboard.tops[0].top.slice(0, 10); // get top 10 records
 
-    const top100Route = `${baseRoute}&offset=50`;
+    const top100Route = `${baseRoute}&offset=99`;
     const top100Response = await axios.get(top100Route, {
       headers,
     });
-
     let top100;
     const top100Records = top100Response?.data?.tops[0]?.top;
-    if (top100Records && top100Records.length === 50) {
-      top100 = top100Records[49];
+    if (top100Records && top100Records[0]) {
+      top100 = top100Records[0];
+    }
+
+    const top1000Route = `${baseRoute}&offset=999`;
+    const top1000Response = await axios.get(top1000Route, {
+      headers,
+    });
+    let top1000;
+    const top1000Records = top1000Response?.data?.tops[0]?.top;
+    if (top1000Records && top1000Records[0]) {
+      top1000 = top1000Records[0];
+    }
+
+    const top10000Route = `${baseRoute}&offset=9999`;
+    const top10000Response = await axios.get(top10000Route, {
+      headers,
+    });
+    let top10000;
+    const top10000Records = top10000Response?.data?.tops[0]?.top;
+    if (top10000Records && top10000Records[0]) {
+      top10000 = top10000Records[0];
     }
 
     for (let i = 0; i < records.length; i++) {
@@ -187,6 +206,18 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
       top100.position = 100;
       top100.playerName = await getPlayerName(credentials, top100.accountId);
       records.push(top100);
+    }
+
+    if (top1000) {
+      top1000.position = 1000;
+      top1000.playerName = await getPlayerName(credentials, top1000.accountId);
+      records.push(top1000);
+    }
+
+    if (top10000) {
+      top10000.position = 10000;
+      top10000.playerName = await getPlayerName(credentials, top10000.accountId);
+      records.push(top10000);
     }
 
     return records;

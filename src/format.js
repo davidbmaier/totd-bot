@@ -141,10 +141,9 @@ const formatTOTDMessage = (totd) => {
 
 const formatLeaderboardMessage = (totd, records, date) => {
   const topTen = records.slice(0, 10);
-  let top100Exists = true;
-  if (records.length <= 10) {
-    top100Exists = false;
-  }
+  let top100 = records.find((record) => record.position === 100);
+  let top1k = records.find((record) => record.position === 1000);
+  let top10k = records.find((record) => record.position === 10000);
 
   const times = topTen.map((top) => formatTime(top.score.toString()));
   const positions = topTen.map((top) => top.position);
@@ -181,10 +180,22 @@ const formatLeaderboardMessage = (totd, records, date) => {
     date: date // used for caching
   };
 
-  if (top100Exists) {
+  if (top100 || top1k || top10k) {
+    let thresholdText = `\`\`\`\n`;
+    if (top100) {
+      thresholdText += `Top 100: ${formatTime(top100.score.toString())}\n`;
+    }
+    if (top1k) {
+      thresholdText += `Top 1k:  ${formatTime(top1k.score.toString())}\n`;
+    }
+    if (top10k) {
+      thresholdText += `Top 10k: ${formatTime(top10k.score.toString())}\n`;
+    }
+    thresholdText += `\`\`\``;
+
     formattedMessage.embeds[0].fields.splice(1, 0, {
-      name: `Top 100`,
-      value: `To get top 100, you need to drive at least a **${formatTime(records[10].score.toString())}**.`
+      name: `Medal Thresholds`,
+      value: thresholdText
     });
   }
 
