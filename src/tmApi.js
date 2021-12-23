@@ -159,28 +159,34 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
       'Authorization': `nadeo_v1 t=${credentials.level2}`
     };
 
-    const route = `https://live-services.trackmania.nadeo.live/api/token/leaderboard/group/${seasonUid}/map/${mapUid}/top?length=50&onlyWorld=true`;
-    const response = await axios.get(route, {
+    const baseRoute = `https://live-services.trackmania.nadeo.live/api/token/leaderboard/group/${seasonUid}/map/${mapUid}/top?length=50&onlyWorld=true`;
+    const baseResponse = await axios.get(baseRoute, {
       headers,
     });
 
-    const leaderboard = response?.data;
+    const leaderboard = baseResponse?.data;
     const records = leaderboard.tops[0].top.slice(0, 10); // get top 10 records
 
-    const top50 = leaderboard.tops[0].top.find((top) => top.position === 50);
-    if (top50) {
-      records.push(top50);
+    const top100Route = `${baseRoute}&offset=50`;
+    const top100Response = await axios.get(top100Route, {
+      headers,
+    });
+
+    let top100;
+    const top100Records = top100Response?.data?.tops[0]?.top;
+    if (top100Records && top100Records.length === 50) {
+      top100 = top100Records[49];
     }
 
     for (let i = 0; i < records.length; i++) {
       records[i].playerName = await getPlayerName(credentials, records[i].accountId);
-
       records[i].position = i + 1;
+    }
 
-      // if we have 50 records, make sure the last position value is correct
-      if (top50 && i === records.length - 1) {
-        records[i].position = `50`;
-      }
+    if (top100) {
+      top100.position = 100;
+      top100.playerName = await getPlayerName(credentials, top100.accountId);
+      records.push(top100);
     }
 
     return records;

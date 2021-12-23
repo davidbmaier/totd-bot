@@ -141,9 +141,9 @@ const formatTOTDMessage = (totd) => {
 
 const formatLeaderboardMessage = (totd, records, date) => {
   const topTen = records.slice(0, 10);
-  let top50Exists = true;
+  let top100Exists = true;
   if (records.length <= 10) {
-    top50Exists = false;
+    top100Exists = false;
   }
 
   const times = topTen.map((top) => formatTime(top.score.toString()));
@@ -151,7 +151,7 @@ const formatLeaderboardMessage = (totd, records, date) => {
   const names = topTen.map((top) => top.playerName);
 
   // assemble makeshift table using spaces
-  let topTenField = `\`\`\`\n        Time        Name\n`;
+  let topTenField = `\`\`\`\n        Time       Name\n`;
   for (let i = 0; i < topTen.length; i++) {
     const positionString = positions[i].toString().length > 1 ? ` ${positions[i]}   ` : ` ${positions[i]}    `;
     const timeString = `${times[i]}  `;
@@ -176,18 +176,15 @@ const formatLeaderboardMessage = (totd, records, date) => {
           name: `Links`,
           value: `More detailed leaderboards on [TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid})`
         }
-      ],
-      footer: {
-        text: `The top 50 time is not exact - it might be slightly off by one or two positions.`
-      }
+      ]
     }],
     date: date // used for caching
   };
 
-  if (top50Exists) {
+  if (top100Exists) {
     formattedMessage.embeds[0].fields.splice(1, 0, {
-      name: `Top 50`,
-      value: `To get top 50, you need to drive at least a **${formatTime(records[10].score.toString())}**.`
+      name: `Top 100`,
+      value: `To get top 100, you need to drive at least a **${formatTime(records[10].score.toString())}**.`
     });
   }
 
