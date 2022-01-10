@@ -89,6 +89,8 @@ client.on(`ready`, async () => {
   try {
     const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
     const lastMonthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.lastMonthly);
+    const yearly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.yearly);
+    const lastYearly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.lastYearly);
     const allTime = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.allTime);
     if (!monthly) {
       console.log(`Initializing monthly rating rankings...`);
@@ -97,6 +99,14 @@ client.on(`ready`, async () => {
     if (!lastMonthly) {
       console.log(`Initializing last monthly rating rankings...`);
       await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.lastMonthly, {top: [], bottom: []});
+    }
+    if (!yearly) {
+      console.log(`Initializing yearly rating rankings...`);
+      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.yearly, {top: [], bottom: []});
+    }
+    if (!lastYearly) {
+      console.log(`Initializing last yearly rating rankings...`);
+      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.lastYearly, {top: [], bottom: []});
     }
     if (!allTime) {
       console.log(`Initializing all-time rating rankings...`);

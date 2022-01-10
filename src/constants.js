@@ -16,6 +16,8 @@ const cupRegions = {
 const ratingRankingType = {
   lastMonthly: `lastMonthly`,
   monthly: `monthly`,
+  yearly: `yearly`,
+  lastYearly: `lastYearly`,
   allTime: `allTime`
 };
 

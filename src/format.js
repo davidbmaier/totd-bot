@@ -311,7 +311,7 @@ const formatRankingMessage = (rankings, timeframe) => {
       const rating = `${resolveRatingToEmoji(rankingItem.averageRating)} (${rankingItem.averageRating})`;
       let date = ``;
       if (rankingItem.date) {
-        if (timeframe.value === constants.ratingRankingType.allTime) {
+        if (timeframe.value === constants.ratingRankingType.allTime || timeframe.value === constants.ratingRankingType.lastYearly) {
           date = `${rankingItem.date} `;
         } else {
           date += `${rankingItem.date.slice(0, -5)} `;
@@ -331,6 +331,10 @@ const formatRankingMessage = (rankings, timeframe) => {
   let titleTimeframe = `this month`;
   if (timeframe.value === constants.ratingRankingType.lastMonthly) {
     titleTimeframe = `last month`;
+  } else if (timeframe.value === constants.ratingRankingType.yearly) {
+    titleTimeframe = `this year`;
+  } else if (timeframe.value === constants.ratingRankingType.lastYearly) {
+    titleTimeframe = `last year`;
   } else if (timeframe.value === constants.ratingRankingType.allTime) {
     titleTimeframe = `all time`;
   }
@@ -363,6 +367,10 @@ const formatRankingMessage = (rankings, timeframe) => {
   if (timeframe.value === constants.ratingRankingType.monthly) {
     const description1 = `The month isn't over yet, so these aren't final -`;
     const description2 = `check \`${utils.addDevPrefix(`!totd rankings last month`)}\` when it's over to see the final rankings!`;
+    embed.description = `${description1} ${description2}`;
+  } else if (timeframe.value === constants.ratingRankingType.yearly) {
+    const description1 = `The year isn't over yet, so these aren't final -`;
+    const description2 = `check \`${utils.addDevPrefix(`!totd rankings last year`)}\` when it's over to see the final rankings!`;
     embed.description = `${description1} ${description2}`;
   }
 

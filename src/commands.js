@@ -275,6 +275,9 @@ const rankings = {
         {label: `month`, value: constants.ratingRankingType.monthly},
         {label: `this month`, value: constants.ratingRankingType.monthly},
         {label: `last month`, value: constants.ratingRankingType.lastMonthly},
+        {label: `year`, value: constants.ratingRankingType.yearly},
+        {label: `this year`, value: constants.ratingRankingType.yearly},
+        {label: `last year`, value: constants.ratingRankingType.lastYearly},
         {label: `all-time`, value: constants.ratingRankingType.allTime},
         {label: `all time`, value: constants.ratingRankingType.allTime}
       ];

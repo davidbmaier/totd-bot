@@ -52,7 +52,11 @@ const insertRatingIntoRanking = (ranking, type, totd) => {
   let topMax = 5;
   let bottomMax = 3;
 
-  if (type === constants.ratingRankingType.allTime) {
+  if (
+    type === constants.ratingRankingType.allTime
+    || type === constants.ratingRankingType.lastYearly
+    || type === constants.ratingRankingType.yearly
+  ) {
     topMax = 10;
     bottomMax = 5;
   }

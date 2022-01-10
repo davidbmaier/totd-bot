@@ -313,12 +313,15 @@ const processRatingRankings = async (redisClient, ratings, oldTOTD) => {
   try {
     console.log(`Updating rating rankings...`);
     const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
+    const yearly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.yearly);
     const allTime = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.allTime);
 
     const updatedMonthly = rating.updateRanking(ratings, monthly, constants.ratingRankingType.monthly, oldTOTD);
+    const updatedYearly = rating.updateRanking(ratings, yearly, constants.ratingRankingType.yearly, oldTOTD);
     const updatedAllTime = rating.updateRanking(ratings, allTime, constants.ratingRankingType.allTime, oldTOTD);
 
     await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, updatedMonthly);
+    await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.yearly, updatedYearly);
     await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.allTime, updatedAllTime);
   } catch (error) {
     console.log(`Rating processing failed:`, error);
@@ -337,9 +340,17 @@ const archiveRatings = async (client, oldTOTD) => {
 
     await processRatingRankings(redisClient, ratings, oldTOTD);
 
-    // if it's the 1st of the month, archive monthly rating rankings
+
     const today = new Date();
-    if (today.getDate() === 1) {
+    if (today.getDate() === 10 && today.getMonth() === 0) {
+      // if it's the 1st of the year, archive yearly rating rankings
+      console.log(`Archiving yearly rating ranking and resetting the active one...`);
+      const yearly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.yearly);
+      console.log(`Last yearly ratings:`, yearly);
+      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.lastYearly, yearly);
+      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.yearly, {top: [], bottom: []});
+    } else if (today.getDate() === 1) {
+      // if it's the 1st of the month, archive monthly rating rankings
       console.log(`Archiving monthly rating ranking and resetting the active one...`);
       const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
       console.log(`Last monthly ratings:`, monthly);
