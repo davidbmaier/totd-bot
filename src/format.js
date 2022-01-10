@@ -194,7 +194,7 @@ const formatLeaderboardMessage = (totd, records, date) => {
     thresholdText += `\`\`\``;
 
     formattedMessage.embeds[0].fields.splice(1, 0, {
-      name: `Medal Thresholds`,
+      name: `Trophy Thresholds`,
       value: thresholdText
     });
   }
