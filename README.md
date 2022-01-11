@@ -16,7 +16,7 @@ Use at your own risk - the bot is in development and may break from time to time
 - `!totd leaderboard` - Prints the current TOTD top 10 and the time needed for top 100 to the current channel.
 - `!totd verdict` - Prints yesterday's global ratings and a short verdict based on them.
 - `!totd ratings` - Prints today's global ratings.
-- `!totd rankings [time frame]` - Prints the TOTD rankings for the given time frame. Supported time frames are `this month`, `last month`, and `all time`.
+- `!totd rankings [time frame]` - Prints the TOTD rankings for the given time frame. Supported time frames are `this month`, `last month`, `this year`, `last year`, and `all time`.
 - `!totd bingo` - Prints this week's bingo board.
 - `!totd last bingo` - Prints last week's bingo board.
 - `!totd vote [1-25]` - Starts a vote on that bingo field. All ongoing votes are resolved when the next TOTD is released.

@@ -217,7 +217,7 @@ const help = {
       \`${utils.addDevPrefix(`!totd verdict`)}\`  -  Display yesterday's TOTD ratings.\n \
       \`${utils.addDevPrefix(`!totd ratings`)}\`  -  Display today's TOTD ratings.\n \
       \`${utils.addDevPrefix(`!totd rankings [time frame]`)}\`  -  Display TOTD rankings based on bot ratings.\n \
-      (Supported time frames: \`this month\`, \`last month\`, and \`all time\`)\n \
+      (Time frames: \`this month\`, \`last month\`, \`this year\`, \`last year\` or \`all time\`)\n \
       \`${utils.addDevPrefix(`!totd bingo`)}\`  -  Display this week's bingo board.\n \
       \`${utils.addDevPrefix(`!totd last bingo`)}\`  -  Display last week's bingo board.\n \
       \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Start a vote to cross off that bingo field.`;
