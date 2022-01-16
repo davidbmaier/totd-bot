@@ -32,7 +32,7 @@ const getTOTDMessage = async (forceRefresh) => {
   // save fresh TOTD to redis
   const redisClient = await redisAPI.login();
   const oldTOTD = await redisAPI.getCurrentTOTD(redisClient);
-  if (oldTOTD.mapUid !== totd.mapUid) {
+  if (oldTOTD?.mapUid !== totd.mapUid) {
     // oldTOTD was a different map, so save that as yesterday's TOTD in Redis
     // note it could have been an earlier one if the bot was done for more than a day
     console.log(`Currently stored TOTD has different mapUid, storing that as yesterday's TOTD`);
