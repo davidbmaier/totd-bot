@@ -136,7 +136,16 @@ client.on(`messageCreate`, async (msg) => {
     });
 
     if (matchedCommand) {
-      await matchedCommand.action(msg, client);
+      try {
+        await matchedCommand.action(msg, client);
+      } catch (error) {
+        if (error.message === `Missing Permissions`) {
+          console.error(`Unable to send error message to channel #${msg.channel.name} in ${msg.guild.name}, no permissions`);
+        } else {
+          console.error(`Unexpected error while sending error message to channel #${msg.channel.name} in ${msg.guild.name}`);
+          console.error(error.message);
+        }
+      }
     } else {
       try {
         await msg.channel.send(
@@ -167,6 +176,7 @@ client.on(`messageCreate`, async (msg) => {
 
 const handleReaction = async (reaction, user, add) => {
   if (reaction.partial) {
+    console.log(`Reaction is partial, fetching...`);
 		// if reaction is partial (not cached), try to fetch it fully
 		try {
 			await reaction.fetch();
