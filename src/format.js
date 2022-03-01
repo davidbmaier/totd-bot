@@ -30,6 +30,9 @@ const formatTOTDMessage = (totd) => {
   if (totd.tmxTags && totd.tmxTags.includes(`Nascar`)) {
     trackLabel = `Nascar`;
   }
+  if (totd.tmxTags && totd.tmxTags.includes(`LOL`)) {
+    trackLabel = `LOL`;
+  }
 
   const title = `**Here's the ${totd.month} ${utils.formatDay(totd.day)} ${trackLabel} of the Day!**`;
 
