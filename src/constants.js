@@ -59,6 +59,8 @@ const bingoFields = [
   `Water blocks\non track`,
   `Multiple\nroutes`,
   `Missable\nCP`,
+  `Blind turn`,
+  `Badly-placed\nCP`,
   // author
   `Author's\nfirst TOTD`,
   `Author already\nhad TOTD\nin the last 7 days`,
