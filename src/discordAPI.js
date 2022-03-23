@@ -396,6 +396,16 @@ const distributeTOTDMessages = async (client) => {
         const redisClientForRemoval = await redisAPI.login();
         await redisAPI.removeConfig(redisClientForRemoval, config.serverID);
         redisAPI.logout(redisClientForRemoval);
+      } else if (error.message === `The user aborted a request.`) {
+        // Discord API error, retry sending the message
+        console.warn(`Discord API error during TOTD message distribution, retrying...`);
+        try {
+          const channel = await client.channels.fetch(config.channelID);
+          await sendTOTDMessage(client, channel, message);
+        } catch (retryError) {
+          console.error(`Unexpected error during TOTD message distribution: ${error.message}`);
+          console.error(error);
+        }
       } else {
         console.error(`Unexpected error during TOTD message distribution: ${error.message}`);
         console.error(error);
