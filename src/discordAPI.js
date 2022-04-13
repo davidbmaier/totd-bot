@@ -391,24 +391,38 @@ const distributeTOTDMessages = async (client) => {
       const channel = await client.channels.fetch(config.channelID);
       await sendTOTDMessage(client, channel, message);
     } catch (error) {
+      let retryCount = 0;
       if (error.message === `Missing Access` || error.message === `Missing Permissions` || error.message === `Unknown Channel`) {
         console.log(`Missing access or permissions, bot was probably kicked from server ${config.serverID} - removing config`);
         const redisClientForRemoval = await redisAPI.login();
         await redisAPI.removeConfig(redisClientForRemoval, config.serverID);
         redisAPI.logout(redisClientForRemoval);
-      } else if (error.message === `The user aborted a request.`) {
-        // Discord API error, retry sending the message
-        console.warn(`Discord API error during TOTD message distribution, retrying...`);
-        try {
-          const channel = await client.channels.fetch(config.channelID);
-          await sendTOTDMessage(client, channel, message);
-        } catch (retryError) {
-          console.error(`Unexpected error during TOTD message distribution: ${error.message}`);
+      } else {
+        // no need to log user abort errors, those are just Discord API problems
+        if (error.message !== `The user aborted a request.`) {
+          console.error(`Unexpected error during TOTD distribution for ${config.serverID}: ${error.message}`);
           console.error(error);
         }
-      } else {
-        console.error(`Unexpected error during TOTD message distribution: ${error.message}`);
-        console.error(error);
+
+        while (retryCount < 3) {
+          retryCount++;
+          // Discord API error, retry sending the message
+          console.warn(`Discord API error during TOTD distribution for ${config.serverID}, retrying... (${retryCount})`);
+
+          try {
+            const channel = await client.channels.fetch(config.channelID);
+            await sendTOTDMessage(client, channel, message);
+            return;
+          } catch (retryError) {
+            if (retryError.message !== `The user aborted a request.`) {
+              console.error(`Unexpected error during TOTD distribution for ${config.serverID} (${retryCount}): ${retryError.message}`);
+              console.error(retryError);
+            }
+          }
+        }
+
+        console.error(`Failed to send TOTD message after 3 retries, giving up`);
+        return;
       }
     }
   });
