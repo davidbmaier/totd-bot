@@ -1,7 +1,7 @@
 {
   "name": "totd-bot",
   "description": "Discord bot for displaying the daily Trackmania Track of the Day",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "main": "main.js",
   "repository": {
     "type": "git",
