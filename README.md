@@ -51,7 +51,7 @@ To run it, just run an `npm i` and an `npm start`. Make sure you've added a `.en
 
 - `DISCORD_TOKEN` is the Discord bot's auth token (see any tutorial for more info).
 - `USER_LOGIN` is your UPlay/Ubisoft Connect credentials - I suggest not using your main account. It doesn't have to own the game, so you can just create a new one for this bot.
-- `DEPLOY_MODE` should only be `prod` if it's supposed to be live. Everything else is interpreted as a development mode (which means that all commands will be prefixed with `dev` - e.g. `!devtotd today`).
+- `DEPLOY_MODE` should only be `prod` if it's supposed to be live. Everything else is interpreted as a development mode (which means that all commands will be registered only in the admin server, and the bot won't reload all the data on startup).
 - `REDIS_URL` is a Redis database - it's required for the scheduled messages and caching. If you're using an insecure instance for local development, you can omit the auth part.
 - `ADMIN_TAG` is the Discord tag of the bot admin - used for administration commands that only they should be allowed to run.
 - `ADMIN_SERVER_ID` and `ADMIN_CHANNEL_ID` are Discord IDs of the admin server and channel - used for all admin commands.
