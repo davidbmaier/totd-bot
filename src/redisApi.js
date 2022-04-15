@@ -26,41 +26,6 @@ const logout = (redisClient) => {
   });
 };
 
-const getAdminServer = (redisClient) => {
-  return new Promise((resolve, reject) => {
-    redisClient.get(`adminServer`, (err, adminConfig) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(JSON.parse(adminConfig) || {});
-      }
-    });
-  });
-};
-
-const setAdminServer = (redisClient, adminServerID, adminChannelID) => {
-  return new Promise((resolve, reject) => {
-    if (adminServerID !== null) {
-      redisClient.set(`adminServer`, JSON.stringify({serverID: adminServerID, channelID: adminChannelID}), (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    } else {
-      // setAdminServer to null = delete adminServer config
-      redisClient.del(`adminServer`, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
-    }
-  });
-};
-
 const getConfigs = (redisClient) => {
   return new Promise((resolve, reject) => {
     redisClient.get(`serverConfigs`, (err, configs) => {
@@ -522,8 +487,6 @@ const saveBingoBoard = async (redisClient, board, lastWeek) => {
 module.exports = {
   login,
   logout,
-  getAdminServer,
-  setAdminServer,
   addConfig,
   removeConfig,
   addRole,

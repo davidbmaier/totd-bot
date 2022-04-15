@@ -60,11 +60,36 @@ const formatDay = (day) => {
   }
 };
 
+const sendMessage = async (channel, message, commandMessage) => {
+  if (commandMessage) {
+    let messageObject = {};
+    // add fetchReply depending on the message format
+    if (typeof message === `string`) {
+      messageObject = {
+        content: message,
+        fetchReply: true
+      };
+    } else {
+      messageObject = {...message, fetchReply: true};
+    }
+    return await commandMessage.reply(messageObject);
+  } else {
+    return await channel.send(message);
+  }
+};
+
+const checkMessageAuthorForTag = (msg, tag) => {
+  const author = msg.author || msg.user;
+  return author.tag === tag;
+};
+
 module.exports = {
   addDevPrefix,
   convertToUNIXSeconds,
   getMinutesAgo,
   getEmojiMapping,
   removeNameFormatting,
-  formatDay
+  formatDay,
+  sendMessage,
+  checkMessageAuthorForTag
 };
