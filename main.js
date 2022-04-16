@@ -81,32 +81,6 @@ new cron(
 client.on(`ready`, async () => {
   console.log(`Ready as ${client.user.tag}!`);
 
-  const globalCommandConfigs = commands.globalCommands.map((commandConfig) => commandConfig.slashCommand);
-  const adminCommandConfigs = commands.adminCommands.map((commandConfig) => commandConfig.slashCommand);
-
-  const adminGuild = await client.guilds.fetch(adminServerID);
-  let globalCommandManager;
-  if (deployMode !== `prod`) {
-    // use admin guild for global commands in dev mode
-    globalCommandManager = adminGuild.commands;
-  } else {
-    globalCommandManager = await client.application.commands;
-  }
-  const adminCommandManager = adminGuild.commands;
-
-  for (const commandConfig of globalCommandConfigs) {
-    if (commandConfig) {
-      await globalCommandManager.create(commandConfig);
-      console.log(`Registered global command: ${commandConfig.name}`);
-    }
-  }
-  for (const commandConfig of adminCommandConfigs) {
-    if (commandConfig) {
-      await adminCommandManager.create(commandConfig);
-      console.log(`Registered admin command: ${commandConfig.name}`);
-    }
-  }
-
   // in production, refresh TOTD to make sure there is a thumbnail in the images for cached messages
   if (deployMode === `prod`) {
     await discordAPI.getTOTDMessage(true);
@@ -144,6 +118,33 @@ client.on(`ready`, async () => {
     console.log(`Unexpected error during monthly/all-time initialization:`, error);
   } finally {
     redisAPI.logout(redisClient);
+  }
+
+  // register all the commands (this might take a minute due to Discord rate limits)
+  const globalCommandConfigs = commands.globalCommands.map((commandConfig) => commandConfig.slashCommand);
+  const adminCommandConfigs = commands.adminCommands.map((commandConfig) => commandConfig.slashCommand);
+
+  const adminGuild = await client.guilds.fetch(adminServerID);
+  let globalCommandManager;
+  if (deployMode !== `prod`) {
+    // use admin guild for global commands in dev mode
+    globalCommandManager = adminGuild.commands;
+  } else {
+    globalCommandManager = client.application.commands;
+  }
+  const adminCommandManager = adminGuild.commands;
+
+  for (const commandConfig of globalCommandConfigs) {
+    if (commandConfig) {
+      await globalCommandManager.create(commandConfig);
+      console.log(`Registered global command: ${commandConfig.name}`);
+    }
+  }
+  for (const commandConfig of adminCommandConfigs) {
+    if (commandConfig) {
+      await adminCommandManager.create(commandConfig);
+      console.log(`Registered admin command: ${commandConfig.name}`);
+    }
   }
 });
 
