@@ -170,9 +170,9 @@ const sendTOTDMessage = async (client, channel, message, commandMessage) => {
     for (let i = 0; i < constants.ratingEmojis.length; i++) {
       emojis.push(utils.getEmojiMapping(constants.ratingEmojis[i]));
     }
-    emojis.forEach(async (emoji) => {
+    for (const emoji of emojis) {
       await discordMessage.react(emoji);
-    });
+    }
     return Promise.resolve();
   } catch (error) {
     console.log(`Couldn't send TOTD message to #${channel.name} in ${channel.guild.name}, throwing error`);
