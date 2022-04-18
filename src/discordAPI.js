@@ -453,10 +453,12 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
   );
   if (currentMapUid === reactionMapUid) {
     const ratingEmojis = constants.ratingEmojis;
+    let ratingEmojiFound = false;
     for (let i = 0; i < ratingEmojis.length; i++) {
       const ratingIdentifier = utils.getEmojiMapping(ratingEmojis[i]);
 
       if (ratingIdentifier.includes(reaction.emoji.identifier)) {
+        ratingEmojiFound = true;
         // check if this is a valid rating (i.e. not a duplicate from this user)
         const valid = await redisAPI.updateIndividualRatings(redisClient, reaction.emoji.name, add, user.id);
         const emojiInfo = `[${user.tag} ${add ? `added` : `removed`} ${reaction.emoji.name}]`;
@@ -467,9 +469,11 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
         } else {
           console.log(`Rating reaction in #${reaction.message.channel.name} (${reaction.message.channel.guild.name}) ${emojiInfo} [duplicate]`);
         }
-
         break;
       }
+    }
+    if (!ratingEmojiFound) {
+      await reaction.remove();
     }
     redisAPI.logout(redisClient);
   } else {
