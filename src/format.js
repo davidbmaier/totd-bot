@@ -304,7 +304,7 @@ const resolveRatingToEmoji = (rating) => {
 const formatRankingMessage = (rankings, timeframe) => {
   // if top and bottom are empty, return a basic placeholder
   if (rankings?.top.length === 0 || rankings?.bottom.length === 0) {
-    return `It seems I don't have any data for the timeframe "${timeframe.label}" yet, sorry!`;
+    return `It seems I don't have any data for that timeframe yet, sorry!`;
   }
 
   const formatRankingRows = (rankingItems) => {
@@ -314,7 +314,7 @@ const formatRankingMessage = (rankings, timeframe) => {
       const rating = `${resolveRatingToEmoji(rankingItem.averageRating)} (${rankingItem.averageRating})`;
       let date = ``;
       if (rankingItem.date) {
-        if (timeframe.value === constants.ratingRankingType.allTime || timeframe.value === constants.ratingRankingType.lastYearly) {
+        if (timeframe === constants.ratingRankingType.allTime || timeframe === constants.ratingRankingType.lastYearly) {
           date = `${rankingItem.date} `;
         } else {
           date += `${rankingItem.date.slice(0, -5)} `;
@@ -332,13 +332,13 @@ const formatRankingMessage = (rankings, timeframe) => {
   };
 
   let titleTimeframe = `this month`;
-  if (timeframe.value === constants.ratingRankingType.lastMonthly) {
+  if (timeframe === constants.ratingRankingType.lastMonthly) {
     titleTimeframe = `last month`;
-  } else if (timeframe.value === constants.ratingRankingType.yearly) {
+  } else if (timeframe === constants.ratingRankingType.yearly) {
     titleTimeframe = `this year`;
-  } else if (timeframe.value === constants.ratingRankingType.lastYearly) {
+  } else if (timeframe === constants.ratingRankingType.lastYearly) {
     titleTimeframe = `last year`;
-  } else if (timeframe.value === constants.ratingRankingType.allTime) {
+  } else if (timeframe === constants.ratingRankingType.allTime) {
     titleTimeframe = `all time`;
   }
 
@@ -367,18 +367,18 @@ const formatRankingMessage = (rankings, timeframe) => {
   }
 
   // add disclaimer to description that month isn't over yet
-  if (timeframe.value === constants.ratingRankingType.monthly) {
+  if (timeframe === constants.ratingRankingType.monthly) {
     const description1 = `The month isn't over yet, so these aren't final -`;
-    const description2 = `check \`${utils.addDevPrefix(`!totd rankings last month`)}\` when it's over to see the final rankings!`;
+    const description2 = `check \`${utils.addDevPrefix(`/rankings last month`)}\` when it's over to see the final rankings!`;
     embed.description = `${description1} ${description2}`;
-  } else if (timeframe.value === constants.ratingRankingType.yearly) {
+  } else if (timeframe === constants.ratingRankingType.yearly) {
     const description1 = `The year isn't over yet, so these aren't final -`;
-    const description2 = `check \`${utils.addDevPrefix(`!totd rankings last year`)}\` when it's over to see the final rankings!`;
+    const description2 = `check \`${utils.addDevPrefix(`/rankings last year`)}\` when it's over to see the final rankings!`;
     embed.description = `${description1} ${description2}`;
   }
 
   // for allTime add disclaimer to footer
-  if (timeframe.value === constants.ratingRankingType.allTime) {
+  if (timeframe === constants.ratingRankingType.allTime) {
     const footer1 = `This ranking only displays data starting from July 2021 - earlier bot ratings were not representative enough.`;
     const footer2 = `So don't take this too seriously if it's missing your favorite track!`;
     embed.footer = {
@@ -519,8 +519,8 @@ const formatBingoBoard = async (fields, lastWeek) => {
 
   const embedDescription = 
     lastWeek
-      ? `This board is closed - use \`${utils.addDevPrefix(`!totd bingo`)}\` to see the current one.`
-      : `If you think we should cross one of these off, you can start a vote using \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`.`;
+      ? `This board is closed - use \`${utils.addDevPrefix(`/bingo`)}\` to see the current one.`
+      : `If you think we should cross one of these off, you can start a vote using \`${utils.addDevPrefix(`/bingovote [1-25]`)}\`.`;
 
   const embed = {
     title: `Here's the TOTD bingo board for week ${weekNumber}!`,
@@ -577,7 +577,7 @@ const formatHelpMessage = (commands, adminCommands) => {
           `I've been developed by tooInfinite#5113 (<@141627532335251456>) - feel free to talk to him if you've got any feedback or ran into any issues with me. \
           My code can be found [here](https://github.com/davidbmaier/totd-bot). \n\
           If you want to, you can [help pay for my hosting](https://github.com/sponsors/davidbmaier). Never required, always appreciated! \n\
-          To invite me to your own server, click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot).`
+          To invite me to your own server, click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=applications.commands%20bot).`
       }
     ]
   };
@@ -592,16 +592,13 @@ const formatHelpMessage = (commands, adminCommands) => {
   return {embeds: [embed]};
 };
 
-const formatInviteMessage = () => {
+const formatInviteMessage = (title, message) => {
+  const inviteLink = `For the invite link, click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=applications.commands%20bot)!`;
   return {
     embeds: [{
       type: `rich`,
-      fields: [
-        {
-          name: `Want to invite me to your own server?`,
-          value: `Click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot)!`
-        }
-      ]
+      title: title || `Want to invite me to your own server?`,
+      description: `${message || ``}\n${inviteLink}`,
     }]
   };
 };

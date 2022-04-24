@@ -20,6 +20,8 @@ const constants = require(`./src/constants`);
 
 const discordToken = process.env.DISCORD_TOKEN;
 const deployMode = process.env.DEPLOY_MODE;
+const adminServerID = process.env.ADMIN_SERVER_ID;
+const adminChannelID = process.env.ADMIN_CHANNEL_ID;
 
 // COTD pings for 7pm (Europe)
 new cron(
@@ -117,60 +119,87 @@ client.on(`ready`, async () => {
   } finally {
     redisAPI.logout(redisClient);
   }
+
+  // register all the commands (this might take a minute due to Discord rate limits)
+  const globalCommandConfigs = commands.globalCommands.map((commandConfig) => commandConfig.slashCommand);
+  const adminCommandConfigs = commands.adminCommands.map((commandConfig) => commandConfig.slashCommand);
+
+  const adminGuild = await client.guilds.fetch(adminServerID);
+  let globalCommandManager;
+  if (deployMode !== `prod`) {
+    // use admin guild for global commands in dev mode
+    globalCommandManager = adminGuild.commands;
+  } else {
+    globalCommandManager = client.application.commands;
+  }
+  const adminCommandManager = adminGuild.commands;
+
+  for (const commandConfig of globalCommandConfigs) {
+    if (commandConfig) {
+      await globalCommandManager.create(commandConfig);
+      console.log(`Registered global command: ${commandConfig.name}`);
+    }
+  }
+  for (const commandConfig of adminCommandConfigs) {
+    if (commandConfig) {
+      await adminCommandManager.create(commandConfig);
+      console.log(`Registered admin command: ${commandConfig.name}`);
+    }
+  }
+});
+
+client.on(`interactionCreate`, async (interaction) => {
+  if (interaction.isCommand()) {
+    if (!interaction.guildId) {
+      // bot doesn't support DMs for now, reply with an explanation
+      return await interaction.reply(`Sorry, I don't support DMs (yet). Please use my commands in a server that we share.`);
+    }
+
+    console.log(`Received command: ${interaction.commandName} (#${interaction.channel.name} in ${interaction.guild?.name})`);
+    const joinedCommands = commands.globalCommands.concat(commands.adminCommands);
+    const matchedCommand = joinedCommands.find((commandConfig) => commandConfig?.slashCommand?.name === interaction.commandName);
+    if (matchedCommand) {
+      try {
+        await matchedCommand.action(interaction, client);
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      console.error(`No matching command found`);
+    }
+  }
 });
 
 client.on(`messageCreate`, async (msg) => {
   if (msg.guild && msg.content.startsWith(utils.addDevPrefix(`!totd`))) {
     console.log(`Received message: ${msg.content} (#${msg.channel.name} in ${msg.guild.name})`);
-
-    const matchedCommand = commands.find((command) => {
-      let aliases = [];
-      if (Array.isArray(command.command)) {
-        aliases = command.command;
+    try {
+      const title = `I've switched from the \`!totd\` prefix to slash commands!`;
+      const instructions = `Just type \`/help\` to see the new commands! Make sure you select the correct command, you can always recognize me by my ${utils.getEmojiMapping(`Author`)} avatar.`;
+      const message = `If you can't see any of my commands when you type \`/\` (e.g. \`/today\` or \`/help\`), tell an admin to invite me again with the following link.\nThat will update my permissions and allow you to use my commands.`;
+      const devDisclaimer = `Run into any problems with that? Feel free to open an issue [here](https://github.com/davidbmaier/totd-bot/issues).`;
+      const formattedMessage = format.formatInviteMessage(title, `${instructions}\n\n${message}\n${devDisclaimer}`);
+      utils.sendMessage(
+        msg.channel,
+        formattedMessage,
+        msg
+      );
+    } catch (error) {
+      if (error.message === `Missing Permissions`) {
+        console.error(`Unable to send error message to channel #${msg.channel.name} in ${msg.guild.name}, no permissions`);
       } else {
-        aliases = [command.command];
-      }
-
-      const matchedAlias = aliases.find((alias) => msg.content.toLowerCase().startsWith(alias.toLowerCase()));
-      return !!matchedAlias;
-    });
-
-    if (matchedCommand) {
-      try {
-        await matchedCommand.action(msg, client);
-      } catch (error) {
-        if (error.message === `Missing Permissions`) {
-          console.error(`Unable to send error message to channel #${msg.channel.name} in ${msg.guild.name}, no permissions`);
-        } else {
-          console.error(`Unexpected error while sending error message to channel #${msg.channel.name} in ${msg.guild.name}`);
-          console.error(error.message);
-        }
-      }
-    } else {
-      try {
-        await msg.channel.send(
-          `I don't know what to do, you might want to check \`${utils.addDevPrefix(`!totd help`)}\` to see what I can understand.`
-        );
-      } catch (error) {
-        if (error.message === `Missing Permissions`) {
-          console.error(`Unable to send error message to channel #${msg.channel.name} in ${msg.guild.name}, no permissions`);
-        } else {
-          console.error(`Unexpected error while sending error message to channel #${msg.channel.name} in ${msg.guild.name}`);
-          console.error(error.message);
-        }
+        console.error(`Unexpected error while sending error message to channel #${msg.channel.name} in ${msg.guild.name}`);
+        console.error(error.message);
       }
     }
   } else if (msg.mentions.has(client.user.id, {ignoreEveryone: true})) {
     const redisClient = await redisAPI.login();
-    const adminConfig = await redisAPI.getAdminServer(redisClient);
     redisAPI.logout(redisClient);
 
-    if (adminConfig?.channelID) {
-      console.log(`Proxying mention to admin server...`);
-      const adminChannel = await client.channels.fetch(adminConfig.channelID);
-      const proxyMessage = format.formatProxyMessage(msg);
-      adminChannel.send(proxyMessage);
-    }
+    console.log(`Proxying mention to admin server...`);
+    const adminChannel = await client.channels.fetch(adminChannelID);
+    const proxyMessage = format.formatProxyMessage(msg);
+    utils.sendMessage(adminChannel, proxyMessage);
   }
 });
 

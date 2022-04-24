@@ -9,10 +9,14 @@ const constants = require(`./constants`);
 const adminTag = process.env.ADMIN_TAG;
 
 const today = {
-  command: utils.addDevPrefix(`!totd today`),
+  slashCommand: {
+    name: `today`,
+    description: `Display the current Track of the Day`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg, client) => {
     try {
-      await discordAPI.sendTOTDMessage(client, msg.channel, await discordAPI.getTOTDMessage());
+      await discordAPI.sendTOTDMessage(client, msg.channel, await discordAPI.getTOTDMessage(), msg);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
       console.log(error);
@@ -21,10 +25,14 @@ const today = {
 };
 
 const leaderboard = {
-  command: utils.addDevPrefix(`!totd leaderboard`),
+  slashCommand: {
+    name: `leaderboard`,
+    description: `Display the current TOTD leaderboard and trophy thresholds.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg, client) => {
     try {
-      await discordAPI.sendTOTDLeaderboard(client, msg.channel);
+      await discordAPI.sendTOTDLeaderboard(client, msg.channel, msg);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
       console.log(error);
@@ -33,10 +41,32 @@ const leaderboard = {
 };
 
 const verdict = {
-  command: [utils.addDevPrefix(`!totd verdict`), utils.addDevPrefix(`!totd yesterday`)],
+  slashCommand: {
+    name: `verdict`,
+    description: `Display yesterday's TOTD ratings.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg, client) => {
     try {
-      await discordAPI.sendTOTDRatings(client, msg.channel, true);
+      await discordAPI.sendTOTDRatings(client, msg.channel, true, msg);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
+    }
+  }
+};
+
+
+// command to see the current ratings
+const ratings = {
+  slashCommand: {
+    name: `ratings`,
+    description: `Display the current TOTD ratings.`,
+    type: `CHAT_INPUT`,
+  },
+  action: async (msg, client) => {
+    try {
+      await discordAPI.sendTOTDRatings(client, msg.channel, false, msg);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
       console.log(error);
@@ -45,56 +75,96 @@ const verdict = {
 };
 
 const enable = {
-  command: utils.addDevPrefix(`!totd enable`),
+  slashCommand: {
+    name: `enable`,
+    description: `Enable daily posts in this channel when the new TOTD is released.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg) => {
-    if (msg.member.permissions.has(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+    if (msg.member.permissions.has(`ADMINISTRATOR`) || utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
         const redisClient = await redisAPI.login();
         await redisAPI.addConfig(redisClient, msg.guild.id, msg.channel.id);
         redisAPI.logout(redisClient);
-        msg.channel.send(`You got it, I'll post the TOTD every day just after it comes out.`);
+        utils.sendMessage(msg.channel, `You got it, I'll post the TOTD every day just after it comes out.`, msg);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.log(error);
       }
     } else {
-      msg.channel.send(`You don't have \`ADMINISTRATOR\` permission, sorry.`);
+      utils.sendMessage(msg.channel, `You don't have \`ADMINISTRATOR\` permission, sorry.`, msg);
     }
   }
 };
 
 const disable = {
-  command: utils.addDevPrefix(`!totd disable`),
+  slashCommand: {
+    name: `disable`,
+    description: `Disable daily TOTD posts again.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg) => {
-    if (msg.member.permissions.has(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+    if (msg.member.permissions.has(`ADMINISTRATOR`) || utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
         const redisClient = await redisAPI.login();
         await redisAPI.removeConfig(redisClient, msg.guild.id);
         redisAPI.logout(redisClient);
-        msg.channel.send(`Alright, I'll stop posting from now on.`);
+        utils.sendMessage(msg.channel, `Alright, I'll stop posting from now on.`, msg);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.log(error);
       }
     } else {
-      msg.channel.send(`You don't have \`ADMINISTRATOR\` permissions, sorry.`);
+      utils.sendMessage(msg.channel, `You don't have \`ADMINISTRATOR\` permissions, sorry.`, msg);
     }
   }
 };
 
 const setRole = {
-  command: utils.addDevPrefix(`!totd set role`),
+  slashCommand: {
+    name: `enablepings`,
+    description: `Enable reminder pings for a role ten minutes before COTD.`,
+    type: `CHAT_INPUT`,
+    options: [
+      {
+        type: `STRING`,
+        name: `role`,
+        description: `The role that should be pinged. Format: @role`,
+        required: true,
+      },
+      {
+        type: `STRING`,
+        name: `region`,
+        description: `The region that the role should be pinged for.`,
+        required: true,
+        choices: [
+          {
+            name: constants.cupRegions.europe,
+            value: constants.cupRegions.europe
+          },
+          {
+            name: constants.cupRegions.america,
+            value: constants.cupRegions.america
+          },
+          {
+            name: constants.cupRegions.asia,
+            value: constants.cupRegions.asia
+          },
+        ]
+      }
+    ]
+  },
   action: async (msg) => {
-    if (msg.member.permissions.has(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+    if (msg.member.permissions.has(`ADMINISTRATOR`) || utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
         const redisClient = await redisAPI.login();
         const configs = await redisAPI.getAllConfigs(redisClient);
         // check if this server already has daily posts set up
         const matchingConfig = configs.find((config) => config.serverID === msg.guild.id);
         if (matchingConfig) {
-          const role = msg.content.split(` `)[3];
+          const role = msg.options.get(`role`).value;
           if (role.startsWith(`<@&`)) {
-            const region = msg.content.split(` `)[4];
+            const region = msg.options.get(`region`).value;
             // valid regions: "Europe" (7pm), "America" (3am), "Asia" (11am)
             if (region) {
               const regions = constants.cupRegions;
@@ -104,22 +174,22 @@ const setRole = {
                 || region === regions.asia
               ) {
                 await redisAPI.addRole(redisClient, msg.guild.id, role, region);
-                msg.channel.send(`Okay, from now on I'll ping that role ten minutes before the ${region} COTD starts.`);
+                utils.sendMessage(msg.channel, `Okay, from now on I'll ping that role ten minutes before the ${region} COTD starts.`, msg);
               } else {
                 const message1 = `Sorry, I only know three regions: \`${regions.europe}\`, \`${regions.america}\`, and \`${regions.asia}\` - `;
-                const message2 = `tell me to set up a role for a region by using \`${utils.addDevPrefix(`!totd set role @[role] [region]`)}\`.\n`;
+                const message2 = `tell me to set up a role for a region by using \`${utils.addDevPrefix(`/enablepings @[role] [region]`)}\`.\n`;
                 const message3 = `If you just want to set up pings for the main Europe event, you can leave out the region.`;
-                msg.channel.send(`${message1}${message2}${message3}`);
+                utils.sendMessage(msg.channel, `${message1}${message2}${message3}`, msg);
               }
             } else {
               await redisAPI.addRole(redisClient, msg.guild.id, role);
-              msg.channel.send(`Okay, from now on I'll ping that role ten minutes before the main COTD starts.`);
+              utils.sendMessage(msg.channel, `Okay, from now on I'll ping that role ten minutes before the main COTD starts.`, msg);
             }
           } else {
-            msg.channel.send(`Sorry, I only understand roles that look like \`@role\` - and I obviously don't accept user IDs either.`);
+            utils.sendMessage(msg.channel, `Sorry, I only understand roles that look like \`@role\` - and I obviously don't accept user IDs either.`, msg);
           }
         } else {
-          msg.channel.send(`Sorry, you'll need to enable the daily posts first.`);
+          utils.sendMessage(msg.channel, `Sorry, you'll need to enable the daily posts first.`, msg);
         }
         redisAPI.logout(redisClient);
       } catch (error) {
@@ -127,18 +197,44 @@ const setRole = {
         console.log(error);
       }
     } else {
-      msg.channel.send(`You don't have \`ADMINISTRATOR\` permissions, sorry.`);
+      utils.sendMessage(msg.channel, `You don't have \`ADMINISTRATOR\` permissions, sorry.`, msg);
     }
   }
 };
 
 const removeRole = {
-  command: utils.addDevPrefix(`!totd remove role`),
+  slashCommand: {
+    name: `disablepings`,
+    description: `Disable TOTD reminder pings for a role.`,
+    type: `CHAT_INPUT`,
+    options: [
+      {
+        type: `STRING`,
+        name: `region`,
+        description: `The region that the role should be pinged for.`,
+        required: true,
+        choices: [
+          {
+            name: constants.cupRegions.europe,
+            value: constants.cupRegions.europe
+          },
+          {
+            name: constants.cupRegions.america,
+            value: constants.cupRegions.america
+          },
+          {
+            name: constants.cupRegions.asia,
+            value: constants.cupRegions.asia
+          },
+        ]
+      }
+    ]
+  },
   action: async (msg) => {
-    if (msg.member.permissions.has(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
+    if (msg.member.permissions.has(`ADMINISTRATOR`) || utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
         const redisClient = await redisAPI.login();
-        const region = msg.content.split(` `)[3];
+        const region = msg.options.get(`region`).value;
         if (region) {
           const regions = constants.cupRegions;
           if (
@@ -147,15 +243,15 @@ const removeRole = {
             || region === regions.asia
           ) {
             await redisAPI.removeRole(redisClient, msg.guild.id, region);
-            msg.channel.send(`Okay, I'll stop the pings for the ${region} COTD.`);
+            utils.sendMessage(msg.channel, `Okay, I'll stop the pings for the ${region} COTD.`, msg);
           } else {
             const message1 = `Sorry, I only know three regions: \`${regions.europe}\`, \`${regions.america}\`, and \`${regions.asia}\`.\n`;
-            const message2 = `Tell me to remove a role for a region by using \`${utils.addDevPrefix(`!totd remove role [region]`)}\`.`;
-            msg.channel.send(`${message1}${message2}`);
+            const message2 = `Tell me to remove a role for a region by using \`${utils.addDevPrefix(`/disablepings [region]`)}\`.`;
+            utils.sendMessage(msg.channel, `${message1}${message2}`, msg);
           }
         } else {
           await redisAPI.removeRole(redisClient, msg.guild.id);
-          msg.channel.send(`Okay, I'll stop the pings for the main COTD.`);
+          utils.sendMessage(msg.channel, `Okay, I'll stop the pings for the main COTD.`, msg);
         }
         redisAPI.logout(redisClient);
       } catch (error) {
@@ -163,16 +259,20 @@ const removeRole = {
         console.log(error);
       }
     } else {
-      msg.channel.send(`You don't have \`ADMINISTRATOR\` permissions, sorry.`);
+      utils.sendMessage(msg.channel, `You don't have \`ADMINISTRATOR\` permissions, sorry.`, msg);
     }
   }
 };
 
 const bingo = {
-  command: utils.addDevPrefix(`!totd bingo`),
+  slashCommand: {
+    name: `bingo`,
+    description: `Display this week's bingo board.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg) => {
     try {
-      await discordAPI.sendBingoBoard(msg.channel);
+      await discordAPI.sendBingoBoard(msg.channel, false, msg);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
       console.log(error);
@@ -181,10 +281,14 @@ const bingo = {
 };
 
 const lastBingo = {
-  command: utils.addDevPrefix(`!totd last bingo`),
+  slashCommand: {
+    name: `lastbingo`,
+    description: `Display last week's bingo board.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg) => {
     try {
-      await discordAPI.sendBingoBoard(msg.channel, true);
+      await discordAPI.sendBingoBoard(msg.channel, true, msg);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
       console.log(error);
@@ -192,15 +296,36 @@ const lastBingo = {
   }
 };
 
+const bingoOptions = [];
+for (let i = 0; i < 25; i++) {
+  bingoOptions.push({
+    name: `Field ${i + 1}`,
+    value: `${i + 1}`
+  });
+}
+
 const bingoVote = {
-  command: utils.addDevPrefix(`!totd vote`),
+  slashCommand: {
+    name: `votebingo`,
+    description: `Start a vote for a bingo field.`,
+    type: `CHAT_INPUT`,
+    options: [
+      {
+        type: `STRING`,
+        name: `field`,
+        description: `The bingo field you want to start a vote for.`,
+        required: true,
+        choices: bingoOptions
+      }
+    ]
+  },
   action: async (msg) => {
     try {
-      const bingoID = msg.content.split(` `)[2];
+      const bingoID = msg.options.get(`field`).value;
       if (!bingoID || Number.isNaN(parseInt(bingoID))) {
-        msg.channel.send(`I didn't catch that - to vote on a bingo field, use \`!totd vote [1-25]\`.`);
+        utils.sendMessage(msg.channel, `I didn't catch that - to vote on a bingo field, use \`/bingovote [1-25]\`.`, msg);
       } else {
-        await discordAPI.sendBingoVote(msg.channel, parseInt(bingoID));
+        await discordAPI.sendBingoVote(msg.channel, parseInt(bingoID), msg);
       }
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
@@ -209,55 +334,15 @@ const bingoVote = {
   }
 };
 
-const help = {
-  command: utils.addDevPrefix(`!totd help`),
-  action: async (msg) => {
-    let message = `\`${utils.addDevPrefix(`!totd today`)}\`  -  Display the current TOTD information.\n \
-      \`${utils.addDevPrefix(`!totd leaderboard`)}\`  -  Display the current top 10 (and the time for top 100).\n \
-      \`${utils.addDevPrefix(`!totd verdict`)}\`  -  Display yesterday's TOTD ratings.\n \
-      \`${utils.addDevPrefix(`!totd ratings`)}\`  -  Display today's TOTD ratings.\n \
-      \`${utils.addDevPrefix(`!totd rankings [time frame]`)}\`  -  Display TOTD rankings based on bot ratings.\n \
-      (Time frames: \`this month\`, \`last month\`, \`this year\`, \`last year\` or \`all time\`)\n \
-      \`${utils.addDevPrefix(`!totd bingo`)}\`  -  Display this week's bingo board.\n \
-      \`${utils.addDevPrefix(`!totd last bingo`)}\`  -  Display last week's bingo board.\n \
-      \`${utils.addDevPrefix(`!totd vote [1-25]`)}\`  -  Start a vote to cross off that bingo field.`;
-
-    let adminMessage;
-    if (msg.member.permissions.has(`ADMINISTRATOR`) || msg.author.tag === adminTag) {
-      adminMessage = `\n\`${utils.addDevPrefix(`!totd enable`)}\`  -  Enable daily TOTD posts in this channel.\n \
-      \`${utils.addDevPrefix(`!totd disable`)}\`  -  Disable the daily posts again.\n \
-      \`${utils.addDevPrefix(`!totd set role [@role] [region]`)}\`  -  Enable pings ten minutes before COTD.\n \
-      \`${utils.addDevPrefix(`!totd remove role [region]`)}\`  -  Disable daily pings again.\n\
-      (Supported regions: \`${constants.cupRegions.europe}\`, \`${constants.cupRegions.america}\`, and \`${constants.cupRegions.asia}\`)`;
-    }
-    try {
-      const formattedMessage = format.formatHelpMessage(message, adminMessage);
-      await msg.channel.send(formattedMessage);
-    } catch (error) {
-      discordAPI.sendErrorMessage(msg.channel);
-      console.log(error);
-    }
-  }
-};
-
 const invite = {
-  command: utils.addDevPrefix(`!totd invite`),
+  slashCommand: {
+    name: `invite`,
+    description: `Get an invite link for the TOTD Bot.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg) => {
     try {
-      await msg.channel.send(format.formatInviteMessage());
-    } catch (error) {
-      discordAPI.sendErrorMessage(msg.channel);
-      console.log(error);
-    }
-  }
-};
-
-// command to see the current ratings
-const ratings = {
-  command: [utils.addDevPrefix(`!totd ratings`), utils.addDevPrefix(`!totd rating`)],
-  action: async (msg, client) => {
-    try {
-      await discordAPI.sendTOTDRatings(client, msg.channel);
+      utils.sendMessage(msg.channel, format.formatInviteMessage(), msg);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
       console.log(error);
@@ -266,35 +351,86 @@ const ratings = {
 };
 
 const rankings = {
-  command: [utils.addDevPrefix(`!totd rankings`), utils.addDevPrefix(`!totd ranking`)],
+  slashCommand: {
+    name: `rankings`,
+    description: `Display TOTD rankings based on bot ratings.`,
+    type: `CHAT_INPUT`,
+    options: [
+      {
+        type: `STRING`,
+        name: `timeframe`,
+        description: `The time frame you want to see rankings for.`,
+        required: true,
+        choices: [
+          {
+            name: `this month`,
+            value: constants.ratingRankingType.monthly,
+          },
+          {
+            name: `last month`,
+            value: constants.ratingRankingType.lastMonthly
+          },
+          {
+            name: `this year`,
+            value: constants.ratingRankingType.yearly
+          },
+          {
+            name: `last year`,
+            value: constants.ratingRankingType.lastYearly
+          },
+          {
+            name: `all time`,
+            value: constants.ratingRankingType.allTime
+          },
+        ]
+      }
+    ]
+  },
   action: async (msg) => {
     try {
-      // use the length of the longer command (cause the extra character is just a space that doesn't get trimmed)
-      const timeframe = msg.content.substr(utils.addDevPrefix(`!totd rankings`).length).trim();
-      const validTimeframes = [
-        {label: `month`, value: constants.ratingRankingType.monthly},
-        {label: `this month`, value: constants.ratingRankingType.monthly},
-        {label: `last month`, value: constants.ratingRankingType.lastMonthly},
-        {label: `year`, value: constants.ratingRankingType.yearly},
-        {label: `this year`, value: constants.ratingRankingType.yearly},
-        {label: `last year`, value: constants.ratingRankingType.lastYearly},
-        {label: `all-time`, value: constants.ratingRankingType.allTime},
-        {label: `all time`, value: constants.ratingRankingType.allTime}
-      ];
-      let matchingTimeframe = validTimeframes[0]; // monthly is default
-
-      validTimeframes.forEach((validTimeframe) => {
-        if (timeframe.startsWith(validTimeframe.label.toLowerCase())) {
-          matchingTimeframe = validTimeframe;
-        }
-      });
+      const matchingTimeframe = msg.options.get(`timeframe`).value;
 
       const redisClient = await redisAPI.login();
-      const rankings = await redisAPI.getRatingRankings(redisClient, matchingTimeframe.value);
+      const rankings = await redisAPI.getRatingRankings(redisClient, matchingTimeframe);
       redisAPI.logout(redisClient);
 
       const rankingMessage = format.formatRankingMessage(rankings, matchingTimeframe);
-      await msg.channel.send(rankingMessage);
+      utils.sendMessage(msg.channel, rankingMessage, msg);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
+    }
+  }
+};
+
+const help = {
+  slashCommand: {
+    name: `help`,
+    description: `Get a list of all commands for the TOTD Bot.`,
+    type: `CHAT_INPUT`,
+  },
+  action: async (msg) => {
+    let message = `\`/today\`  -  Display the current TOTD information.\n \
+      \`/leaderboard\`  -  Display the current top 10 (and the time for top 100).\n \
+      \`/verdict\`  -  Display yesterday's TOTD ratings.\n \
+      \`/ratings\`  -  Display today's TOTD ratings.\n \
+      \`/rankings [time frame]\`  -  Display TOTD rankings based on bot ratings.\n \
+      (Time frames: \`this month\`, \`last month\`, \`this year\`, \`last year\` or \`all time\`)\n \
+      \`/bingo\`  -  Display this week's bingo board.\n \
+      \`/lastbingo\`  -  Display last week's bingo board.\n \
+      \`/bingovote [1-25]\`  -  Start a vote to cross off that bingo field.`;
+
+    let adminMessage;
+    if (msg.member.permissions.has(`ADMINISTRATOR`) || utils.checkMessageAuthorForTag(msg, adminTag)) {
+      adminMessage = `\n\`/enable\`  -  Enable daily TOTD posts in this channel.\n \
+      \`/disable\`  -  Disable the daily posts again.\n \
+      \`/enablepings [@role] [region]\`  -  Enable pings ten minutes before COTD.\n \
+      \`/disablepings [region]\`  -  Disable daily pings again.\n\
+      (Supported regions: \`${constants.cupRegions.europe}\`, \`${constants.cupRegions.america}\`, and \`${constants.cupRegions.asia}\`)`;
+    }
+    try {
+      const formattedMessage = format.formatHelpMessage(message, adminMessage);
+      utils.sendMessage(msg.channel, formattedMessage, msg);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
       console.log(error);
@@ -303,12 +439,17 @@ const rankings = {
 };
 
 const refresh = {
-  command: utils.addDevPrefix(`!totd refresh today`),
+  slashCommand: {
+    name: `refreshtotd`,
+    description: `Manually refresh the current TOTD data.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg) => {
-    if (msg.author.tag === adminTag) {
+    if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
+        const response = await utils.sendMessage(msg.channel, `Working on it... ${utils.getEmojiMapping(`Loading`)}`, msg);
         await discordAPI.getTOTDMessage(true);
-        await msg.channel.send(`I've refreshed the current TOTD data!`);
+        response.edit(`I've refreshed the current TOTD data!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -318,12 +459,17 @@ const refresh = {
 };
 
 const refreshLeaderboard = {
-  command: utils.addDevPrefix(`!totd refresh leaderboard`),
+  slashCommand: {
+    name: `refreshleaderboard`,
+    description: `Manually refresh the current leaderboard data.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg) => {
-    if (msg.author.tag === adminTag) {
+    if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
+        const response = await utils.sendMessage(msg.channel, `Working on it... ${utils.getEmojiMapping(`Loading`)}`, msg);
         await discordAPI.getTOTDLeaderboardMessage(true);
-        await msg.channel.send(`I've refreshed the current leaderboard data!`);
+        response.edit(`I've refreshed the current leaderboard data!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -333,14 +479,19 @@ const refreshLeaderboard = {
 };
 
 const refreshRatings = {
-  command: utils.addDevPrefix(`!totd refresh ratings`),
+  slashCommand: {
+    name: `refreshratings`,
+    description: `Manually refresh the current ratings data.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg) => {
-    if (msg.author.tag === adminTag) {
+    if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
+        const response = await utils.sendMessage(msg.channel, `Working on it... ${utils.getEmojiMapping(`Loading`)}`, msg);
         const redisClient = await redisAPI.login();
         await redisAPI.clearTOTDRatings(redisClient);
         redisAPI.logout(redisClient);
-        await msg.channel.send(`I've refreshed the current rating data!`);
+        response.edit(`I've refreshed the current rating data!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -350,12 +501,17 @@ const refreshRatings = {
 };
 
 const refreshBingo = {
-  command: utils.addDevPrefix(`!totd refresh bingo`),
+  slashCommand: {
+    name: `refreshbingo`,
+    description: `Manually refresh the current bingo board.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg) => {
-    if (msg.author.tag === adminTag) {
+    if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
+        const response = await utils.sendMessage(msg.channel, `Working on it... ${utils.getEmojiMapping(`Loading`)}`, msg);
         await discordAPI.getBingoMessage(true);
-        await msg.channel.send(`I've refreshed the current bingo board!`);
+        response.edit(`I've refreshed the current bingo board!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -364,47 +520,18 @@ const refreshBingo = {
   }
 };
 
-const bingoCount = {
-  command: utils.addDevPrefix(`!totd refresh count`),
+const refreshBingoCount = {
+  slashCommand: {
+    name: `refreshbingocount`,
+    description: `Manually refresh the current bingo vote count.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg, client) => {
-    if (msg.author.tag === adminTag) {
+    if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
+        const response = await utils.sendMessage(msg.channel, `Working on it... ${utils.getEmojiMapping(`Loading`)}`, msg);
         await discordAPI.countBingoVotes(client);
-        await msg.channel.send(`I've counted and resolved the current bingo votes!`);
-      } catch (error) {
-        discordAPI.sendErrorMessage(msg.channel);
-        console.error(error);
-      }
-    }
-  }
-};
-
-const setAdminServer = {
-  command: utils.addDevPrefix(`!totd set admin`),
-  action: async (msg) => {
-    if (msg.author.tag === adminTag) {
-      try {
-        const redisClient = await redisAPI.login();
-        await redisAPI.setAdminServer(redisClient, msg.guild.id, msg.channel.id);
-        redisAPI.logout(redisClient);
-        await msg.channel.send(`Alright, this is now the admin server!`);
-      } catch (error) {
-        discordAPI.sendErrorMessage(msg.channel);
-        console.error(error);
-      }
-    }
-  }
-};
-
-const removeAdminServer = {
-  command: utils.addDevPrefix(`!totd remove admin`),
-  action: async (msg) => {
-    if (msg.author.tag === adminTag) {
-      try {
-        const redisClient = await redisAPI.login();
-        await redisAPI.setAdminServer(redisClient, null);
-        redisAPI.logout(redisClient);
-        await msg.channel.send(`I've removed the admin server configuration!`);
+        response.edit(`I've counted and resolved the current bingo votes!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -414,9 +541,13 @@ const removeAdminServer = {
 };
 
 const serverInfo = {
-  command: utils.addDevPrefix(`!totd servers`),
+  slashCommand: {
+    name: `servers`,
+    description: `Get information about the servers the TOTD bot is in.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg, client) => {
-    if (msg.author.tag === adminTag) {
+    if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
         const servers = [];
         let memberCount = 0;
@@ -424,13 +555,92 @@ const serverInfo = {
           servers.push(guild);
           memberCount += guild.memberCount;
         });
-        await msg.channel.send(`I'm currently in ${servers.length} servers and counting - reaching an audience of ${memberCount}!`);
+        utils.sendMessage(msg.channel, `I'm currently in ${servers.length} servers and counting - reaching an audience of ${memberCount}!`, msg);
 
         // fetch and log detailed infos asynchronously
         servers.forEach(async (server) => {
           const owner = await client.users.fetch(server.ownerId); // don't use fetchOwner since we need the owner user, not the guild member
-          console.log(`Server: ${server.name} - Owner: ${JSON.stringify(owner.tag)} - ID: ${server.id}`);
+          console.log(`Server: ${server.name} - Owner: ${owner.tag} - ID: ${server.id}`);
         });
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.error(error);
+      }
+    }
+  }
+};
+
+const notifyServersWithWrongPermissions = {
+  slashCommand: {
+    name: `notifywrongpermissions`,
+    description: `Notify all server owners where the bot is lacking slash command permmissions.`,
+    type: `CHAT_INPUT`,
+    options: [
+      {
+        type: `BOOLEAN`,
+        name: `senddms`,
+        description: `Whether DMs should be sent to the server owners.`,
+        required: true,
+      }
+    ]
+  },
+  action: async (msg, client) => {
+    if (utils.checkMessageAuthorForTag(msg, adminTag)) {
+      try {
+        const response = await utils.sendMessage(msg.channel, `Working on it... ${utils.getEmojiMapping(`Loading`)}`, msg);
+        const serversWithWrongPermissions = [];
+        const servers = client.guilds.cache;
+        for (const server of servers.values()) {
+          try {
+            // attempt to create a test command - there's apparently no other way to check whether the bot has application commands permissions
+            const testCommand = await server.commands.create({
+              name: `totdtest`,
+              description: `Test command for the TOTD bot.`,
+            });
+            await testCommand.delete();
+          } catch (error) {
+            if (error.message === `Missing Access` || error.message === `Missing Permissions`) {
+              serversWithWrongPermissions.push(server);
+            } else {
+              console.error(`Something else went wrong for server ${server.name}.`);
+              console.error(error);
+            }
+          }
+        }
+
+        if (msg.options.get(`senddms`).value) {
+          serversWithWrongPermissions.forEach(async (server) => {
+            const owner = await client.users.fetch(server.ownerId);
+            console.log(`Server ${server.name} doesn't have slash command permissions, sending DM to ${owner.tag}.`);
+            try {
+              await owner.send({
+                embeds: [
+                  {
+                    title: `A quick update about the TOTD Bot`,
+                    description: `Hey ${owner.username}, thanks for using the TOTD Bot!\n`
+                      + `I've recently switched from \`!totd\` commands to slash commands so I can get verified by Discord.\n`
+                      + `However, it looks like **I don't have the required permissions** on your server "**${server.name}**" to register my commands.\n`
+                      + `Until that's fixed the scheduled TOTD posts will still work, but you won't be able to tell me to do anything.\n\n`
+                      + `**Please invite me again with the following link** (all the permissions are the same as before, the only change is the extra \`applications.commands\` scope).\n`
+                      + `If you're running into any issues with that, or you still can't see my commands afterwards, please talk to tooInfinite#5113 or [open an issue on the Github repo](https://github.com/davidbmaier/totd-bot/issues).\n`
+                      + `**Click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=applications.commands%20bot) for the invite!**`
+                  }
+                ]
+              });
+            } catch (dmError) {
+              console.error(`Something went wrong while sending a DM to ${owner.tag} for server ${server.name}.`);
+              console.error(dmError);
+            }
+          });
+
+          response.edit(`I've DM'd all the server owners that haven't updated their permissions for me yet!`);
+        } else {
+          response.edit(`I've found ${serversWithWrongPermissions.length} servers that don't have the required permissions for me to register my commands.`);
+          serversWithWrongPermissions.forEach(async (server) => {
+            const owner = await client.users.fetch(server.ownerId);
+            console.log(`Server with missing slash command permissions: ${server.name} - Owner: ${owner.tag} - ID: ${server.id}`);
+          });
+        }
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -440,11 +650,15 @@ const serverInfo = {
 };
 
 const debug = {
-  command: utils.addDevPrefix(`!totd debug`),
+  slashCommand: {
+    name: `debug`,
+    description: `Placeholder command for testing.`,
+    type: `CHAT_INPUT`,
+  },
   action: async (msg) => {
-    if (msg.author.tag === adminTag) {
+    if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
-        await msg.channel.send(`Debug me!`);
+        utils.sendMessage(msg.channel, `Debug me!`, msg);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -453,28 +667,31 @@ const debug = {
   }
 };
 
-module.exports = [
-  help,
-  invite,
-  refresh,
-  refreshLeaderboard,
-  refreshRatings,
-  refreshBingo,
-  debug,
-  today,
-  leaderboard,
-  ratings,
-  rankings,
-  verdict,
-  enable,
-  disable,
-  setRole,
-  removeRole,
-  bingo,
-  lastBingo,
-  bingoVote,
-  bingoCount,
-  setAdminServer,
-  removeAdminServer,
-  serverInfo
-];
+module.exports = {
+  globalCommands: [
+    help,
+    invite,
+    today,
+    leaderboard,
+    ratings,
+    rankings,
+    verdict,
+    enable,
+    disable,
+    setRole,
+    removeRole,
+    bingo,
+    lastBingo,
+    bingoVote,
+  ],
+  adminCommands: [
+    refresh,
+    refreshLeaderboard,
+    refreshRatings,
+    refreshBingo,
+    refreshBingoCount,
+    debug,
+    serverInfo,
+    notifyServersWithWrongPermissions
+  ]
+};

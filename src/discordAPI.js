@@ -5,6 +5,8 @@ const utils = require(`./utils`);
 const constants = require(`./constants`);
 const rating = require(`./rating`);
 
+const adminChannelID = process.env.ADMIN_CHANNEL_ID;
+
 const errorMessage = `Oops, something went wrong here - please talk to <@141627532335251456> and let him know that didn't work.`;
 
 const getTOTDMessage = async (forceRefresh) => {
@@ -159,18 +161,18 @@ const getBingoMessage = async (forceRefresh, lastWeek) => {
   }
 };
 
-const sendTOTDMessage = async (client, channel, message) => {
+const sendTOTDMessage = async (client, channel, message, commandMessage) => {
   try {
     console.log(`Sending current TOTD to #${channel.name} in ${channel.guild.name}`);
-    const discordMessage = await channel.send(message);
+    const discordMessage = await utils.sendMessage(channel, message, commandMessage);
     // add rating emojis
     const emojis = [];
     for (let i = 0; i < constants.ratingEmojis.length; i++) {
       emojis.push(utils.getEmojiMapping(constants.ratingEmojis[i]));
     }
-    emojis.forEach(async (emoji) => {
+    for (const emoji of emojis) {
       await discordMessage.react(emoji);
-    });
+    }
     return Promise.resolve();
   } catch (error) {
     console.log(`Couldn't send TOTD message to #${channel.name} in ${channel.guild.name}, throwing error`);
@@ -178,8 +180,8 @@ const sendTOTDMessage = async (client, channel, message) => {
   }
 };
 
-const sendTOTDLeaderboard = async (client, channel) => {
-  const discordMessage = await channel.send(`Fetching current leaderboard, give me a second... ${utils.getEmojiMapping(`Loading`)}`);
+const sendTOTDLeaderboard = async (client, channel, commandMessage) => {
+  const discordMessage = await utils.sendMessage(channel, `Fetching current leaderboard, give me a second... ${utils.getEmojiMapping(`Loading`)}`, commandMessage);
 
   const leaderboardMessage = await getTOTDLeaderboardMessage();
 
@@ -187,21 +189,21 @@ const sendTOTDLeaderboard = async (client, channel) => {
   discordMessage.edit(leaderboardMessage);
 };
 
-const sendTOTDRatings = async (client, channel, yesterday) => {
+const sendTOTDRatings = async (client, channel, yesterday, commandMessage) => {
   const ratingString = yesterday ? `yesterday's verdict` : `current rating`;
   console.log(`Sending ${ratingString} to #${channel.name} in ${channel.guild.name}`);
   const message = await getRatingMessage(yesterday);
-  await channel.send(message);
+  await utils.sendMessage(channel, message, commandMessage);
 };
 
-const sendBingoBoard = async (channel, lastWeek) => {
+const sendBingoBoard = async (channel, lastWeek, commandMessage) => {
   const bingoString = lastWeek ? `last week's` : `current`;
   console.log(`Sending ${bingoString} bingo board to #${channel.name} in ${channel.guild.name}`);
   const message = await getBingoMessage(false, lastWeek);
-  await channel.send(message);
+  await utils.sendMessage(channel, message, commandMessage);
 };
 
-const sendBingoVote = async (channel, bingoID) => {
+const sendBingoVote = async (channel, bingoID, commandMessage) => {
   const redisClient = await redisAPI.login();
   let board = await redisAPI.getBingoBoard(redisClient);
 
@@ -209,23 +211,25 @@ const sendBingoVote = async (channel, bingoID) => {
   board.splice(12, 0, {text: `Free space`, checked: false});
 
   if (bingoID < 1 || bingoID > 25) {
-    return await channel.send(`Hmm, that's not on the board. I only understand numbers from 1 to 25 I'm afraid.`);
+    return await utils.sendMessage(channel, `Hmm, that's not on the board. I only understand numbers from 1 to 25 I'm afraid.`, commandMessage);
   } else if (bingoID === 13) {
-    return await channel.send(`You want to vote on the free space? Are you okay?`);
+    return await utils.sendMessage(channel, `You want to vote on the free space? Are you okay?`, commandMessage);
   }
 
   const field = board[bingoID - 1];
   if (field.checked) {
-    return await channel.send(`Looks like that field is already checked off for this week.`);
+    return await utils.sendMessage(channel, `Looks like that field is already checked off for this week.`, commandMessage);
   } else if (field.voteActive) {
-    return await channel.send(`There's already a vote going on for that field, check again tomorrow.`);
+    return await utils.sendMessage(channel, `There's already a vote going on for that field, check again tomorrow.`, commandMessage);
   }
 
   const textWithoutBreaks = field.text.replace(/\n/g, ` `);
-  const voteMessage = await channel.send(
+  const voteMessage = await utils.sendMessage(
+    channel,
     `Bingo vote started: **${textWithoutBreaks}**\n` +
-    `Does that sound like today's track?\n` +
-    `Vote using the reactions below - I'll close the vote when the next TOTD comes out.`
+      `Does that sound like today's track?\n` +
+      `Vote using the reactions below - I'll close the vote when the next TOTD comes out.`,
+    commandMessage
   );
 
   const voteYes = utils.getEmojiMapping(`VoteYes`);
@@ -358,13 +362,10 @@ const archiveRatings = async (client, oldTOTD) => {
       await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, {top: [], bottom: []});
     }
 
-    // send ratings to admin server if it's been configured
-    const adminConfig = await redisAPI.getAdminServer(redisClient);
-    if (adminConfig?.channelID) {
-      console.log(`Sending verdict to admin server...`);
-      const adminChannel = await client.channels.fetch(adminConfig.channelID);
-      adminChannel.send(await getRatingMessage(true));
-    }
+    // send ratings to admin server
+    console.log(`Sending verdict to admin server...`);
+    const adminChannel = await client.channels.fetch(adminChannelID);
+    utils.sendMessage(adminChannel, await getRatingMessage(true));
   }
   await redisAPI.clearTOTDRatings(redisClient);
 
@@ -442,7 +443,7 @@ const sendCOTDPings = async (client, region) => {
       try {
         const channel = await client.channels.fetch(config.channelID);
         console.log(`Pinging ${config[roleProp]} in #${channel.name} (${channel.guild.name})`);
-        channel.send(`${config[roleProp]} The Cup of the Day is about to begin! ${utils.getEmojiMapping(`COTDPing`)} Ten minutes to go!`);
+        utils.sendMessage(channel, `${config[roleProp]} The Cup of the Day is about to begin! ${utils.getEmojiMapping(`COTDPing`)} Ten minutes to go!`);
       } catch (error) {
         if (error.message === `Missing Access`) {
           console.log(`Can't access server, bot was probably kicked.`);
@@ -466,10 +467,12 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
   );
   if (currentMapUid === reactionMapUid) {
     const ratingEmojis = constants.ratingEmojis;
+    let ratingEmojiFound = false;
     for (let i = 0; i < ratingEmojis.length; i++) {
       const ratingIdentifier = utils.getEmojiMapping(ratingEmojis[i]);
 
       if (ratingIdentifier.includes(reaction.emoji.identifier)) {
+        ratingEmojiFound = true;
         // check if this is a valid rating (i.e. not a duplicate from this user)
         const valid = await redisAPI.updateIndividualRatings(redisClient, reaction.emoji.name, add, user.id);
         const emojiInfo = `[${user.tag} ${add ? `added` : `removed`} ${reaction.emoji.name}]`;
@@ -480,9 +483,11 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
         } else {
           console.log(`Rating reaction in #${reaction.message.channel.name} (${reaction.message.channel.guild.name}) ${emojiInfo} [duplicate]`);
         }
-
         break;
       }
+    }
+    if (!ratingEmojiFound) {
+      await reaction.remove();
     }
     redisAPI.logout(redisClient);
   } else {
@@ -492,7 +497,7 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
 };
 
 const sendErrorMessage = (channel) => {
-  channel.send(errorMessage);
+  utils.sendMessage(channel, errorMessage);
 };
 
 module.exports = {

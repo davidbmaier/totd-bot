@@ -1,6 +1,6 @@
 # TOTD Discord Bot
 
-This is a Discord bot for displaying the daily [Trackmania](https://www.trackmania.com/) Track of the Day (and maybe more in the future).
+This is a Discord bot for displaying the daily [Trackmania](https://www.trackmania.com/) Track of the Day (and a few other things).
 
 **Disclaimer:** This bot uses undocumented APIs (and libraries based on them), so it may break at any time - potentially indefinitely if Nadeo/Ubisoft decide to close off those APIs.
 
@@ -8,32 +8,33 @@ This is a Discord bot for displaying the daily [Trackmania](https://www.trackman
 
 ## What can this bot do? 🤖
 
-**Public invite link:** [Click here!](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=bot)
+**Public invite link:** [Click here!](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=applications.commands%20bot)
 
-Use at your own risk - the bot is in development and may break from time to time.
+**Note:** The bot is now using slash commands instead of the `!totd` prefix - if you've used the bot before, you'll need to simply use the invite link above to update its permissions.
 
-- `!totd today` - Prints the current TOTD information to the current channel.
-- `!totd leaderboard` - Prints the current TOTD top 10 and the time needed for top 100 to the current channel.
-- `!totd verdict` - Prints yesterday's global ratings and a short verdict based on them.
-- `!totd ratings` - Prints today's global ratings.
-- `!totd rankings [time frame]` - Prints the TOTD rankings for the given time frame. Supported time frames are `this month`, `last month`, `this year`, `last year`, and `all time`.
-- `!totd bingo` - Prints this week's bingo board.
-- `!totd last bingo` - Prints last week's bingo board.
-- `!totd vote [1-25]` - Starts a vote on that bingo field. All ongoing votes are resolved when the next TOTD is released.
-- `!totd enable` - Stores the current channel to the list the daily scheduled TOTD post gets sent to. One channel per server. Admin only.
-- `!totd disable` - Removes the current channel from the list the scheduled TOTD post gets sent to. Admin only.
-- `!totd set role [@role] [region]` - Adds the role to the list of roles it pings 10 minutes before COTD. Daily TOTD posts have to be set up already. Supported regions for pings are `Europe`, `America`, and `Asia` - one for each official COTD. Admin only.
-- `!totd remove role [region]` - Removes the currently set role from the pings. Admin only.
-- `!totd help` - Displays some info about the bot.
+- `/today` - Prints the current TOTD information to the current channel.
+- `/leaderboard` - Prints the current TOTD top 10 and the time needed for top 100 to the current channel.
+- `/verdict` - Prints yesterday's global ratings and a short verdict based on them.
+- `/ratings` - Prints today's global ratings.
+- `/rankings [time frame]` - Prints the TOTD rankings for the given time frame. Supported time frames are `this month`, `last month`, `this year`, `last year`, and `all time`.
+- `/bingo` - Prints this week's bingo board.
+- `/lastbingo` - Prints last week's bingo board.
+- `/votebingo [1-25]` - Starts a vote on that bingo field. All ongoing votes are resolved when the next TOTD is released.
+- `/enable` - Stores the current channel to the list the daily scheduled TOTD post gets sent to. One channel per server. Admin only.
+- `/disable` - Removes the current channel from the list the scheduled TOTD post gets sent to. Admin only.
+- `/enablepings [@role] [region]` - Adds the role to the list of roles it pings 10 minutes before COTD. Daily TOTD posts have to be set up already. Supported regions for pings are `Europe`, `America`, and `Asia` - one for each official COTD. Admin only.
+- `/disablepings [region]` - Removes the currently set role from the pings. Admin only.
+- `/help` - Displays some info about the bot.
+- `/invite` - Displays a link to invite the bot to your server.
 
 Debug (and bot admin) only:
 
-- `!totd refresh today` - Refreshes the internally cached TOTD information.
-- `!totd refresh leaderboard` - Refreshes the internally cached leaderboard information.
-- `!totd refresh ratings` - Prints the current global ratings and a short verdict based on them (admin-only since it's not resolved yet).
-- `!totd refresh bingo` - Regenerates the current bingo board.
-- `!totd refresh count` - Resolves the ongoing bingo field votes.
-- `!totd servers` - Prints the current number of servers the bot is in. Also logs the server details.
+- `/refreshtotd` - Refreshes the internally cached TOTD information.
+- `/refreshleaderboard` - Refreshes the internally cached leaderboard information.
+- `/refreshratings` - Prints the current global ratings and a short verdict based on them (admin-only since it's not resolved yet).
+- `/refreshbingo` - Regenerates the current bingo board.
+- `/refreshbingocount` - Resolves the ongoing bingo field votes.
+- `/servers` - Prints the current number of servers the bot is in. Also logs the server details.
 
 ## Screenshots 📷
 
@@ -50,9 +51,10 @@ To run it, just run an `npm i` and an `npm start`. Make sure you've added a `.en
 
 - `DISCORD_TOKEN` is the Discord bot's auth token (see any tutorial for more info).
 - `USER_LOGIN` is your UPlay/Ubisoft Connect credentials - I suggest not using your main account. It doesn't have to own the game, so you can just create a new one for this bot.
-- `DEPLOY_MODE` should only be `prod` if it's supposed to be live. Everything else is interpreted as a development mode (which means that all commands will be prefixed with `dev` - e.g. `!devtotd today`).
+- `DEPLOY_MODE` should only be `prod` if it's supposed to be live. Everything else is interpreted as a development mode (which means that all commands will be registered only in the admin server, and the bot won't reload all the data on startup).
 - `REDIS_URL` is a Redis database - it's required for the scheduled messages and caching. If you're using an insecure instance for local development, you can omit the auth part.
-- `ADMIN_TAG` is the Discord tag of the bot admin - mainly used for undocumented debug commands that only they should be allowed to run.
+- `ADMIN_TAG` is the Discord tag of the bot admin - used for administration commands that only they should be allowed to run.
+- `ADMIN_SERVER_ID` and `ADMIN_CHANNEL_ID` are Discord IDs of the admin server and channel - used for all admin commands.
 
 Every commit on `main` triggers an update to the live version of the bot running on a Heroku dyno.
 
