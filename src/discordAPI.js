@@ -387,7 +387,7 @@ const distributeTOTDMessages = async (client) => {
   const configs = await redisAPI.getAllConfigs(redisClient);
   redisAPI.logout(redisClient);
 
-  configs.forEach(async (config) => {
+  const distributeTOTDMessage = async (config) => {
     try {
       const channel = await client.channels.fetch(config.channelID);
       await sendTOTDMessage(client, channel, message);
@@ -426,7 +426,16 @@ const distributeTOTDMessages = async (client) => {
         return;
       }
     }
-  });
+  };
+
+  for (const [configIndex, config] of configs.entries()) {
+    if (configIndex % 50 === 0 && configIndex !== 0) {
+      // wait for 2 seconds before continuing to avoid hitting Discord API rate limit (50 reqs/s)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log(`Waiting 2 seconds before sending TOTD message to next batch of servers...`);
+    }
+    distributeTOTDMessage(config);
+  }
 };
 
 const sendCOTDPings = async (client, region) => {
