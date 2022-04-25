@@ -429,10 +429,10 @@ const distributeTOTDMessages = async (client) => {
   };
 
   for (const [configIndex, config] of configs.entries()) {
-    if (configIndex % 50 === 0 && configIndex !== 0) {
-      // wait for 2 seconds before continuing to avoid hitting Discord API rate limit (50 reqs/s)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log(`Waiting 2 seconds before sending TOTD message to next batch of servers...`);
+    if (configIndex % 40 === 0 && configIndex !== 0) {
+      // wait for 5 seconds before continuing to definitely avoid hitting Discord API rate limit (50 reqs/s)
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      console.log(`Waiting 5 seconds before sending TOTD message to next batch of servers...`);
     }
     distributeTOTDMessage(config);
   }
