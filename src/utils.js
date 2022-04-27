@@ -38,6 +38,7 @@ const removeNameFormatting = (text = ``) => {
   cleanedText = cleanedText.replaceAll(`$o`, ``);
   cleanedText = cleanedText.replaceAll(`$b`, ``);
   cleanedText = cleanedText.replaceAll(`$i`, ``);
+  cleanedText = cleanedText.replaceAll(`$I`, ``);
   cleanedText = cleanedText.replaceAll(`$t`, ``);
   cleanedText = cleanedText.replaceAll(`$s`, ``);
   cleanedText = cleanedText.replaceAll(`$S`, ``);
