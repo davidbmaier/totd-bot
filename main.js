@@ -239,4 +239,8 @@ client.on(`guildDelete`, (guild) => {
   console.log(`Left server: ${guild.name}`);
 });
 
+client.on(`rateLimit`, (rateLimit) => {
+  console.warn(`Rate limit reached: ${rateLimit.limit} on ${rateLimit.method} ${rateLimit.path}/${rateLimit.route} (global: ${rateLimit.global}) - wait for ${rateLimit.timeout}`);
+});
+
 client.login(discordToken);
