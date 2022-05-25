@@ -100,3 +100,5 @@ The TOTD Bot only stores data that is required for its core functionality:
 Whenever the bot gets removed from a server with any configuration, it automatically removes that server's information from its datastore within a day.
 
 For debugging purposes, the bot also logs user IDs, channel IDs and server IDs as well as the corresponding names when people interact with it.
+
+If you want to request deletion of any of your data (user, message, channel or server IDs that are directly related to you), please contact the bot owner on Discord (tooInfinite#5113).
