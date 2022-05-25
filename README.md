@@ -81,3 +81,22 @@ Thanks go to:
 - The [TMX](https://trackmania.exchange/) team for their platform and well-documented API.
 - Miss ([@codecat](https://github.com/codecat)) for her work on [trackmania.io](https://trackmania.io).
 - [@breeku](https://github.com/breeku) for creating [a neat wrapper](https://github.com/breeku/trackmania-api-node) around a bunch of reverse-engineered Nadeo APIs (let's hope they don't break).
+
+## Terms of Service
+
+When you invite this bot to your server or interact with it on another server, you agree to the following terms:
+
+- You agree to the bot storing and logging information about your Discord account/server for debugging purposes. It will only be used to improve the bot's functionality and will never be shared with any third parties.
+- You agree that you will not attempt to misuse the bot in any way - spamming commands and attempting to flood the bot with requests will result in a ban of your account/server.
+- The bot owner has the right to deny you access to the bot's features for any reason.
+
+## Privacy Policy
+
+The TOTD Bot only stores data that is required for its core functionality:
+- It stores server and channel IDs for all servers that set up scheduled posts with the bot.
+- It also stores user IDs and the corresponding rating that user submitted for the current TOTD to prevent people from voting more than once - this data is removed after a day.
+- Apart from that, it only stores past TOTD data (map and rating information) to be able to display historical data to users.
+
+Whenever the bot gets removed from a server with any configuration, it automatically removes that server's information from its datastore within a day.
+
+For debugging purposes, the bot also logs user IDs, channel IDs and server IDs as well as the corresponding names when people interact with it.
