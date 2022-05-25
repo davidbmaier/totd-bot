@@ -575,14 +575,6 @@ const notifyServersWithWrongPermissions = {
     name: `notifywrongpermissions`,
     description: `Notify all server owners where the bot is lacking slash command permmissions.`,
     type: `CHAT_INPUT`,
-    options: [
-      {
-        type: `BOOLEAN`,
-        name: `senddms`,
-        description: `Whether DMs should be sent to the server owners.`,
-        required: true,
-      }
-    ]
   },
   action: async (msg, client) => {
     if (utils.checkMessageAuthorForTag(msg, adminTag)) {
@@ -608,39 +600,11 @@ const notifyServersWithWrongPermissions = {
           }
         }
 
-        if (msg.options.get(`senddms`).value) {
-          serversWithWrongPermissions.forEach(async (server) => {
-            const owner = await client.users.fetch(server.ownerId);
-            console.log(`Server ${server.name} doesn't have slash command permissions, sending DM to ${owner.tag}.`);
-            try {
-              await owner.send({
-                embeds: [
-                  {
-                    title: `A quick update about the TOTD Bot`,
-                    description: `Hey ${owner.username}, thanks for using the TOTD Bot!\n`
-                      + `I've recently switched from \`!totd\` commands to slash commands so I can get verified by Discord.\n`
-                      + `However, it looks like **I don't have the required permissions** on your server "**${server.name}**" to register my commands.\n`
-                      + `Until that's fixed the scheduled TOTD posts will still work, but you won't be able to tell me to do anything.\n\n`
-                      + `**Please invite me again with the following link** (all the permissions are the same as before, the only change is the extra \`applications.commands\` scope).\n`
-                      + `If you're running into any issues with that, or you still can't see my commands afterwards, please talk to tooInfinite#5113 or [open an issue on the Github repo](https://github.com/davidbmaier/totd-bot/issues).\n`
-                      + `**Click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=applications.commands%20bot) for the invite!**`
-                  }
-                ]
-              });
-            } catch (dmError) {
-              console.error(`Something went wrong while sending a DM to ${owner.tag} for server ${server.name}.`);
-              console.error(dmError);
-            }
-          });
-
-          response.edit(`I've DM'd all the server owners that haven't updated their permissions for me yet!`);
-        } else {
-          response.edit(`I've found ${serversWithWrongPermissions.length} servers that don't have the required permissions for me to register my commands.`);
-          serversWithWrongPermissions.forEach(async (server) => {
-            const owner = await client.users.fetch(server.ownerId);
-            console.log(`Server with missing slash command permissions: ${server.name} - Owner: ${owner.tag} - ID: ${server.id}`);
-          });
-        }
+        response.edit(`I've found ${serversWithWrongPermissions.length} servers that don't have the required permissions for me to register my commands.`);
+        serversWithWrongPermissions.forEach(async (server) => {
+          const owner = await client.users.fetch(server.ownerId);
+          console.log(`Server with missing slash command permissions: ${server.name} - Owner: ${owner.tag} - ID: ${server.id}`);
+        });
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);

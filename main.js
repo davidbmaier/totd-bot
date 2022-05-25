@@ -171,28 +171,7 @@ client.on(`interactionCreate`, async (interaction) => {
 });
 
 client.on(`messageCreate`, async (msg) => {
-  if (msg.guild && msg.content.startsWith(utils.addDevPrefix(`!totd`))) {
-    console.log(`Received message: ${msg.content} (#${msg.channel.name} in ${msg.guild.name})`);
-    try {
-      const title = `I've switched from the \`!totd\` prefix to slash commands!`;
-      const instructions = `Just type \`/help\` to see the new commands! Make sure you select the correct command, you can always recognize me by my ${utils.getEmojiMapping(`Author`)} avatar.`;
-      const message = `If you can't see any of my commands when you type \`/\` (e.g. \`/today\` or \`/help\`), tell an admin to invite me again with the following link.\nThat will update my permissions and allow you to use my commands.`;
-      const devDisclaimer = `Run into any problems with that? Feel free to open an issue [here](https://github.com/davidbmaier/totd-bot/issues).`;
-      const formattedMessage = format.formatInviteMessage(title, `${instructions}\n\n${message}\n${devDisclaimer}`);
-      utils.sendMessage(
-        msg.channel,
-        formattedMessage,
-        msg
-      );
-    } catch (error) {
-      if (error.message === `Missing Permissions`) {
-        console.error(`Unable to send error message to channel #${msg.channel.name} in ${msg.guild.name}, no permissions`);
-      } else {
-        console.error(`Unexpected error while sending error message to channel #${msg.channel.name} in ${msg.guild.name}`);
-        console.error(error.message);
-      }
-    }
-  } else if (msg.mentions.has(client.user.id, {ignoreEveryone: true})) {
+  if (msg.mentions.has(client.user.id, {ignoreEveryone: true})) {
     const redisClient = await redisAPI.login();
     redisAPI.logout(redisClient);
 
