@@ -93,12 +93,12 @@ When you invite this bot to your server or interact with it on another server, y
 ## Privacy Policy
 
 The TOTD Bot only stores data that is required for its core functionality:
-- It stores server and channel IDs for all servers that set up scheduled posts with the bot.
-- It also stores user IDs and the corresponding rating that user submitted for the current TOTD to prevent people from voting more than once - this data is removed after a day.
+- It stores server and channel IDs for all servers that set up scheduled posts with the bot - this data is removed as soon as the configuration is deleted by a server admin/whenever the bot can't access a given server anymore (i.e. when it was kicked).
+- It also stores user IDs and the corresponding rating that a user submitted for the current TOTD to prevent people from voting more than once - this data is removed after a day.
 - Apart from that, it only stores past TOTD data (map and rating information) to be able to display historical data to users.
 
 Whenever the bot gets removed from a server with any configuration, it automatically removes that server's information from its datastore within a day.
 
-For debugging purposes, the bot also logs user IDs, channel IDs and server IDs as well as the corresponding names when people interact with it.
+For debugging purposes, the bot also logs user IDs, channel IDs and server IDs as well as the corresponding names when people interact with it. Logs are potentially stored indefinitely, but are of course also subject to deletion requests if a user requests that all their data is removed.
 
-If you want to request deletion of any of your data (user, message, channel or server IDs that are directly related to you), please contact the bot owner on Discord (tooInfinite#5113).
+If you want to request information about or deletion of any of your data (user, message, channel or server IDs that are directly related to you), please contact the bot owner on Discord (tooInfinite#5113).
