@@ -71,7 +71,7 @@ new cron(
 new cron(
   `20 00 19 * * 1`,
   async () => {
-    await discordAPI.getBingoMessage(true);
+    await discordAPI.archiveBingoBoards();
   },
   null,
   true,

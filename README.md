@@ -17,8 +17,8 @@ This is a Discord bot for displaying the daily [Trackmania](https://www.trackman
 - `/verdict` - Prints yesterday's global ratings and a short verdict based on them.
 - `/ratings` - Prints today's global ratings.
 - `/rankings [time frame]` - Prints the TOTD rankings for the given time frame. Supported time frames are `this month`, `last month`, `this year`, `last year`, and `all time`.
-- `/bingo` - Prints this week's bingo board.
-- `/lastbingo` - Prints last week's bingo board.
+- `/bingo` - Prints this week's bingo board for the current server.
+- `/lastbingo` - Prints last week's bingo board for the current server.
 - `/votebingo [1-25]` - Starts a vote on that bingo field. All ongoing votes are resolved when the next TOTD is released.
 - `/enable` - Stores the current channel to the list the daily scheduled TOTD post gets sent to. One channel per server. Admin only.
 - `/disable` - Removes the current channel from the list the scheduled TOTD post gets sent to. Admin only.

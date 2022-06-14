@@ -115,9 +115,39 @@ const getRatingMessage = async (yesterday) => {
   }
 };
 
-const getBingoMessage = async (forceRefresh, lastWeek) => {
+const generateNewBingoBoard = async (serverID, redisClient) => {
+  console.log(`Regenerating bingo board for server ${serverID}...`);
+
+  const bingoFields = [...constants.bingoFields];
+  const pickedFields = [];
+  while (pickedFields.length < 24) {
+    const randomPick = Math.floor(Math.random() * bingoFields.length);
+    const pickedField = bingoFields.splice(randomPick, 1)[0];
+    pickedFields.push({
+      text: pickedField,
+      checked: false,
+      voteActive: false
+    });
+  }
+
+  const board = pickedFields;
+  await redisAPI.saveBingoBoard(redisClient, board, serverID);
+  console.log(`Refreshed bingo board in Redis`);
+  return board;
+};
+
+const archiveBingoBoards = async () => {
+  console.log(`Archiving old bingo boards...`);
   const redisClient = await redisAPI.login();
-  let board = await redisAPI.getBingoBoard(redisClient, lastWeek);
+  const allBoards = await redisAPI.getAllBingoBoards(redisClient);
+  await redisAPI.archiveBingoBoards(redisClient, allBoards);
+  await redisAPI.resetBingoBoards(redisClient);
+  redisAPI.logout(redisClient);
+};
+
+const getBingoMessage = async (serverID, lastWeek, forceRefresh) => {
+  const redisClient = await redisAPI.login();
+  let board = await redisAPI.getBingoBoard(redisClient, serverID, lastWeek);
 
   if (lastWeek) {
     if (board) {
@@ -130,28 +160,7 @@ const getBingoMessage = async (forceRefresh, lastWeek) => {
     }
   } else {
     if (!board || forceRefresh) {
-      if (board) {
-        console.log(`Archiving old bingo board...`);
-        await redisAPI.saveBingoBoard(redisClient, board, true);
-      }
-
-      console.log(`Regenerating bingo board...`);
-      const bingoFields = [...constants.bingoFields];
-      const pickedFields = [];
-      while (pickedFields.length < 24) {
-        const randomPick = Math.floor(Math.random() * bingoFields.length);
-        const pickedField = bingoFields.splice(randomPick, 1)[0];
-        pickedFields.push({
-          text: pickedField,
-          checked: false,
-          voteActive: false
-        });
-      }
-
-      board = pickedFields;
-
-      await redisAPI.saveBingoBoard(redisClient, board);
-      console.log(`Refreshed bingo board in Redis`);
+      board = await generateNewBingoBoard(serverID, redisClient);
     } else {
       console.log(`Using cached bingo board...`);
     }
@@ -199,13 +208,13 @@ const sendTOTDRatings = async (client, channel, yesterday, commandMessage) => {
 const sendBingoBoard = async (channel, lastWeek, commandMessage) => {
   const bingoString = lastWeek ? `last week's` : `current`;
   console.log(`Sending ${bingoString} bingo board to #${channel.name} in ${channel.guild.name}`);
-  const message = await getBingoMessage(false, lastWeek);
+  const message = await getBingoMessage(channel.guildId, lastWeek);
   await utils.sendMessage(channel, message, commandMessage);
 };
 
 const sendBingoVote = async (channel, bingoID, commandMessage) => {
   const redisClient = await redisAPI.login();
-  let board = await redisAPI.getBingoBoard(redisClient);
+  let board = await redisAPI.getBingoBoard(redisClient, channel.guildId);
 
   // add free space to the center
   board.splice(12, 0, {text: `Free space`, checked: false});
@@ -244,72 +253,75 @@ const sendBingoVote = async (channel, bingoID, commandMessage) => {
   board.splice(12, 1);
 
   // save vote info to redis
-  await redisAPI.saveBingoBoard(redisClient, board);
+  await redisAPI.saveBingoBoard(redisClient, board, channel.guildId);
   return redisAPI.logout(redisClient);
 };
 
 const countBingoVotes = async (client) => {
   console.log(`Counting outstanding bingo votes...`);
   const redisClient = await redisAPI.login();
-  let board = await redisAPI.getBingoBoard(redisClient);
+  let boards = await redisAPI.getAllBingoBoards(redisClient);
 
   const updatedFields = [];
 
-  for (let i = 0; i < board.length; i++) {
-    const field = board[i];
-    if (!field.checked && field.voteActive && field.voteMessageID && field.voteChannelID) {
-      // vote found, resolving it
-      let voteMessage;
-      try {
-        const voteChannel = await client.channels.fetch(field.voteChannelID);
-        voteMessage = await voteChannel.messages.fetch(field.voteMessageID);
-        if (!voteMessage) {
-          throw new Error(`Message not found`);
-        }
-
-        const voteYes = utils.getEmojiMapping(`VoteYes`);
-        const voteNo = utils.getEmojiMapping(`VoteNo`);
-
-        let countYes = 0;
-        let countNo = 0;
-        voteMessage.reactions.cache.forEach((reaction, reactionID) => {
-          // use count - 1 since the bot adds one initially
-          if (voteYes.includes(reactionID)) {
-            countYes = reaction.count - 1;
-          } else if (voteNo.includes(reactionID)) {
-            countNo = reaction.count - 1;
+  for (const [serverID, board] of Object.entries(boards)) {
+    console.log(`Counting votes for ${serverID}`);
+    for (let i = 0; i < board.length; i++) {
+      const field = board[i];
+      if (!field.checked && field.voteActive && field.voteMessageID && field.voteChannelID) {
+        // vote found, resolving it
+        let voteMessage;
+        try {
+          const voteChannel = await client.channels.fetch(field.voteChannelID);
+          voteMessage = await voteChannel.messages.fetch(field.voteMessageID);
+          if (!voteMessage) {
+            throw new Error(`Message not found`);
           }
-          // if Yes and No both don't match, ignore the reaction
-        });
 
-        if (countYes > countNo) {
-          field.checked = true;
-          delete field.voteActive;
-          delete field.voteMessageID;
-          delete field.voteChannelID;
-          updatedFields.push(field.text);
-        } else {
+          const voteYes = utils.getEmojiMapping(`VoteYes`);
+          const voteNo = utils.getEmojiMapping(`VoteNo`);
+
+          let countYes = 0;
+          let countNo = 0;
+          voteMessage.reactions.cache.forEach((reaction, reactionID) => {
+            // use count - 1 since the bot adds one initially
+            if (voteYes.includes(reactionID)) {
+              countYes = reaction.count - 1;
+            } else if (voteNo.includes(reactionID)) {
+              countNo = reaction.count - 1;
+            }
+            // if Yes and No both don't match, ignore the reaction
+          });
+
+          if (countYes > countNo) {
+            field.checked = true;
+            delete field.voteActive;
+            delete field.voteMessageID;
+            delete field.voteChannelID;
+            updatedFields.push(field.text);
+          } else {
+            field.voteActive = false;
+            delete field.voteMessageID;
+            delete field.voteChannelID;
+          }
+        } catch (error) {
+          console.log(`Caught error fetching votes for field ${field.text}:`, error);
+          // if message or channel can't be found, just remove the active vote
           field.voteActive = false;
           delete field.voteMessageID;
           delete field.voteChannelID;
         }
-      } catch (error) {
-        console.log(`Caught error fetching votes for field ${field.text}:`, error);
-        // if message or channel can't be found, just remove the active vote
-        field.voteActive = false;
-        delete field.voteMessageID;
-        delete field.voteChannelID;
       }
     }
-  }
 
-  if (updatedFields.length > 0) {
-    console.log(`Vote check finished, newly checked fields:`, updatedFields);
-  } else {
-    console.log(`Vote check finished, no new bingo field checked`);
-  }
+    if (updatedFields.length > 0) {
+      console.log(`Vote check finished, newly checked fields:`, updatedFields);
+    } else {
+      console.log(`Vote check finished, no new bingo field checked`);
+    }
 
-  await redisAPI.saveBingoBoard(redisClient, board);
+    await redisAPI.saveBingoBoard(redisClient, board, serverID);
+  }
   return redisAPI.logout(redisClient);
 };
 
@@ -514,6 +526,7 @@ module.exports = {
   getTOTDMessage,
   getTOTDLeaderboardMessage,
   getBingoMessage,
+  archiveBingoBoards,
   sendErrorMessage,
   sendTOTDLeaderboard,
   sendTOTDRatings,

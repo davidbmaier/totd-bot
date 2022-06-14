@@ -448,18 +448,19 @@ const updateIndividualRatings = async (redisClient, emojiName, add, user) => {
   });
 };
 
-const getBingoBoard = async (redisClient, lastWeek) => {
+const getBingoBoard = async (redisClient, serverID, lastWeek) => {
   return new Promise((resolve, reject) => {
     let bingoEntry = `bingo`;
     if (lastWeek) {
       bingoEntry = `lastBingo`;
     }
-    redisClient.get(bingoEntry, (err, board) => {
+    redisClient.get(bingoEntry, (err, boards) => {
       if (err) {
         reject(err);
       } else {
-        if (board) {
-          resolve(JSON.parse(board));
+        if (boards) {
+          const parsedBoards = JSON.parse(boards);
+          resolve(parsedBoards[serverID]);
         } else {
           resolve();
         }
@@ -468,17 +469,60 @@ const getBingoBoard = async (redisClient, lastWeek) => {
   });
 };
 
-const saveBingoBoard = async (redisClient, board, lastWeek) => {
+const getAllBingoBoards = async (redisClient) => {
   return new Promise((resolve, reject) => {
-    let bingoEntry = `bingo`;
-    if (lastWeek) {
-      bingoEntry = `lastBingo`;
-    }
-    redisClient.set(bingoEntry, JSON.stringify(board), (err) => {
+    redisClient.get(`bingo`, (err, boards) => {
       if (err) {
         reject(err);
       } else {
-        resolve(board);
+        if (boards) {
+          resolve(JSON.parse(boards));
+        } else {
+          resolve();
+        }
+      }
+    });
+  });
+};
+
+const saveBingoBoard = async (redisClient, board, serverID) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(`bingo`, (getErr, boards) => {
+      if (getErr) {
+        return reject(getErr);
+      }
+      const parsedBoards = JSON.parse(boards);
+      parsedBoards[serverID] = board;
+      redisClient.set(`bingo`, JSON.stringify(parsedBoards), (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(board);
+        }
+      });
+    });
+  });
+};
+
+const resetBingoBoards = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    redisClient.set(`bingo`, JSON.stringify({}), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+const archiveBingoBoards = async (redisClient, boards) => {
+  return new Promise((resolve, reject) => {
+    redisClient.set(`lastBingo`, JSON.stringify(boards), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(boards);
       }
     });
   });
@@ -509,6 +553,9 @@ module.exports = {
   updateIndividualRatings,
   getBingoBoard,
   saveBingoBoard,
+  resetBingoBoards,
+  getAllBingoBoards,
+  archiveBingoBoards,
   savePreviousTOTD,
   getPreviousTOTD
 };

@@ -369,11 +369,11 @@ const formatRankingMessage = (rankings, timeframe) => {
   // add disclaimer to description that month isn't over yet
   if (timeframe === constants.ratingRankingType.monthly) {
     const description1 = `The month isn't over yet, so these aren't final -`;
-    const description2 = `check \`${utils.addDevPrefix(`/rankings last month`)}\` when it's over to see the final rankings!`;
+    const description2 = `check \`/rankings last month\` when it's over to see the final rankings!`;
     embed.description = `${description1} ${description2}`;
   } else if (timeframe === constants.ratingRankingType.yearly) {
     const description1 = `The year isn't over yet, so these aren't final -`;
-    const description2 = `check \`${utils.addDevPrefix(`/rankings last year`)}\` when it's over to see the final rankings!`;
+    const description2 = `check \`/rankings last year\` when it's over to see the final rankings!`;
     embed.description = `${description1} ${description2}`;
   }
 
@@ -517,13 +517,13 @@ const formatBingoBoard = async (fields, lastWeek) => {
 
   const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `bingo.png`);
 
-  const embedDescription = 
+  const embedDescription =
     lastWeek
-      ? `This board is closed - use \`${utils.addDevPrefix(`/bingo`)}\` to see the current one.`
-      : `If you think we should cross one of these off, you can start a vote using \`${utils.addDevPrefix(`/bingovote [1-25]`)}\`.`;
+      ? `This board is closed - use \`/bingo\` to see the current one.`
+      : `If you think we should cross one of these off, you can start a vote using \`/votebingo [1-25]\`.`;
 
   const embed = {
-    title: `Here's the TOTD bingo board for week ${weekNumber}!`,
+    title: `Here's your server's TOTD bingo board for week ${weekNumber}!`,
     description: embedDescription,
     type: `rich`,
     image: {

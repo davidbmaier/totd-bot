@@ -177,7 +177,7 @@ const setRole = {
                 utils.sendMessage(msg.channel, `Okay, from now on I'll ping that role ten minutes before the ${region} COTD starts.`, msg);
               } else {
                 const message1 = `Sorry, I only know three regions: \`${regions.europe}\`, \`${regions.america}\`, and \`${regions.asia}\` - `;
-                const message2 = `tell me to set up a role for a region by using \`${utils.addDevPrefix(`/enablepings @[role] [region]`)}\`.\n`;
+                const message2 = `tell me to set up a role for a region by using \`/enablepings @[role] [region]\`.\n`;
                 const message3 = `If you just want to set up pings for the main Europe event, you can leave out the region.`;
                 utils.sendMessage(msg.channel, `${message1}${message2}${message3}`, msg);
               }
@@ -246,7 +246,7 @@ const removeRole = {
             utils.sendMessage(msg.channel, `Okay, I'll stop the pings for the ${region} COTD.`, msg);
           } else {
             const message1 = `Sorry, I only know three regions: \`${regions.europe}\`, \`${regions.america}\`, and \`${regions.asia}\`.\n`;
-            const message2 = `Tell me to remove a role for a region by using \`${utils.addDevPrefix(`/disablepings [region]`)}\`.`;
+            const message2 = `Tell me to remove a role for a region by using \`/disablepings [region]\`.`;
             utils.sendMessage(msg.channel, `${message1}${message2}`, msg);
           }
         } else {
@@ -416,8 +416,8 @@ const help = {
       \`/ratings\`  -  Display today's TOTD ratings.\n \
       \`/rankings [time frame]\`  -  Display TOTD rankings based on bot ratings.\n \
       (Time frames: \`this month\`, \`last month\`, \`this year\`, \`last year\` or \`all time\`)\n \
-      \`/bingo\`  -  Display this week's bingo board.\n \
-      \`/lastbingo\`  -  Display last week's bingo board.\n \
+      \`/bingo\`  -  Display this week's bingo board for this server.\n \
+      \`/lastbingo\`  -  Display last week's bingo board for this server.\n \
       \`/bingovote [1-25]\`  -  Start a vote to cross off that bingo field.`;
 
     let adminMessage;
@@ -503,14 +503,23 @@ const refreshRatings = {
 const refreshBingo = {
   slashCommand: {
     name: `refreshbingo`,
-    description: `Manually refresh the current bingo board.`,
+    description: `Manually refresh the current bingo board for a server.`,
     type: `CHAT_INPUT`,
+    options: [
+      {
+        type: `STRING`,
+        name: `serverid`,
+        description: `The server ID to refresh the bingo board for.`,
+        required: true
+      }
+    ]
   },
   action: async (msg) => {
     if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
+        const serverID = msg.options.get(`serverid`).value;
         const response = await utils.sendMessage(msg.channel, `Working on it... ${utils.getEmojiMapping(`Loading`)}`, msg);
-        await discordAPI.getBingoMessage(true);
+        await discordAPI.getBingoMessage(serverID, false, true);
         response.edit(`I've refreshed the current bingo board!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
