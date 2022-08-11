@@ -378,10 +378,6 @@ const rankings = {
             name: `last year`,
             value: constants.ratingRankingType.lastYearly
           },
-          {
-            name: `all time`,
-            value: constants.ratingRankingType.allTime
-          },
         ]
       }
     ]
@@ -415,7 +411,7 @@ const help = {
       \`/verdict\`  -  Display yesterday's TOTD ratings.\n \
       \`/ratings\`  -  Display today's TOTD ratings.\n \
       \`/rankings [time frame]\`  -  Display TOTD rankings based on bot ratings.\n \
-      (Time frames: \`this month\`, \`last month\`, \`this year\`, \`last year\` or \`all time\`)\n \
+      (Time frames: \`this month\`, \`last month\`, \`this year\` or \`last year\`)\n \
       \`/bingo\`  -  Display this week's bingo board for this server.\n \
       \`/lastbingo\`  -  Display last week's bingo board for this server.\n \
       \`/bingovote [1-25]\`  -  Start a vote to cross off that bingo field.`;
