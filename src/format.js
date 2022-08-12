@@ -236,15 +236,15 @@ const formatRatingsMessage = (ratings, yesterday, map) => {
   } else if (checkForControversialVotes() && -0.5 <= stats.averageRating && stats.averageRating < 0.5) {
     verdict += `A bit of a controversial one - let's agree on *interesting*.`;
   } else if (stats.averageRating < -2) {
-    verdict += `Looks like an absolute nightmare of a track!`;
-  } else if (stats.averageRating < -1) {
     verdict += `Best to just forget about this one, huh?`;
+  } else if (stats.averageRating < -1) {
+    verdict += `Not really well-liked, but it could still be worse.`;
   } else if (stats.averageRating < 0) {
-    verdict += `Not exactly a good track, but it could have been worse.`;
+    verdict += `Not great, not terrible.`;
   } else if (stats.averageRating < 1) {
-    verdict += `An alright track, but fairly mediocre.`;
+    verdict += `An alright track, but there's some room for improvement.`;
   } else if (stats.averageRating < 2) {
-    verdict += `Pretty good track, but not quite perfect.`;
+    verdict += `Pretty good track, definitely worth playing.`;
   } else {
     verdict += `Absolutely fantastic track, definitely a highlight!`;
   }
