@@ -12,7 +12,7 @@ const axios = require(`axios`);
 
 const uplayLogin = Buffer.from(process.env.USER_LOGIN).toString(`base64`);
 
-const loginToTM = async () => {
+const loginLive = async () => {
   try {
     const ubi = await loginUbi(uplayLogin); // login to ubi
     const tmUbi = await loginTrackmaniaUbi(ubi.ticket); // login to trackmania
@@ -24,7 +24,22 @@ const loginToTM = async () => {
       nadeoToken: nadeo.accessToken
     };
   } catch (e) {
-    console.log(`loginToTM error:`);
+    console.log(`loginLive error:`);
+    console.log(e);
+  }
+};
+
+const loginCore = async () => {
+  try {
+    const ubi = await loginUbi(uplayLogin); // login to ubi
+    const tmUbi = await loginTrackmaniaUbi(ubi.ticket); // login to trackmania
+
+    return {
+      ubiTicket: ubi.ticket,
+      nadeoToken: tmUbi.accessToken
+    };
+  } catch (e) {
+    console.log(`loginCore error:`);
     console.log(e);
   }
 };
@@ -193,8 +208,17 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
     const leaderboard = baseResponse?.data;
     const records = leaderboard.tops[0].top;
 
+    console.log(`Fetching player names...`);
+    const coreCredentials = await loginCore();
+    const coreHeaders = getNadeoHeaders(coreCredentials);
+    const playerNameRoute = `https://prod.trackmania.core.nadeo.online/accounts/displayNames/?accountIdList=${records.map((record) => record.accountId).join(`,`)}`;
+    const playerNameResponse = await axios.get(playerNameRoute, {
+      headers: coreHeaders,
+    });
+    console.log(`Player names received`);
+
     for (let i = 0; i < records.length; i++) {
-      records[i].playerName = await getPlayerName(credentials, records[i].accountId);
+      records[i].playerName = playerNameResponse.data.find((player) => player.accountId === records[i].accountId).displayName;
       records[i].position = i + 1;
     }
 
@@ -220,7 +244,7 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
 };
 
 module.exports = {
-  loginToTM,
+  loginLive,
   getCurrentTOTD,
   getTOTDLeaderboard
 };

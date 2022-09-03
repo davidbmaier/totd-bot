@@ -24,7 +24,7 @@ const getTOTDMessage = async (forceRefresh) => {
   }
 
   console.log(`Refreshing TOTD from API...`);
-  const credentials = await tmAPI.loginToTM();
+  const credentials = await tmAPI.loginLive();
   const totd = await tmAPI.getCurrentTOTD(credentials);
   const formattedMessage = format.formatTOTDMessage(totd);
 
@@ -60,7 +60,7 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
   ) {
     // if cached message does not exist or is older than ten minutes, refresh
     console.log(`Refreshing leaderboard from API...`);
-    const credentials = await tmAPI.loginToTM();
+    const credentials = await tmAPI.loginLive();
     const totd = await tmAPI.getCurrentTOTD(credentials);
     const top = await tmAPI.getTOTDLeaderboard(credentials, totd.seasonUid, totd.mapUid);
     // if top doesn't exist yet, fall back
