@@ -71,6 +71,13 @@ const checkMessageAuthorForTag = (msg, tag) => {
   return author.tag === tag;
 };
 
+const formatCommand = (name, commandIDs) => {
+  if (commandIDs && commandIDs[name]) {
+    return `</${name}:${commandIDs[name]}>`;
+  }
+  return `\`/${name}\``;
+};
+
 module.exports = {
   convertToUNIXSeconds,
   getMinutesAgo,
@@ -78,5 +85,6 @@ module.exports = {
   removeNameFormatting,
   formatDay,
   sendMessage,
-  checkMessageAuthorForTag
+  checkMessageAuthorForTag,
+  formatCommand
 };

@@ -23,6 +23,8 @@ const deployMode = process.env.DEPLOY_MODE;
 const adminServerID = process.env.ADMIN_SERVER_ID;
 const adminChannelID = process.env.ADMIN_CHANNEL_ID;
 
+const commandIDs = {};
+
 // COTD pings for 7pm (Europe)
 new cron(
   `00 50 18 * * *`,
@@ -136,7 +138,8 @@ client.on(`ready`, async () => {
 
   for (const commandConfig of globalCommandConfigs) {
     if (commandConfig) {
-      await globalCommandManager.create(commandConfig);
+      const commandRes = await globalCommandManager.create(commandConfig);
+      commandIDs[commandConfig.name] = commandRes.id;
       console.log(`Registered global command: ${commandConfig.name}`);
     }
   }
@@ -160,7 +163,7 @@ client.on(`interactionCreate`, async (interaction) => {
     const matchedCommand = joinedCommands.find((commandConfig) => commandConfig?.slashCommand?.name === interaction.commandName);
     if (matchedCommand) {
       try {
-        await matchedCommand.action(interaction, client);
+        await matchedCommand.action(interaction, client, commandIDs);
       } catch (e) {
         console.error(e);
       }

@@ -301,7 +301,7 @@ const resolveRatingToEmoji = (rating) => {
   }
 };
 
-const formatRankingMessage = (rankings, timeframe) => {
+const formatRankingMessage = (rankings, timeframe, commandIDs) => {
   // if top and bottom are empty, return a basic placeholder
   if (rankings?.top.length === 0 || rankings?.bottom.length === 0) {
     return `It seems I don't have any data for that timeframe yet, sorry!`;
@@ -369,11 +369,11 @@ const formatRankingMessage = (rankings, timeframe) => {
   // add disclaimer to description that month isn't over yet
   if (timeframe === constants.ratingRankingType.monthly) {
     const description1 = `The month isn't over yet, so these aren't final -`;
-    const description2 = `check \`/rankings last month\` when it's over to see the final rankings!`;
+    const description2 = `check ${utils.formatCommand(`rankings`, commandIDs)} \`last month\` when it's over to see the final rankings!`;
     embed.description = `${description1} ${description2}`;
   } else if (timeframe === constants.ratingRankingType.yearly) {
     const description1 = `The year isn't over yet, so these aren't final -`;
-    const description2 = `check \`/rankings last year\` when it's over to see the final rankings!`;
+    const description2 = `check ${utils.formatCommand(`rankings`, commandIDs)} \`last year\` when it's over to see the final rankings!`;
     embed.description = `${description1} ${description2}`;
   }
 
@@ -389,7 +389,7 @@ const formatRankingMessage = (rankings, timeframe) => {
   return {embeds: [embed]};
 };
 
-const formatBingoBoard = async (fields, lastWeek) => {
+const formatBingoBoard = async (fields, lastWeek, commandIDs) => {
   // add free space to the center
   fields.splice(12, 0, {text: `Free space`, checked: true});
 
@@ -519,8 +519,8 @@ const formatBingoBoard = async (fields, lastWeek) => {
 
   const embedDescription =
     lastWeek
-      ? `This board is closed - use \`/bingo\` to see the current one.`
-      : `If you think we should cross one of these off, you can start a vote using \`/votebingo [1-25]\`.`;
+      ? `This board is closed - use ${utils.formatCommand(`bingo`, commandIDs)} to see the current one.`
+      : `If you think we should cross one of these off, you can start a vote using ${utils.formatCommand(`votebingo`, commandIDs)}.`;
 
   const embed = {
     title: `Here's your server's TOTD bingo board for week ${weekNumber}!`,

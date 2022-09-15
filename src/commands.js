@@ -154,7 +154,7 @@ const setRole = {
       }
     ]
   },
-  action: async (msg) => {
+  action: async (msg, client, commandIDs) => {
     if (msg.member.permissions.has(`ADMINISTRATOR`) || utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
         const redisClient = await redisAPI.login();
@@ -177,7 +177,7 @@ const setRole = {
                 utils.sendMessage(msg.channel, `Okay, from now on I'll ping that role ten minutes before the ${region} COTD starts.`, msg);
               } else {
                 const message1 = `Sorry, I only know three regions: \`${regions.europe}\`, \`${regions.america}\`, and \`${regions.asia}\` - `;
-                const message2 = `tell me to set up a role for a region by using \`/enablepings @[role] [region]\`.\n`;
+                const message2 = `tell me to set up a role for a region by using ${utils.formatCommand(`enablepings`, commandIDs)}.\n`;
                 const message3 = `If you just want to set up pings for the main Europe event, you can leave out the region.`;
                 utils.sendMessage(msg.channel, `${message1}${message2}${message3}`, msg);
               }
@@ -230,7 +230,7 @@ const removeRole = {
       }
     ]
   },
-  action: async (msg) => {
+  action: async (msg, client, commandIDs) => {
     if (msg.member.permissions.has(`ADMINISTRATOR`) || utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
         const redisClient = await redisAPI.login();
@@ -246,7 +246,7 @@ const removeRole = {
             utils.sendMessage(msg.channel, `Okay, I'll stop the pings for the ${region} COTD.`, msg);
           } else {
             const message1 = `Sorry, I only know three regions: \`${regions.europe}\`, \`${regions.america}\`, and \`${regions.asia}\`.\n`;
-            const message2 = `Tell me to remove a role for a region by using \`/disablepings [region]\`.`;
+            const message2 = `Tell me to remove a role for a region by using ${utils.formatCommand(`disablepings`, commandIDs)}.`;
             utils.sendMessage(msg.channel, `${message1}${message2}`, msg);
           }
         } else {
@@ -270,9 +270,9 @@ const bingo = {
     description: `Display this week's bingo board.`,
     type: `CHAT_INPUT`,
   },
-  action: async (msg) => {
+  action: async (msg, client, commandIDs) => {
     try {
-      await discordAPI.sendBingoBoard(msg.channel, false, msg);
+      await discordAPI.sendBingoBoard(msg.channel, false, msg, commandIDs);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
       console.log(error);
@@ -286,9 +286,9 @@ const lastBingo = {
     description: `Display last week's bingo board.`,
     type: `CHAT_INPUT`,
   },
-  action: async (msg) => {
+  action: async (msg, client, commandIDs) => {
     try {
-      await discordAPI.sendBingoBoard(msg.channel, true, msg);
+      await discordAPI.sendBingoBoard(msg.channel, true, msg, commandIDs);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
       console.log(error);
@@ -319,11 +319,11 @@ const bingoVote = {
       }
     ]
   },
-  action: async (msg) => {
+  action: async (msg, client, commandIDs) => {
     try {
       const bingoID = msg.options.get(`field`).value;
       if (!bingoID || Number.isNaN(parseInt(bingoID))) {
-        utils.sendMessage(msg.channel, `I didn't catch that - to vote on a bingo field, use \`/bingovote [1-25]\`.`, msg);
+        utils.sendMessage(msg.channel, `I didn't catch that - to vote on a bingo field, use ${utils.formatCommand(`votebingo`, commandIDs)}.`, msg);
       } else {
         await discordAPI.sendBingoVote(msg.channel, parseInt(bingoID), msg);
       }
@@ -382,7 +382,7 @@ const rankings = {
       }
     ]
   },
-  action: async (msg) => {
+  action: async (msg, client, commandIDs) => {
     try {
       const matchingTimeframe = msg.options.get(`timeframe`).value;
 
@@ -390,7 +390,7 @@ const rankings = {
       const rankings = await redisAPI.getRatingRankings(redisClient, matchingTimeframe);
       redisAPI.logout(redisClient);
 
-      const rankingMessage = format.formatRankingMessage(rankings, matchingTimeframe);
+      const rankingMessage = format.formatRankingMessage(rankings, matchingTimeframe, commandIDs);
       utils.sendMessage(msg.channel, rankingMessage, msg);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
@@ -405,24 +405,22 @@ const help = {
     description: `Get a list of all commands for the TOTD Bot.`,
     type: `CHAT_INPUT`,
   },
-  action: async (msg) => {
-    let message = `\`/today\`  -  Display the current TOTD information.\n \
-      \`/leaderboard\`  -  Display the current top 10 (and the time for top 100).\n \
-      \`/verdict\`  -  Display yesterday's TOTD ratings.\n \
-      \`/ratings\`  -  Display today's TOTD ratings.\n \
-      \`/rankings [time frame]\`  -  Display TOTD rankings based on bot ratings.\n \
-      (Time frames: \`this month\`, \`last month\`, \`this year\` or \`last year\`)\n \
-      \`/bingo\`  -  Display this week's bingo board for this server.\n \
-      \`/lastbingo\`  -  Display last week's bingo board for this server.\n \
-      \`/bingovote [1-25]\`  -  Start a vote to cross off that bingo field.`;
+  action: async (msg, client, commandIDs) => {
+    let message = `${utils.formatCommand(`today`, commandIDs)} - Display the current TOTD information.\n \
+      ${utils.formatCommand(`leaderboard`, commandIDs)} - Display the current top 10 (and the time for top 100).\n \
+      ${utils.formatCommand(`verdict`, commandIDs)} - Display yesterday's TOTD ratings.\n \
+      ${utils.formatCommand(`ratings`, commandIDs)} - Display today's TOTD ratings.\n \
+      ${utils.formatCommand(`rankings`, commandIDs)} - Display TOTD rankings based on bot ratings.\n \
+      ${utils.formatCommand(`bingo`, commandIDs)} - Display this week's bingo board for this server.\n \
+      ${utils.formatCommand(`lastbingo`, commandIDs)} - Display last week's bingo board for this server.\n \
+      ${utils.formatCommand(`votebingo`, commandIDs)} - Start a vote to cross off that bingo field.`;
 
     let adminMessage;
     if (msg.member.permissions.has(`ADMINISTRATOR`) || utils.checkMessageAuthorForTag(msg, adminTag)) {
-      adminMessage = `\n\`/enable\`  -  Enable daily TOTD posts in this channel.\n \
-      \`/disable\`  -  Disable the daily posts again.\n \
-      \`/enablepings [@role] [region]\`  -  Enable pings ten minutes before COTD.\n \
-      \`/disablepings [region]\`  -  Disable daily pings again.\n\
-      (Supported regions: \`${constants.cupRegions.europe}\`, \`${constants.cupRegions.america}\`, and \`${constants.cupRegions.asia}\`)`;
+      adminMessage = `\n${utils.formatCommand(`enable`, commandIDs)} - Enable daily TOTD posts in this channel.\n \
+      ${utils.formatCommand(`disable`, commandIDs)} - Disable the daily posts again.\n \
+      ${utils.formatCommand(`enablepings`, commandIDs)} - Enable pings ten minutes before COTD.\n \
+      ${utils.formatCommand(`disablepings`, commandIDs)} - Disable daily pings again.`;
     }
     try {
       const formattedMessage = format.formatHelpMessage(message, adminMessage);
@@ -510,12 +508,12 @@ const refreshBingo = {
       }
     ]
   },
-  action: async (msg) => {
+  action: async (msg, client, commandIDs) => {
     if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
         const serverID = msg.options.get(`serverid`).value;
         const response = await utils.sendMessage(msg.channel, `Working on it... ${utils.getEmojiMapping(`Loading`)}`, msg);
-        await discordAPI.getBingoMessage(serverID, false, true);
+        await discordAPI.getBingoMessage(serverID, false, true, commandIDs);
         response.edit(`I've refreshed the current bingo board!`);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);

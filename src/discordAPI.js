@@ -145,7 +145,7 @@ const archiveBingoBoards = async () => {
   redisAPI.logout(redisClient);
 };
 
-const getBingoMessage = async (serverID, lastWeek, forceRefresh) => {
+const getBingoMessage = async (serverID, lastWeek, forceRefresh, commandIDs) => {
   const redisClient = await redisAPI.login();
   let board = await redisAPI.getBingoBoard(redisClient, serverID, lastWeek);
 
@@ -153,7 +153,7 @@ const getBingoMessage = async (serverID, lastWeek, forceRefresh) => {
     if (board) {
       console.log(`Using last week's board`);
       redisAPI.logout(redisClient);
-      return await format.formatBingoBoard(board, lastWeek);
+      return await format.formatBingoBoard(board, lastWeek, commandIDs);
     } else {
       console.log(`Couldn't find last week's board`);
       return `Hmm, I don't remember last week's board. Sorry about that!`;
@@ -166,7 +166,7 @@ const getBingoMessage = async (serverID, lastWeek, forceRefresh) => {
     }
 
     redisAPI.logout(redisClient);
-    return await format.formatBingoBoard(board);
+    return await format.formatBingoBoard(board, false, commandIDs);
   }
 };
 
@@ -205,10 +205,10 @@ const sendTOTDRatings = async (client, channel, yesterday, commandMessage) => {
   await utils.sendMessage(channel, message, commandMessage);
 };
 
-const sendBingoBoard = async (channel, lastWeek, commandMessage) => {
+const sendBingoBoard = async (channel, lastWeek, commandMessage, commandIDs) => {
   const bingoString = lastWeek ? `last week's` : `current`;
   console.log(`Sending ${bingoString} bingo board to #${channel.name} in ${channel.guild.name}`);
-  const message = await getBingoMessage(channel.guildId, lastWeek);
+  const message = await getBingoMessage(channel.guildId, lastWeek, false, commandIDs);
   await utils.sendMessage(channel, message, commandMessage);
 };
 
