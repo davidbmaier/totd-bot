@@ -216,6 +216,10 @@ const sendBingoVote = async (channel, bingoID, commandMessage) => {
   const redisClient = await redisAPI.login();
   let board = await redisAPI.getBingoBoard(redisClient, channel.guildId);
 
+  if (!board) {
+    return await utils.sendMessage(channel, `There's no board yet, why are you trying to vote? You can use \`/bingo\` to generate this server's board for this week.`);
+  }
+
   // add free space to the center
   board.splice(12, 0, {text: `Free space`, checked: false});
 
