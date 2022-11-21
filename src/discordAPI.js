@@ -185,6 +185,7 @@ const sendTOTDMessage = async (client, channel, message, commandMessage) => {
     return Promise.resolve();
   } catch (error) {
     console.log(`Couldn't send TOTD message to #${channel.name} in ${channel.guild.name}, throwing error`);
+    console.error(error);
     return Promise.reject(error);
   }
 };
