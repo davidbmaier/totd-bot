@@ -19,6 +19,7 @@ const getEmojiMapping = (emojiName) => {
 const removeNameFormatting = (text = ``) => {
   // this should take care of all the possible options, see https://doc.maniaplanet.com/client/text-formatting for reference
   let cleanedText = text.replace(/\$[0-9a-fA-F]{3}/g, ``);
+  cleanedText = cleanedText.replaceAll(`$W`, ``);
   cleanedText = cleanedText.replaceAll(`$w`, ``);
   cleanedText = cleanedText.replaceAll(`$n`, ``);
   cleanedText = cleanedText.replaceAll(`$m`, ``);
