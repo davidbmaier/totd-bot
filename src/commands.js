@@ -622,7 +622,7 @@ const debug = {
     description: `Placeholder command for testing.`,
     type: `CHAT_INPUT`,
   },
-  action: async (msg) => {
+  action: async (msg, client) => {
     if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
         utils.sendMessage(msg.channel, `Debug me!`, msg);

@@ -180,9 +180,9 @@ const sendTOTDMessage = async (client, channel, message, commandMessage) => {
       emojis.push(utils.getEmojiMapping(constants.ratingEmojis[i]));
     }
     for (const emoji of emojis) {
-      await discordMessage.react(emoji);
+      discordMessage.react(emoji);
     }
-    return Promise.resolve();
+    return Promise.resolve(discordMessage);
   } catch (error) {
     console.log(`Couldn't send TOTD message to #${channel.name} in ${channel.guild.name}, throwing error`);
     console.error(error);
@@ -402,12 +402,21 @@ const distributeTOTDMessages = async (client) => {
   countBingoVotes(client);
 
   const configs = await redisAPI.getAllConfigs(redisClient);
-  redisAPI.logout(redisClient);
 
-  const distributeTOTDMessage = async (config) => {
+  const distributeTOTDMessage = async (config, initialMessage) => {
     try {
       const channel = await client.channels.fetch(config.channelID);
-      await sendTOTDMessage(client, channel, message);
+      const totdMessage = await sendTOTDMessage(client, channel, message);
+
+      if (initialMessage && totdMessage.embeds[0]?.image?.url) {
+        console.log(`Writing back initial message's thumbnail URL to Redis and future posts`);
+        message.embeds[0].image.url = totdMessage.embeds[0]?.image?.url;
+        delete message.files;
+
+        const updatedTOTD = await redisAPI.getCurrentTOTD(redisClient);
+        await redisAPI.saveCurrentTOTD(redisClient, {...updatedTOTD, thumbnailUrl: totdMessage.embeds[0]?.image?.url});
+        redisAPI.logout(redisClient);
+      }
     } catch (error) {
       let retryCount = 0;
       if (error.message === `Missing Access` || error.message === `Missing Permissions` || error.message === `Unknown Channel`) {
@@ -445,13 +454,17 @@ const distributeTOTDMessages = async (client) => {
     }
   };
 
+  // send the first message in a blocking way to store the image URL
+  console.log(`Sending out the first TOTD message before posting the rest`);
+  await distributeTOTDMessage(configs.shift(), true);
+  console.log(`Initial TOTD message process, continuing with the rest`);
   for (const [configIndex, config] of configs.entries()) {
     if (configIndex % 35 === 0 && configIndex !== 0) {
       // wait for 15 seconds before continuing to definitely avoid hitting Discord API rate limit (50 reqs/s)
       await new Promise(resolve => setTimeout(resolve, 15000));
       console.log(`Waiting 15 seconds before sending TOTD message to next batch of servers...`);
     }
-    distributeTOTDMessage(config);
+    distributeTOTDMessage(config, false);
   }
 };
 

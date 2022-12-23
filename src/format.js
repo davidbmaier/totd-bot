@@ -71,14 +71,9 @@ const formatTOTDMessage = (totd) => {
 
   const scoreNote = `React to this message to rate the TOTD!`;
 
-  const thumbnailAttachment = new Discord.MessageAttachment(totd.thumbnailUrl, `totd.png`);
-
   const embed = {
     title: title,
     type: `rich`,
-    image: {
-      url: `attachment://totd.png`
-    },
     description: scoreNote,
     fields: [
       {
@@ -134,9 +129,19 @@ const formatTOTDMessage = (totd) => {
     embeds: [embed]
   };
 
-  // to attach the image, it needs to be sent along as a file
-  if (thumbnailAttachment) {
+  if (totd.thumbnailUrl?.includes(`discordapp.com`)) {
+    // if the image is hosted on Discord, just use the link
+    embed.image = {
+      url: totd.thumbnailUrl
+    };
+  } else {
+    // if the image is external, upload the file itself
+    const thumbnailAttachment = new Discord.MessageAttachment(totd.thumbnailUrl, `totd.png`);
+    // to attach the image, it needs to be sent along as a file
     messageObject.files = [thumbnailAttachment];
+    embed.image = {
+      url: `attachment://totd.png`
+    };
   }
 
   return messageObject;
