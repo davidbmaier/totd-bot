@@ -363,7 +363,7 @@ const archiveRatings = async (client, oldTOTD) => {
 
 
     const today = new Date();
-    if (today.getDate() === 10 && today.getMonth() === 0) {
+    if (today.getDate() === 1 && today.getMonth() === 0) {
       // if it's the 1st of the year, archive yearly rating rankings
       console.log(`Archiving yearly rating ranking and resetting the active one...`);
       const yearly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.yearly);
