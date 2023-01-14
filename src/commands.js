@@ -616,6 +616,22 @@ const notifyServersWithWrongPermissions = {
   }
 };
 
+const kem = {
+  slashCommand: {
+    name: `kem`,
+    description: `Say the line, Bart!`,
+    type: `CHAT_INPUT`,
+  },
+  action: async (msg) => {
+    try {
+      utils.sendMessage(msg.channel, `Fix it, Kem!`, msg);
+    } catch (error) {
+      discordAPI.sendErrorMessage(msg.channel);
+      console.log(error);
+    }
+  }
+};
+
 const debug = {
   slashCommand: {
     name: `debug`,
@@ -650,6 +666,7 @@ module.exports = {
     bingo,
     lastBingo,
     bingoVote,
+    kem
   ],
   adminCommands: [
     refresh,
