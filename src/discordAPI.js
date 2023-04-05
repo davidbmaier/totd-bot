@@ -500,7 +500,13 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
   const totd = await redisAPI.getCurrentTOTD(redisClient);
 
   if (reaction.message.partial) {
-    await reaction.message.fetch();
+    console.log(`Reaction message is partial, fetching...`);
+		try {
+			await reaction.message.fetch();
+		} catch (error) {
+			console.error(`Something went wrong when fetching the full reaction message: `, error);
+			return;
+		}
   }
 
   // use the mapUid to check if this is the current TOTD
