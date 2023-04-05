@@ -499,6 +499,10 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
   const redisClient = await redisAPI.login();
   const totd = await redisAPI.getCurrentTOTD(redisClient);
 
+  if (reaction.message.partial) {
+    await reaction.message.fetch();
+  }
+
   // use the mapUid to check if this is the current TOTD
   const currentMapUid = totd.mapUid;
   const reactionMapUid = utils.removeNameFormatting(
