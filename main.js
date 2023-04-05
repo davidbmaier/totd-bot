@@ -202,6 +202,8 @@ const handleReaction = async (reaction, user, add) => {
     && user.id !== client.user.id // check the reaction was not sent by the bot
   ) {
     discordAPI.updateTOTDReactionCount(reaction, add, user);
+  } else {
+    console.log(`Reaction was either on a non-bot message or from the bot itself: (Author: ${reaction.message.author.username}, User: ${user.tag})`);
   }
 };
 
