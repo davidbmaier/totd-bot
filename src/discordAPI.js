@@ -499,7 +499,7 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
   const redisClient = await redisAPI.login();
   const totd = await redisAPI.getCurrentTOTD(redisClient);
 
-  if (reaction.message.partial) {
+  if (reaction.message.partial || reaction.message.embeds.length === 0) {
     console.log(`Reaction message is partial, fetching...`);
 		try {
 			await reaction.message.fetch();
