@@ -514,7 +514,7 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
   const reactionMapUid = utils.removeNameFormatting(
     reaction.message?.embeds[0]?.footer?.text?.trim()
   );
-  if (currentMapUid === reactionMapUid) {
+  if (currentMapUid === reactionMapUid || reactionMapUid === undefined) { // weird edge case: embed might be missing, but it's still a valid reaction
     const ratingEmojis = constants.ratingEmojis;
     let ratingEmojiFound = false;
     for (let i = 0; i < ratingEmojis.length; i++) {
@@ -541,7 +541,7 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
     redisAPI.logout(redisClient);
   } else {
     // not a TOTD post, close the redis connection
-    console.log(`Reaction wasn't on any current TOTD post (retrieved mapUid: ${reaction.message?.embeds[0]?.footer?.text?.trim()})`);
+    console.log(`Reaction wasn't on any current TOTD post (retrieved mapUid: ${reactionMapUid})`);
     console.log(reaction);
     redisAPI.logout(redisClient);
   }
