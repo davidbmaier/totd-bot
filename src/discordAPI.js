@@ -540,9 +540,8 @@ const updateTOTDReactionCount = async (reaction, add, user) => {
     }
     redisAPI.logout(redisClient);
   } else {
-    // not a TOTD post, close the redis connection
-    console.log(`Reaction wasn't on any current TOTD post (retrieved mapUid: ${reactionMapUid})`);
-    console.log(reaction);
+    console.log(`Ignored reaction: (${reaction.emoji.identifier} ${add ? `added` : `removed`} for mapUid "${reactionMapUid}")`);
+    // ignored, close the redis connection
     redisAPI.logout(redisClient);
   }
 };
