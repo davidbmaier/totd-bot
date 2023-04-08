@@ -259,8 +259,6 @@ const formatRatingsMessage = (ratings, yesterday, map) => {
     description = `**${utils.removeNameFormatting(map.name)}** by **${map.authorName}**`;
   }
 
-  description += `\n\n⚠️ Due to recent instabilities in Discord's API, the ratings might not always be 100% correct - feel free to annoy tooInfinite#5113 (<@141627532335251456>) about it if they don't look right.`;
-
   return {
     embeds: [{
       title:
