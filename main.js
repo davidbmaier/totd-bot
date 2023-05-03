@@ -214,11 +214,11 @@ client.on(`messageReactionRemove`, async (reaction, user) => {
 });
 
 client.on(`guildCreate`, (guild) => {
-  console.log(`Joined new server: ${guild.name}`);
+  console.log(`Joined new server: ${guild.name} (${guild.id})`);
 });
 
 client.on(`guildDelete`, (guild) => {
-  console.log(`Left server: ${guild.name}`);
+  console.log(`Left server: ${guild.name} (${guild.id})`);
 });
 
 /* client.on(`rateLimit`, (rateLimit) => {
