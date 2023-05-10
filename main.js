@@ -126,7 +126,7 @@ client.on(`ready`, async () => {
   const globalCommandConfigs = commands.globalCommands.map((commandConfig) => commandConfig.slashCommand);
   const adminCommandConfigs = commands.adminCommands.map((commandConfig) => commandConfig.slashCommand);
 
-  /* const adminGuild = await client.guilds.fetch(adminServerID);
+  const adminGuild = await client.guilds.fetch(adminServerID);
   let globalCommandManager;
   if (deployMode !== `prod`) {
     // use admin guild for global commands in dev mode
@@ -148,7 +148,7 @@ client.on(`ready`, async () => {
       await adminCommandManager.create(commandConfig);
       console.log(`Registered admin command: ${commandConfig.name}`);
     }
-  } */
+  }
 
   discordAPI.distributeTOTDMessages(client);
 });
