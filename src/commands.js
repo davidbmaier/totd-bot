@@ -573,41 +573,29 @@ const serverInfo = {
   }
 };
 
-const notifyServersWithWrongPermissions = {
+const distributeTOTDMessages = {
   slashCommand: {
-    name: `notifywrongpermissions`,
-    description: `Notify all server owners where the bot is lacking slash command permmissions.`,
+    name: `distribute`,
+    description: `Manually broadcast the current TOTD message to all subscribed channels.`,
     type: `CHAT_INPUT`,
+    options: [
+      {
+        type: `STRING`,
+        name: `confirm`,
+        description: `Send "yes" to confirm you really want to do this.`,
+        required: true
+      }
+    ]
   },
   action: async (msg, client) => {
     if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
-        const response = await utils.sendMessage(msg.channel, `Working on it... ${utils.getEmojiMapping(`Loading`)}`, msg);
-        const serversWithWrongPermissions = [];
-        const servers = client.guilds.cache;
-        for (const server of servers.values()) {
-          try {
-            // attempt to create a test command - there's apparently no other way to check whether the bot has application commands permissions
-            const testCommand = await server.commands.create({
-              name: `totdtest`,
-              description: `Test command for the TOTD bot.`,
-            });
-            await testCommand.delete();
-          } catch (error) {
-            if (error.message === `Missing Access` || error.message === `Missing Permissions`) {
-              serversWithWrongPermissions.push(server);
-            } else {
-              console.error(`Something else went wrong for server ${server.name}.`);
-              console.error(error);
-            }
-          }
+        const confirmation = msg.options.get(`confirm`).value;
+        if (confirmation !== `yes`) {
+          utils.sendMessage(msg.channel, `Ignoring broadcast command because it was missing the required confirmation.`, msg);
+        } else {
+          discordAPI.distributeTOTDMessages(client);
         }
-
-        response.edit(`I've found ${serversWithWrongPermissions.length} servers that don't have the required permissions for me to register my commands.`);
-        serversWithWrongPermissions.forEach(async (server) => {
-          const owner = await client.users.fetch(server.ownerId);
-          console.log(`Server with missing slash command permissions: ${server.name} - Owner: ${owner.tag} - ID: ${server.id}`);
-        });
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
         console.error(error);
@@ -638,7 +626,7 @@ const debug = {
     description: `Placeholder command for testing.`,
     type: `CHAT_INPUT`,
   },
-  action: async (msg, client) => {
+  action: async (msg) => {
     if (utils.checkMessageAuthorForTag(msg, adminTag)) {
       try {
         utils.sendMessage(msg.channel, `Debug me!`, msg);
@@ -676,6 +664,6 @@ module.exports = {
     refreshBingoCount,
     debug,
     serverInfo,
-    notifyServersWithWrongPermissions
+    distributeTOTDMessages
   ]
 };
