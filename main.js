@@ -149,8 +149,6 @@ client.on(`ready`, async () => {
       console.log(`Registered admin command: ${commandConfig.name}`);
     }
   }
-
-  discordAPI.distributeTOTDMessages(client);
 });
 
 client.on(`interactionCreate`, async (interaction) => {
