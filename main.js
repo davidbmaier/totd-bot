@@ -58,9 +58,9 @@ new cron(
   `Europe/Paris`
 );
 
-// display the current totd every day at 19:00:05
+// display the current totd every day at 19:00:10
 new cron(
-  `05 00 19 * * *`,
+  `10 00 19 * * *`,
   async () => {
     await discordAPI.distributeTOTDMessages(client);
   },
@@ -126,7 +126,7 @@ client.on(`ready`, async () => {
   const globalCommandConfigs = commands.globalCommands.map((commandConfig) => commandConfig.slashCommand);
   const adminCommandConfigs = commands.adminCommands.map((commandConfig) => commandConfig.slashCommand);
 
-  const adminGuild = await client.guilds.fetch(adminServerID);
+  /* const adminGuild = await client.guilds.fetch(adminServerID);
   let globalCommandManager;
   if (deployMode !== `prod`) {
     // use admin guild for global commands in dev mode
@@ -148,7 +148,9 @@ client.on(`ready`, async () => {
       await adminCommandManager.create(commandConfig);
       console.log(`Registered admin command: ${commandConfig.name}`);
     }
-  }
+  } */
+
+  discordAPI.distributeTOTDMessages(client);
 });
 
 client.on(`interactionCreate`, async (interaction) => {

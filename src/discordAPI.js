@@ -395,7 +395,14 @@ const distributeTOTDMessages = async (client) => {
   const oldTOTD = await redisAPI.getCurrentTOTD(redisClient);
 
   console.log(`Broadcasting TOTD message to subscribed channels`);
-  const message = await getTOTDMessage(true);
+  let message = await getTOTDMessage(true);
+
+  // check that the newly retrieved map is different from yesterday's
+  if (oldTOTD.mapUid === message.embeds[0].footer.text) {
+    console.warn(`Newly fetched TOTD is the same as the old one, refetching in a few seconds`);
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    message = await getTOTDMessage(true);
+  }
 
   await archiveRatings(client, oldTOTD);
   await redisAPI.clearIndividualRatings(redisClient);
