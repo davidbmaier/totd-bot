@@ -9,9 +9,6 @@ const adminChannelID = process.env.ADMIN_CHANNEL_ID;
 
 const errorMessage = `Oops, something went wrong here - please talk to <@141627532335251456> and let him know that didn't work.`;
 
-// initial login on startup to populate the tokens
-tmAPI.login();
-
 const getTOTDMessage = async (forceRefresh) => {
   if (!forceRefresh) {
     console.log(`Using cached TOTD...`);

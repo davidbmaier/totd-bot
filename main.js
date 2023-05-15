@@ -12,6 +12,7 @@ const cron = require(`cron`).CronJob;
 require(`dotenv`).config();
 
 const discordAPI = require(`./src/discordAPI`);
+const tmAPI = require(`./src/tmApi`);
 const redisAPI = require(`./src/redisApi`);
 const format = require(`./src/format`);
 const commands = require(`./src/commands`);
@@ -82,6 +83,8 @@ new cron(
 
 client.on(`ready`, async () => {
   console.log(`Ready as ${client.user.tag}!`);
+
+  await tmAPI.login();
 
   // in production, refresh TOTD to make sure there is a thumbnail in the images for cached messages
   if (deployMode === `prod`) {

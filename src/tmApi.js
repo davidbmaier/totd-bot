@@ -4,16 +4,13 @@ const { DateTime } = require(`luxon`);
 const userLogin = process.env.USER_LOGIN;
 
 let coreToken;
-let clubToken;
 let liveToken;
 
 let lastRequestSent;
 
 const sendRequest = async ({url, token, method = `get`, body = {}, headersOverride}) => {
   let tokenValue = coreToken;
-  if (token === `club`) {
-    tokenValue = clubToken;
-  } else if (token === `live`) {
+  if (token === `live`) {
     tokenValue = liveToken;
   }
 
