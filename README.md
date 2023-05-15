@@ -80,7 +80,6 @@ Thanks go to:
 - Juice#7454 for the improved voting emojis.
 - The [TMX](https://trackmania.exchange/) team for their platform and well-documented API.
 - Miss ([@codecat](https://github.com/codecat)) for her work on [trackmania.io](https://trackmania.io).
-- [@breeku](https://github.com/breeku) for creating [a neat wrapper](https://github.com/breeku/trackmania-api-node) around a bunch of reverse-engineered Nadeo APIs (let's hope they don't break).
 
 ## Terms of Service
 

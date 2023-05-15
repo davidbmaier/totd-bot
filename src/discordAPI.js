@@ -9,6 +9,9 @@ const adminChannelID = process.env.ADMIN_CHANNEL_ID;
 
 const errorMessage = `Oops, something went wrong here - please talk to <@141627532335251456> and let him know that didn't work.`;
 
+// initial login on startup to populate the tokens
+tmAPI.login();
+
 const getTOTDMessage = async (forceRefresh) => {
   if (!forceRefresh) {
     console.log(`Using cached TOTD...`);
@@ -24,8 +27,7 @@ const getTOTDMessage = async (forceRefresh) => {
   }
 
   console.log(`Refreshing TOTD from API...`);
-  const credentials = await tmAPI.loginLive();
-  const totd = await tmAPI.getCurrentTOTD(credentials);
+  const totd = await tmAPI.getCurrentTOTD();
   const formattedMessage = format.formatTOTDMessage(totd);
 
   // also refresh the leaderboard
@@ -60,9 +62,8 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
   ) {
     // if cached message does not exist or is older than ten minutes, refresh
     console.log(`Refreshing leaderboard from API...`);
-    const credentials = await tmAPI.loginLive();
-    const totd = await tmAPI.getCurrentTOTD(credentials);
-    const top = await tmAPI.getTOTDLeaderboard(credentials, totd.seasonUid, totd.mapUid);
+    const totd = await tmAPI.getCurrentTOTD();
+    const top = await tmAPI.getTOTDLeaderboard(totd.seasonUid, totd.mapUid);
     // if top doesn't exist yet, fall back
     if (!top) {
       const fallbackMessage = `Hmm, either there's not enough records yet, or the leaderboard is being updated too fast - please check again in a couple minutes.`;
@@ -395,11 +396,16 @@ const distributeTOTDMessages = async (client) => {
   const oldTOTD = await redisAPI.getCurrentTOTD(redisClient);
 
   console.log(`Broadcasting TOTD message to subscribed channels`);
-  let message = await getTOTDMessage(true);
+  let message;
+  try {
+    await getTOTDMessage(true);
+  } catch (error) {
+    console.error(`Failed to get TOTD message during distribution`);
+  }
 
   // check that the newly retrieved map is different from yesterday's
-  if (oldTOTD.mapUid === message.embeds[0].footer.text) {
-    console.warn(`Newly fetched TOTD is the same as the old one, refetching in a few seconds`);
+  if (!message || oldTOTD.mapUid === message.embeds[0].footer.text) {
+    console.warn(`Refetching TOTD message in a few seconds`);
     await new Promise((resolve) => setTimeout(resolve, 5000));
     message = await getTOTDMessage(true);
   }

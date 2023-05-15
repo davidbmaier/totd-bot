@@ -1,77 +1,113 @@
-const {
-  loginUbi,
-  loginTrackmaniaUbi,
-  loginTrackmaniaNadeo,
-  getMaps,
-  getTOTDs,
-  getProfiles,
-  getProfilesById,
-} = require(`trackmania-api-node`);
-require(`dotenv`).config();
 const axios = require(`axios`);
+const { DateTime } = require(`luxon`);
 
-const uplayLogin = Buffer.from(process.env.USER_LOGIN).toString(`base64`);
+const userLogin = process.env.USER_LOGIN;
 
-const loginLive = async () => {
-  try {
-    const ubi = await loginUbi(uplayLogin); // login to ubi
-    const tmUbi = await loginTrackmaniaUbi(ubi.ticket); // login to trackmania
-    const nadeo = await loginTrackmaniaNadeo(tmUbi.accessToken, `NadeoLiveServices`); // login to nadeo
+let coreToken;
+let clubToken;
+let liveToken;
 
-    return {
-      ubiTicket: ubi.ticket,
-      tmToken: tmUbi.accessToken,
-      nadeoToken: nadeo.accessToken
-    };
-  } catch (e) {
-    console.log(`loginLive error:`);
-    console.log(e);
+let lastRequestSent;
+
+const sendRequest = async ({url, token, method = `get`, body = {}, headersOverride}) => {
+  let tokenValue = coreToken;
+  if (token === `club`) {
+    tokenValue = clubToken;
+  } else if (token === `live`) {
+    tokenValue = liveToken;
   }
-};
 
-const loginCore = async () => {
-  try {
-    const ubi = await loginUbi(uplayLogin); // login to ubi
-    const tmUbi = await loginTrackmaniaUbi(ubi.ticket); // login to trackmania
-
-    return {
-      ubiTicket: ubi.ticket,
-      nadeoToken: tmUbi.accessToken
-    };
-  } catch (e) {
-    console.log(`loginCore error:`);
-    console.log(e);
-  }
-};
-
-const getNadeoHeaders = (credentials) => {
-  return {
+  let headers = {
     'Content-Type': `application/json`,
-    'Ubi-AppId': `86263886-327a-4328-ac69-527f0d20a237`,
-    'Ubi-RequestedPlatformType': `uplay`,
-    'Authorization': `nadeo_v1 t=${credentials.nadeoToken}`
+    'User-Agent': `TOTD Discord Bot - tooInfinite#5113`,
+    'Authorization': `nadeo_v1 t=${tokenValue}`,
+    ...headersOverride
   };
+
+  try {
+    // make sure only two requests get sent per second max
+    if (lastRequestSent) {
+      const timeDiff = DateTime.now().diff(lastRequestSent, `seconds`);
+      if (timeDiff.toObject().seconds < 1) {
+        //console.log(`--- Delaying request for rate limit`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+    console.log(`--- Sending ${method} request to "${url}"`);
+    lastRequestSent = DateTime.now();
+    const response = await axios({
+      url: url,
+      method: method,
+      data: body,
+      headers: headers
+    });
+
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 401) {
+      console.log(`--- 401: Refresh tokens and call the endpoint again`);
+      await login();
+      return await sendRequest({url, token, method, body, headersOverride});
+    } else {
+      console.error(error);
+      throw error;
+    }
+  }
 };
 
-const getPlayerName = async (credentials, playerId) => {
-  try {
-    const tmProfiles = await getProfiles(credentials.tmToken, [playerId]);
-
-    if (tmProfiles.length === 0) {
-      return playerId;
+const login = async () => {
+  const ticketResponse = await sendRequest({
+    url: `https://public-ubiservices.ubi.com/v3/profiles/sessions`,
+    method: `post`,
+    headersOverride: {
+      'Ubi-AppId': `86263886-327a-4328-ac69-527f0d20a237`,
+      Authorization: `Basic ${Buffer.from(userLogin).toString(`base64`)}`
     }
+  });
+  const ticket = ticketResponse.ticket;
 
-    const ubiProfiles = await getProfilesById(credentials.ubiTicket, [tmProfiles[0].uid]);
+  const coreTokenResponse = await sendRequest({
+    url: `https://prod.trackmania.core.nadeo.online/v2/authentication/token/ubiservices`,
+    method: `post`,
+    headersOverride: {
+      Authorization: `ubi_v1 t=${ticket}`
+    },
+    body: {audience: `NadeoServices`}
+  });
+  coreToken = coreTokenResponse.accessToken;
 
-    if (ubiProfiles.profiles.length === 0) {
-      return playerId;
-    }
+  const liveTokenResponse = await sendRequest({
+    url: `https://prod.trackmania.core.nadeo.online/v2/authentication/token/ubiservices`,
+    method: `post`,
+    headersOverride: {
+      Authorization: `ubi_v1 t=${ticket}`
+    },
+    body: {audience: `NadeoLiveServices`}
+  });
+  liveToken = liveTokenResponse.accessToken;
 
-    return ubiProfiles.profiles[0].nameOnPlatform;
-  } catch (e) {
-    console.log(`getPlayerName error:`);
-    console.log(e);
-  }
+  console.log(`Login successful`);
+};
+
+const getPlayerNames = async (accountIDs) => {
+  const names = await sendRequest({
+    url: `https://prod.trackmania.core.nadeo.online/accounts/displayNames/?accountIdList=${accountIDs.join(`,`)}`,
+    token: `core`
+  });
+  return names;
+};
+
+const getPlayerName = async (accountID) => {
+  const account = await getPlayerNames([accountID]);
+  return account[0].displayName;
+};
+
+const getMaps = async (mapUids) => {
+  const maps = await sendRequest({
+    url: `https://prod.trackmania.core.nadeo.online/maps/?mapUidList=${mapUids.join(`,`)}`,
+    token: `core`
+  });
+  return maps;
 };
 
 const getTMXInfo = async (mapUid) => {
@@ -113,9 +149,12 @@ const getTMXInfo = async (mapUid) => {
   }
 };
 
-const getCurrentTOTD = async (credentials) => {
+const getCurrentTOTD = async () => {
   try {
-    const totds = await getTOTDs(credentials.nadeoToken);
+    const totds = await sendRequest({
+      url: `https://live-services.trackmania.nadeo.live/api/token/campaign/month?length=5&offset=0&royal=false`,
+      token: `live`
+    });
 
     let currentTOTDMeta;
     for (let i = 0; i < totds.monthList[0].days.length; i++) {
@@ -127,11 +166,11 @@ const getCurrentTOTD = async (credentials) => {
       }
     }
 
-    const currentTOTDArray = await getMaps(credentials.tmToken, [currentTOTDMeta.mapUid]);
+    const currentTOTDArray = await getMaps([currentTOTDMeta.mapUid]);
     const currentTOTD = currentTOTDArray[0];
     currentTOTD.seasonUid = currentTOTDMeta.seasonUid;
 
-    currentTOTD.authorName = await getPlayerName(credentials, currentTOTD.author);
+    currentTOTD.authorName = await getPlayerName([currentTOTD.author]);
 
     // get the current hour in Paris
     const currentHour = new Date().toLocaleString(`en-US`, {hour: `2-digit`, hour12: false, timeZone: `Europe/Paris`});
@@ -174,57 +213,41 @@ const getCurrentTOTD = async (credentials) => {
   }
 };
 
-const getLeaderboardPosition = async (credentials, seasonUid, mapUid, position) => {
-  try {
-    const route = `https://live-services.trackmania.nadeo.live/api/token/leaderboard/group/${seasonUid}/map/${mapUid}/top?length=1&onlyWorld=true&offset=${position - 1}`;
+const getLeaderboardPosition = async (seasonUid, mapUid, position) => {
+  const leaderboardPositionInfo = await sendRequest({
+    url: `https://live-services.trackmania.nadeo.live/api/token/leaderboard/group/${seasonUid}/map/${mapUid}/top?length=1&onlyWorld=true&offset=${position - 1}`,
+    token: `live`
+  });
 
-    const response = await axios.get(route, {
-      headers: getNadeoHeaders(credentials)
-    });
-
-    const record = response?.data?.tops[0]?.top[0];
-
-    if (record) {
-      record.playerName = await getPlayerName(credentials, record.accountId);
-      record.position = position;
-    }
-
-    return record;
-  } catch (e) {
-    console.log(`getLeaderboardPosition error:`);
-    console.log(e);
+  const record = leaderboardPositionInfo?.tops[0]?.top[0];
+  if (record) {
+    record.playerName = await getPlayerName([record.accountId]);
+    record.position = position;
   }
+
+  return record;
 };
 
-const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
+const getTOTDLeaderboard = async (seasonUid, mapUid) => {
   try {
-    const headers = getNadeoHeaders(credentials);
-
-    const baseRoute = `https://live-services.trackmania.nadeo.live/api/token/leaderboard/group/${seasonUid}/map/${mapUid}/top?length=10&onlyWorld=true`;
-    const baseResponse = await axios.get(baseRoute, {
-      headers,
+    const leaderboardInfo = await sendRequest({
+      url: `https://live-services.trackmania.nadeo.live/api/token/leaderboard/group/${seasonUid}/map/${mapUid}/top?length=10&onlyWorld=true`,
+      token: `live`
     });
 
-    const leaderboard = baseResponse?.data;
-    const records = leaderboard.tops[0].top;
+    const records = leaderboardInfo.tops[0].top;
 
     console.log(`Fetching player names...`);
-    const coreCredentials = await loginCore();
-    const coreHeaders = getNadeoHeaders(coreCredentials);
-    const playerNameRoute = `https://prod.trackmania.core.nadeo.online/accounts/displayNames/?accountIdList=${records.map((record) => record.accountId).join(`,`)}`;
-    const playerNameResponse = await axios.get(playerNameRoute, {
-      headers: coreHeaders,
-    });
-    console.log(`Player names received`);
+    const playerNames = await getPlayerNames(records.map((record) => record.accountId));
 
     for (let i = 0; i < records.length; i++) {
-      records[i].playerName = playerNameResponse.data.find((player) => player.accountId === records[i].accountId).displayName;
+      records[i].playerName = playerNames.find((player) => player.accountId === records[i].accountId).displayName;
       records[i].position = i + 1;
     }
 
-    const top100 = await getLeaderboardPosition(credentials, seasonUid, mapUid, 100);
-    const top1000 = await getLeaderboardPosition(credentials, seasonUid, mapUid, 1000);
-    const top10000 = await getLeaderboardPosition(credentials, seasonUid, mapUid, 10000);
+    const top100 = await getLeaderboardPosition(seasonUid, mapUid, 100);
+    const top1000 = await getLeaderboardPosition(seasonUid, mapUid, 1000);
+    const top10000 = await getLeaderboardPosition(seasonUid, mapUid, 10000);
 
     if (top100) {
       records.push(top100);
@@ -237,14 +260,15 @@ const getTOTDLeaderboard = async (credentials, seasonUid, mapUid) => {
     }
 
     return records;
-  } catch (e) {
+  } catch (error) {
     console.log(`getTOTDLeaderboard error:`);
-    console.log(e);
+    console.log(error);
   }
 };
 
+
 module.exports = {
-  loginLive,
+  login,
   getCurrentTOTD,
   getTOTDLeaderboard
 };
