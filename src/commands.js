@@ -85,6 +85,10 @@ const ratings = {
     } else {
       try {
         const mapUid = msg.options.get(`totd`).value;
+        if (mapUid === ``) {
+          utils.sendMessage(msg.channel, `You'll have to select an actual TOTD if you want to see some ratings.`, msg);
+          return;
+        }
         await discordAPI.sendTOTDRatings(client, msg.channel, mapUid, msg);
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
