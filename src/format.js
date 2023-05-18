@@ -210,16 +210,16 @@ const formatLeaderboardMessage = (totd, records, date) => {
   return formattedMessage;
 };
 
-const formatRatingsMessage = (ratings, yesterday, map) => {
+const formatRatingsMessage = (mapInfo) => {
   let formattedRatings = ``;
 
-  for (const item in ratings) {
-    const rating = ratings[item];
+  for (const item in mapInfo.ratings) {
+    const rating = mapInfo.ratings[item];
     // add it to the front since the ratings go from --- to +++
     formattedRatings = `${utils.getEmojiMapping(item)} - ${rating}\n${formattedRatings}`;
   }
 
-  const stats = rating.calculateRatingStats(ratings);
+  const stats = rating.calculateRatingStats(mapInfo.ratings);
 
   let verdict = `Total ratings: ${stats.totalVotes}\n`;
   if (stats.totalVotes > 0) {
@@ -233,11 +233,7 @@ const formatRatingsMessage = (ratings, yesterday, map) => {
   const checkForControversialVotes = () => stats.averagePositive > 2 && stats.averageNegative > 2;
 
   if (stats.totalVotes === 0) {
-    if (yesterday) {
-       verdict += `Looks like I didn't get any votes yesterday...`;
-    } else {
-      verdict += `Looks like I don't have any votes yet...`;
-    }
+    verdict += `Looks like I didn't get any votes for this map...`;
   } else if (checkForControversialVotes() && -0.5 <= stats.averageRating && stats.averageRating < 0.5) {
     verdict += `A bit of a controversial one - let's agree on *interesting*.`;
   } else if (stats.averageRating < -2) {
@@ -255,16 +251,16 @@ const formatRatingsMessage = (ratings, yesterday, map) => {
   }
 
   let description = ``;
-  if (map?.name) {
-    description = `**${utils.removeNameFormatting(map.name)}** by **${map.authorName}**`;
+  if (mapInfo?.name) {
+    description = `**${utils.removeNameFormatting(mapInfo.name)}** by **${mapInfo.authorName}** (${mapInfo.month} ${utils.formatDay(mapInfo.day)} ${mapInfo.year})`;
   }
 
   return {
     embeds: [{
       title:
-        yesterday
-          ? `Here are yesterday's TOTD ratings!`
-          : `Here are today's TOTD ratings!`,
+        mapInfo.formatDay
+          ? `Here are today's TOTD ratings!`
+          : `Here are the TOTD ratings!`,
       type: `rich`,
       description: description,
       fields: [
@@ -280,9 +276,9 @@ const formatRatingsMessage = (ratings, yesterday, map) => {
         }
       ],
       footer: {
-        text: yesterday
-          ? `These ratings aren't just from here - I collect feedback from a bunch of other servers as well!`
-          : `This track is still being voted on, so take these numbers with a grain of salt.`
+        text: mapInfo.today
+          ? `This track is still being voted on, so take these numbers with a grain of salt.`
+          : `These ratings aren't just from here - I collect feedback from a bunch of other servers as well!`
       }
     }]
   };

@@ -152,13 +152,24 @@ client.on(`ready`, async () => {
       console.log(`Registered admin command: ${commandConfig.name}`);
     }
   }
+
+  const existingCommands = await globalCommandManager.fetch();
+  const joinedCommands = commands.globalCommands.concat(commands.adminCommands);
+
+  existingCommands.forEach((command) => {
+    const foundCommand = joinedCommands.find((c) => c.slashCommand.name === command.name);
+    if (!foundCommand) {
+      console.log(`Removing command ${command.name}`);
+      globalCommandManager.delete(command.id);
+    }
+  });
 });
 
 client.on(`interactionCreate`, async (interaction) => {
   if (interaction.isCommand()) {
     if (!interaction.guildId) {
       // bot doesn't support DMs for now, reply with an explanation
-      return await interaction.reply(`Sorry, I don't support DMs (yet). Please use my commands in a server that we share.`);
+      return await interaction.reply(`Sorry, I don't support DMs. Please use my commands in a server that we share.`);
     }
 
     console.log(`Received command: ${interaction.commandName} (#${interaction.channel.name} in ${interaction.guild?.name})`);
@@ -172,6 +183,19 @@ client.on(`interactionCreate`, async (interaction) => {
       }
     } else {
       console.error(`No matching command found`);
+    }
+  } else if (interaction.isAutocomplete()) {
+    console.log(`Received autocomplete for ${interaction.commandName} (#${interaction.channel.name} in ${interaction.guild.name} - @${interaction.user.username})): ${interaction.options.getFocused()}`);
+    const joinedCommands = commands.globalCommands.concat(commands.adminCommands);
+    const matchedCommand = joinedCommands.find((commandConfig) => commandConfig.slashCommand.name === interaction.commandName);
+    if (matchedCommand) {
+      try {
+        await matchedCommand.action(interaction, client);
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      console.log(`No matching command found`);
     }
   }
 });

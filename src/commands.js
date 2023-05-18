@@ -40,36 +40,56 @@ const leaderboard = {
   }
 };
 
-const verdict = {
-  slashCommand: {
-    name: `verdict`,
-    description: `Display yesterday's TOTD ratings.`,
-    type: `CHAT_INPUT`,
-  },
-  action: async (msg, client) => {
-    try {
-      await discordAPI.sendTOTDRatings(client, msg.channel, true, msg);
-    } catch (error) {
-      discordAPI.sendErrorMessage(msg.channel);
-      console.log(error);
-    }
-  }
-};
-
-
 // command to see the current ratings
 const ratings = {
   slashCommand: {
     name: `ratings`,
-    description: `Display the current TOTD ratings.`,
+    description: `Display a TOTD's ratings.`,
     type: `CHAT_INPUT`,
+    options: [
+      {
+        type: `STRING`,
+        name: `totd`,
+        description: `A Track of the Day (that there are ratings for).`,
+        required: true,
+        autocomplete: true
+      },
+    ]
   },
   action: async (msg, client) => {
-    try {
-      await discordAPI.sendTOTDRatings(client, msg.channel, false, msg);
-    } catch (error) {
-      discordAPI.sendErrorMessage(msg.channel);
-      console.log(error);
+    if (msg.isAutocomplete()) {
+      try {
+        const redisClient = await redisAPI.login();
+
+        const focusedValue = msg.options.getFocused();
+        if (focusedValue === ``) {
+          const today = await redisAPI.getCurrentTOTD(redisClient);
+          const yesterday = await redisAPI.getPreviousTOTD(redisClient);
+          const response = [
+            {name: `Today's TOTD (${utils.removeNameFormatting(today.name)} by ${today.authorName})`, value: today.mapUid},
+            {name: `Yesterday's TOTD (${utils.removeNameFormatting(yesterday.name)} by ${yesterday.authorName})`, value: yesterday.mapUid},
+            {name: `Or just start typing to search for a previous TOTD...`, value: ``}
+          ];
+          await msg.respond(response);
+        } else {
+          const storedTOTDs = await redisAPI.getAllStoredTOTDs(redisClient);
+          const options = Object.entries(storedTOTDs).reverse().map(
+            ([mapUid, map]) => ({ name: `${utils.removeNameFormatting(map.name)} by ${map.authorName} (${map.month} ${utils.formatDay(map.day)} ${map.year})`, value: mapUid })).filter((option) => option.name.toLowerCase().includes(focusedValue.toLowerCase())
+          );
+          await msg.respond(options.slice(0, 25));
+        }
+        redisAPI.logout(redisClient);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      try {
+        const mapUid = msg.options.get(`totd`).value;
+        await discordAPI.sendTOTDRatings(client, msg.channel, mapUid, msg);
+      } catch (error) {
+        discordAPI.sendErrorMessage(msg.channel);
+        console.log(error);
+      }
     }
   }
 };
@@ -408,8 +428,7 @@ const help = {
   action: async (msg, client, commandIDs) => {
     let message = `${utils.formatCommand(`today`, commandIDs)} - Display the current TOTD information.\n \
       ${utils.formatCommand(`leaderboard`, commandIDs)} - Display the current top 10 (and the time for top 100).\n \
-      ${utils.formatCommand(`verdict`, commandIDs)} - Display yesterday's TOTD ratings.\n \
-      ${utils.formatCommand(`ratings`, commandIDs)} - Display today's TOTD ratings.\n \
+      ${utils.formatCommand(`ratings`, commandIDs)} - Display a stored TOTD's ratings.\n \
       ${utils.formatCommand(`rankings`, commandIDs)} - Display TOTD rankings based on bot ratings.\n \
       ${utils.formatCommand(`bingo`, commandIDs)} - Display this week's bingo board for this server.\n \
       ${utils.formatCommand(`lastbingo`, commandIDs)} - Display last week's bingo board for this server.\n \
@@ -646,7 +665,6 @@ module.exports = {
     leaderboard,
     ratings,
     rankings,
-    verdict,
     enable,
     disable,
     setRole,

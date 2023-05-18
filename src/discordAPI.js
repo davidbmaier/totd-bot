@@ -88,24 +88,12 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
   }
 };
 
-const getRatingMessage = async (yesterday) => {
+const getRatingMessage = async (mapInfo) => {
   try {
-    const redisClient = await redisAPI.login();
-    let ratings;
-    let map;
-    if (yesterday) {
-      ratings = await redisAPI.getLastTOTDVerdict(redisClient);
-      map = await redisAPI.getPreviousTOTD(redisClient);
+    if (mapInfo) {
+      return format.formatRatingsMessage(mapInfo);
     } else {
-      ratings = await redisAPI.getTOTDRatings(redisClient);
-      map = await redisAPI.getCurrentTOTD(redisClient);
-    }
-    redisAPI.logout(redisClient);
-
-    if (ratings) {
-      return format.formatRatingsMessage(ratings, yesterday, map);
-    } else {
-      return `Hmm, I don't seem to remember yesterday's track. Sorry about that!`;
+      return `Hmm, I don't seem to remember that track. Sorry about that!`;
     }
   } catch (err) {
     console.log(`Error while getting rating message:`, err);
@@ -197,11 +185,25 @@ const sendTOTDLeaderboard = async (client, channel, commandMessage) => {
   discordMessage.edit(leaderboardMessage);
 };
 
-const sendTOTDRatings = async (client, channel, yesterday, commandMessage) => {
-  const ratingString = yesterday ? `yesterday's verdict` : `current rating`;
+const sendTOTDRatings = async (client, channel, mapUid, commandMessage) => {
+  const redisClient = await redisAPI.login();
+  const today = await redisAPI.getCurrentTOTD(redisClient);
+
+  let mapInfo;
+  if (mapUid === today.mapUid) {
+    mapInfo = today;
+    mapInfo.today = true;
+    mapInfo.ratings = await redisAPI.getTOTDRatings(redisClient);
+  } else {
+    const storedTOTDs = await redisAPI.getAllStoredTOTDs(redisClient);
+    mapInfo = storedTOTDs[mapUid];
+  }
+
+  const ratingString = mapInfo?.today ? `current rating` : `previous verdict (${mapInfo?.day}/${mapInfo?.month}/${mapInfo?.year})`;
   console.log(`Sending ${ratingString} to #${channel.name} in ${channel.guild.name}`);
-  const message = await getRatingMessage(yesterday);
+  const message = await getRatingMessage(mapInfo);
   await utils.sendMessage(channel, message, commandMessage);
+  redisAPI.logout(redisClient);
 };
 
 const sendBingoBoard = async (channel, lastWeek, commandMessage, commandIDs) => {
@@ -355,10 +357,18 @@ const archiveRatings = async (client, oldTOTD) => {
   console.log(`Old ratings:`, ratings);
 
   if (ratings) {
-    await redisAPI.saveLastTOTDVerdict(redisClient, ratings);
+    const totds = await redisAPI.getAllStoredTOTDs(redisClient);
+    totds[oldTOTD.mapUid] = {
+      name: oldTOTD.name,
+      authorName: oldTOTD.authorName,
+      day: oldTOTD.day,
+      month: oldTOTD.month,
+      year: oldTOTD.year,
+      ratings: ratings
+    };
+    await redisAPI.storeTOTDs(redisClient, totds);
 
     await processRatingRankings(redisClient, ratings, oldTOTD);
-
 
     const today = new Date();
     if (today.getDate() === 1 && today.getMonth() === 0) {
@@ -380,7 +390,7 @@ const archiveRatings = async (client, oldTOTD) => {
     // send ratings to admin server
     console.log(`Sending verdict to admin server...`);
     const adminChannel = await client.channels.fetch(adminChannelID);
-    utils.sendMessage(adminChannel, await getRatingMessage(true));
+    utils.sendMessage(adminChannel, await getRatingMessage(totds[oldTOTD.mapUid]));
   }
   await redisAPI.clearTOTDRatings(redisClient);
 

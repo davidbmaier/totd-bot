@@ -229,39 +229,6 @@ const clearCurrentLeaderboard = async (redisClient) => {
   });
 };
 
-const getLastTOTDVerdict = async (redisClient) => {
-  return new Promise((resolve, reject) => {
-    redisClient.get(`verdict`, async (err, verdict) => {
-      if (err) {
-        reject(err);
-      } else {
-        if (verdict) {
-          try {
-            const parsedVerdict = JSON.parse(verdict);
-            resolve(parsedVerdict);
-          } catch (error) {
-            reject(`Unable to parse verdict JSON`);
-          }
-        } else {
-          resolve();
-        }
-      }
-    });
-  });
-};
-
-const saveLastTOTDVerdict = async (redisClient, verdict) => {
-  return new Promise((resolve, reject) => {
-    redisClient.set(`verdict`, JSON.stringify(verdict), (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
-  });
-};
-
 const getRatingRankings = async (redisClient, type) => {
   return new Promise((resolve, reject) => {
     const key = `${type}Ratings`;
@@ -528,6 +495,34 @@ const archiveBingoBoards = async (redisClient, boards) => {
   });
 };
 
+const getAllStoredTOTDs = async (redisClient) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(`totds`, (err, totds) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (totds) {
+          resolve(JSON.parse(totds));
+        } else {
+          resolve();
+        }
+      }
+    });
+  });
+};
+
+const storeTOTDs = async (redisClient, totds) => {
+  return new Promise((resolve, reject) => {
+    redisClient.set(`totds`, JSON.stringify(totds), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(totds);
+      }
+    });
+  });
+};
+
 module.exports = {
   login,
   logout,
@@ -541,8 +536,6 @@ module.exports = {
   getCurrentTOTD,
   getCurrentLeaderboard,
   clearCurrentLeaderboard,
-  getLastTOTDVerdict,
-  saveLastTOTDVerdict,
   getRatingRankings,
   saveRatingRankings,
   getTOTDRatings,
@@ -557,5 +550,7 @@ module.exports = {
   getAllBingoBoards,
   archiveBingoBoards,
   savePreviousTOTD,
-  getPreviousTOTD
+  getPreviousTOTD,
+  getAllStoredTOTDs,
+  storeTOTDs
 };
