@@ -27,9 +27,6 @@ const getTOTDMessage = async (forceRefresh) => {
   const totd = await tmAPI.getCurrentTOTD();
   const formattedMessage = format.formatTOTDMessage(totd);
 
-  // also refresh the leaderboard
-  getTOTDLeaderboardMessage(true);
-
   // save fresh TOTD to redis
   const redisClient = await redisAPI.login();
   const oldTOTD = await redisAPI.getCurrentTOTD(redisClient);
@@ -43,12 +40,17 @@ const getTOTDMessage = async (forceRefresh) => {
   redisAPI.logout(redisClient);
 
   console.log(`Refreshed TOTD in Redis`);
+
+  // also refresh the leaderboard
+  getTOTDLeaderboardMessage(true);
+
   return formattedMessage;
 };
 
 const getTOTDLeaderboardMessage = async (forceRefresh) => {
   const redisClient = await redisAPI.login();
   const cachedleaderBoardMessage = await redisAPI.getCurrentLeaderboard(redisClient);
+  const totd = await redisAPI.getCurrentTOTD(redisClient);
   redisAPI.logout(redisClient);
 
   if (
@@ -59,7 +61,6 @@ const getTOTDLeaderboardMessage = async (forceRefresh) => {
   ) {
     // if cached message does not exist or is older than ten minutes, refresh
     console.log(`Refreshing leaderboard from API...`);
-    const totd = await tmAPI.getCurrentTOTD();
     const top = await tmAPI.getTOTDLeaderboard(totd.seasonUid, totd.mapUid);
     // if top doesn't exist yet, fall back
     if (!top) {
@@ -405,7 +406,7 @@ const distributeTOTDMessages = async (client) => {
   console.log(`Broadcasting TOTD message to subscribed channels`);
   let message;
   try {
-    await getTOTDMessage(true);
+    message = await getTOTDMessage(true);
   } catch (error) {
     console.error(`Failed to get TOTD message during distribution`);
   }

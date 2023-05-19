@@ -87,6 +87,10 @@ const login = async () => {
 };
 
 const getPlayerNames = async (accountIDs) => {
+  if (accountIDs.length === 0) {
+    console.log(`getPlayerNames was called with an empty array, skipping fetch`);
+    return [];
+  }
   const names = await sendRequest({
     url: `https://prod.trackmania.core.nadeo.online/accounts/displayNames/?accountIdList=${accountIDs.join(`,`)}`,
     token: `core`
