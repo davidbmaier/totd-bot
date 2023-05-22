@@ -167,6 +167,11 @@ const getCurrentTOTD = async () => {
       }
     }
 
+    if (!currentTOTDMeta) {
+      console.error(totds);
+      throw `Couldn't find current TOTD, see above for retrieved maps`;
+    }
+
     const currentTOTDArray = await getMaps([currentTOTDMeta.mapUid]);
     const currentTOTD = currentTOTDArray[0];
     currentTOTD.seasonUid = currentTOTDMeta.seasonUid;
