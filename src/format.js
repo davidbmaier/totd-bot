@@ -213,7 +213,15 @@ const formatLeaderboardMessage = (totd, records, date) => {
 const formatRatingsMessage = (mapInfo) => {
   let formattedRatings = ``;
 
-  for (const item in mapInfo.ratings) {
+  const orderedRatings = {
+    MinusMinusMinus: mapInfo.ratings.MinusMinusMinus,
+    MinusMinus: mapInfo.ratings.MinusMinus,
+    Minus: mapInfo.ratings.Minus,
+    Plus: mapInfo.ratings.Plus,
+    PlusPlus: mapInfo.ratings.PlusPlus,
+    PlusPlusPlus: mapInfo.ratings.PlusPlusPlus
+  };
+  for (const item in orderedRatings) {
     const rating = mapInfo.ratings[item];
     // add it to the front since the ratings go from --- to +++
     formattedRatings = `${utils.getEmojiMapping(item)} - ${rating}\n${formattedRatings}`;
