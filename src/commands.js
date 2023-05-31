@@ -586,7 +586,7 @@ const serverInfo = {
         // fetch and log detailed infos asynchronously
         servers.forEach(async (server) => {
           const owner = await client.users.fetch(server.ownerId); // don't use fetchOwner since we need the owner user, not the guild member
-          console.log(`Server: ${server.name} - Owner: ${owner.tag} - ID: ${server.id}`);
+          console.log(`Server: ${server.name} (${server.memberCount}) - Owner: ${owner.tag} - ID: ${server.id}`);
         });
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
