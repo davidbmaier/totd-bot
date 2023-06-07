@@ -16,7 +16,7 @@ const sendRequest = async ({url, token, method = `get`, body = {}, headersOverri
 
   let headers = {
     'Content-Type': `application/json`,
-    'User-Agent': `TOTD Discord Bot - tooInfinite#5113`,
+    'User-Agent': `TOTD Discord Bot - tooInfinite`,
     'Authorization': `nadeo_v1 t=${tokenValue}`,
     ...headersOverride
   };

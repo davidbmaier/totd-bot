@@ -583,7 +583,7 @@ const formatHelpMessage = (commands, adminCommands) => {
       {
         name: `More Info`,
         value:
-          `I've been developed by tooInfinite#5113 (<@141627532335251456>) - feel free to talk to him if you've got any feedback or ran into any issues with me. \
+          `I've been developed by tooInfinite (<@141627532335251456>) - feel free to talk to him if you've got any feedback or ran into any issues with me. \
           My code can be found [here](https://github.com/davidbmaier/totd-bot). \n\
           If you want to, you can [help pay for my hosting](https://github.com/sponsors/davidbmaier). Never required, always appreciated! \n\
           To invite me to your own server, click [here](https://discord.com/api/oauth2/authorize?client_id=807920588738920468&permissions=388160&scope=applications.commands%20bot).`

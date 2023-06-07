@@ -4,7 +4,7 @@ This is a Discord bot for displaying the daily [Trackmania](https://www.trackman
 
 **Disclaimer:** This bot uses undocumented APIs (and libraries based on them), so it may break at any time - potentially indefinitely if Nadeo/Ubisoft decide to close off those APIs.
 
-**Extra disclaimer:** This is just a pet project I'm working on for fun (and to learn a bit about Discord bots) - don't expect super-tidy code or great documentation. If you encounter any issues with it, either open an issue on Github or talk to me on Discord (tooInfinite#5113).
+**Extra disclaimer:** This is just a pet project I'm working on for fun (and to learn a bit about Discord bots) - don't expect super-tidy code or great documentation. If you encounter any issues with it, either open an issue on Github or talk to me on Discord (tooInfinite).
 
 ## What can this bot do? 🤖
 
@@ -99,4 +99,4 @@ Whenever the bot gets removed from a server with any configuration, it automatic
 
 For debugging purposes, the bot also logs user IDs, channel IDs and server IDs as well as the corresponding names when people interact with it. Logs are potentially stored indefinitely, but are of course also subject to deletion requests if a user requests that all their data is removed.
 
-If you want to request information about or deletion of any of your data (user, message, channel or server IDs that are directly related to you), please contact the bot owner on Discord (tooInfinite#5113).
+If you want to request information about or deletion of any of your data (user, message, channel or server IDs that are directly related to you), please contact the bot owner on Discord (tooInfinite).
