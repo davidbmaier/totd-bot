@@ -214,7 +214,6 @@ client.on(`messageCreate`, async (msg) => {
 
 const handleReaction = async (reaction, user, add) => {
   if (reaction.partial) {
-    console.log(`Reaction is partial, fetching...`);
 		// if reaction is partial (not cached), try to fetch it fully
 		try {
 			await reaction.fetch();
