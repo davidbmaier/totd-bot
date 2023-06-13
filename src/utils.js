@@ -18,22 +18,7 @@ const getEmojiMapping = (emojiName) => {
 
 const removeNameFormatting = (text = ``) => {
   // this should take care of all the possible options, see https://doc.maniaplanet.com/client/text-formatting for reference
-  let cleanedText = text.replace(/\$[0-9a-fA-F]{3}/g, ``);
-  cleanedText = cleanedText.replaceAll(`$W`, ``);
-  cleanedText = cleanedText.replaceAll(`$w`, ``);
-  cleanedText = cleanedText.replaceAll(`$n`, ``);
-  cleanedText = cleanedText.replaceAll(`$m`, ``);
-  cleanedText = cleanedText.replaceAll(`$O`, ``);
-  cleanedText = cleanedText.replaceAll(`$o`, ``);
-  cleanedText = cleanedText.replaceAll(`$b`, ``);
-  cleanedText = cleanedText.replaceAll(`$i`, ``);
-  cleanedText = cleanedText.replaceAll(`$I`, ``);
-  cleanedText = cleanedText.replaceAll(`$t`, ``);
-  cleanedText = cleanedText.replaceAll(`$s`, ``);
-  cleanedText = cleanedText.replaceAll(`$S`, ``);
-  cleanedText = cleanedText.replaceAll(`$g`, ``);
-  cleanedText = cleanedText.replaceAll(`$z`, ``);
-  cleanedText = cleanedText.replaceAll(`$$`, ``);
+  let cleanedText = text.replace(/(?<!\$)((?<d>\$+)\k<d>)?((?<=\$)(?!\$)|(\$([a-f\d]{1,3}|[ionmwsztg<>]|[lhp](\[[^\]]+\])?)))/gmi, ``);
   return cleanedText;
 };
 
