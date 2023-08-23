@@ -85,6 +85,7 @@ client.on(`ready`, async () => {
   console.log(`Ready as ${client.user.tag}!`);
 
   await tmAPI.login();
+  await tmAPI.loginOAuth();
 
   // in production, refresh TOTD to make sure there is a thumbnail in the images for cached messages
   if (deployMode === `prod`) {

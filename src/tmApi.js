@@ -2,22 +2,29 @@ const axios = require(`axios`);
 const { DateTime } = require(`luxon`);
 
 const userLogin = process.env.USER_LOGIN;
+const oauthID = process.env.OAUTH_ID;
+const oauthSecret = process.env.OAUTH_SECRET;
 
 let coreToken;
 let liveToken;
+let oauthToken;
 
 let lastRequestSent;
 
 const sendRequest = async ({url, token, method = `get`, body = {}, headersOverride}) => {
+  let authOverride;
+
   let tokenValue = coreToken;
   if (token === `live`) {
     tokenValue = liveToken;
+  } else if (token === `oauth`) {
+    authOverride = `Bearer ${oauthToken}`;
   }
 
   let headers = {
     'Content-Type': `application/json`,
     'User-Agent': `TOTD Discord Bot - tooInfinite`,
-    'Authorization': `nadeo_v1 t=${tokenValue}`,
+    'Authorization': authOverride || `nadeo_v1 t=${tokenValue}`,
     ...headersOverride
   };
 
@@ -43,7 +50,11 @@ const sendRequest = async ({url, token, method = `get`, body = {}, headersOverri
   } catch (error) {
     if (error.response?.status === 401) {
       console.log(`--- 401: Refresh tokens and call the endpoint again`);
-      await login();
+      if (token === `oauth`) {
+        await loginOAuth();
+      } else {
+        await login();
+      }
       return await sendRequest({url, token, method, body, headersOverride});
     } else {
       console.error(error);
@@ -83,18 +94,34 @@ const login = async () => {
   });
   liveToken = liveTokenResponse.accessToken;
 
-  console.log(`Login successful`);
+  console.log(`Game API login successful`);
+};
+
+const loginOAuth = async () => {
+  const oauthTokenResponse = await sendRequest({
+    url: `https://api.trackmania.com/api/access_token`,
+    method: `post`,
+    headersOverride: {
+      'Content-Type': `application/x-www-form-urlencoded`,
+      Authorization: `` // no auth header for login
+    },
+    body: `grant_type=client_credentials&client_id=${oauthID}&client_secret=${oauthSecret}`
+  });
+  oauthToken = oauthTokenResponse.access_token;
+  console.log(`OAuth login successful`);
 };
 
 const getPlayerNames = async (accountIDs) => {
-  if (accountIDs.length === 0) {
-    console.log(`getPlayerNames was called with an empty array, skipping fetch`);
-    return [];
-  }
-  const names = await sendRequest({
-    url: `https://prod.trackmania.core.nadeo.online/accounts/displayNames/?accountIdList=${accountIDs.join(`,`)}`,
-    token: `core`
+  // assemble accountIDs in correct format
+  const accountIDList = accountIDs.map((accountID) => `accountId[]=${accountID}`).join(`&`);
+
+  const accounts = await sendRequest({
+    url: `https://api.trackmania.com/api/display-names/?${accountIDList}`,
+    token: `oauth`
   });
+
+  // reorganize account-name mappings into array of {accountId, displayName} for compatibility
+  const names = Object.entries(accounts).map(([accountID, accountName]) => ({accountId: accountID, displayName: accountName}));
   return names;
 };
 
@@ -275,6 +302,7 @@ const getTOTDLeaderboard = async (seasonUid, mapUid) => {
 
 module.exports = {
   login,
+  loginOAuth,
   getCurrentTOTD,
   getTOTDLeaderboard
 };
