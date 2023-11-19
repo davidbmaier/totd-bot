@@ -380,7 +380,7 @@ const formatRankingMessage = (rankings, timeframe) => {
     embed.footer = {
       text: `${description1} ${description2}`
     };
-  } else if (timeframe.includes(currentYear)) {
+  } else if (timeframe === `${constants.specialRankings.completeYear} ${currentYear}`) {
     const description1 = `The year isn't over yet, so these aren't final -`;
     const description2 = `check again when it's over to see the final rankings!`;
     embed.footer = {
