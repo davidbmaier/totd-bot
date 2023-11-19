@@ -396,7 +396,7 @@ const rankings = {
       try {
         const focusedValue = msg.options.getFocused();
 
-        const monthsBackwards = luxon.Info.months(`long`).reverse();
+        const monthsBackwards = [...luxon.Info.months(`long`)].reverse();
         // hard-coded year and month for the first TOTD entry in the DB
         const firstYear = 2021;
         const firstMonth = `July`;
@@ -422,6 +422,7 @@ const rankings = {
               options.push({name: `${year} (full year)`, value: `complete ${year}`});
             }
             if (year === firstYear && month === firstMonth) {
+              options.push({name: `${year} (full year)`, value: `complete ${year}`});
               options.push({name: `All-time`, value: `all-time`});
               break;
             }

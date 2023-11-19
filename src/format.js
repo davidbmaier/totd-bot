@@ -387,9 +387,8 @@ const formatRankingMessage = (rankings, timeframe) => {
       text: `${description1} ${description2}`
     };
   }
-
-  // for allTime add disclaimer to footer
-  if (timeframe === `all-time`) {
+  // for allTime/year 2021 add disclaimer to footer
+  if (timeframe === `all-time` || timeframe === `${constants.specialRankings.completeYear} 2021`) {
     const footer = `This ranking only displays data starting from July 2021.`;
     embed.footer = {
       text: `${footer}`
