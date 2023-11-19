@@ -310,50 +310,48 @@ const resolveRatingToEmoji = (rating) => {
   }
 };
 
-const formatRankingMessage = (rankings, timeframe, commandIDs) => {
+const formatRankingMessage = (rankings, timeframe) => {
   // if top and bottom are empty, return a basic placeholder
   if (rankings?.top.length === 0 || rankings?.bottom.length === 0) {
     return `It seems I don't have any data for that timeframe yet, sorry!`;
   }
 
+  const currentYear = luxon.DateTime.now().year;
+  const currentMonth = luxon.DateTime.now().monthLong;
+
+  const formatRatingNumber = (rating) => {
+    let ratingString = `${rating}`;
+    if (!ratingString.includes(`.`)) {
+      ratingString += `.0`;
+    }
+    return ratingString;
+  };
+
   const formatRankingRows = (rankingItems) => {
     let section = ``;
     rankingItems.forEach((rankingItem) => {
       // resolve rating to emoji
-      const rating = `${resolveRatingToEmoji(rankingItem.averageRating)} (${rankingItem.averageRating})`;
-      let date = ``;
-      if (rankingItem.date) {
-        if (timeframe === constants.ratingRankingType.allTime || timeframe === constants.ratingRankingType.lastYearly) {
-          date = `${rankingItem.date} `;
-        } else {
-          date += `${rankingItem.date.slice(0, -5)} `;
-        }
+      const rating = `${resolveRatingToEmoji(rankingItem.averageRating)} \`${formatRatingNumber(rankingItem.averageRating)}\``;
+      let date = `${rankingItem.month} ${utils.formatDay(rankingItem.day)}`;
+      if (timeframe === constants.specialRankings.allTime) {
+        // add the year if the ranking goes across multiple years
+        date += ` ${rankingItem.year}`;
       }
       const mapLink = `https://trackmania.io/#/leaderboard/${rankingItem.mapUId}`;
       // escape Discord formatting characters
-      const authorName = rankingItem.mapAuthor.replace(/[_>*~|`]/g, `\\$&`);
+      const authorName = rankingItem.authorName.replace(/[_>*~|`]/g, `\\$&`);
+      const voteCount = Object.values(rankingItem.ratings).reduce((sum, value) => sum + value, 0);
 
       // ++ (rating) date - mapName (mapAuthor)
-      const row = `${rating} ${date}- [${rankingItem.mapName}](${mapLink}) (${authorName})\n`;
+      const row = `${rating} ${date} - [${utils.removeNameFormatting(rankingItem.name)}](${mapLink}) by **${authorName}** (${voteCount} votes)\n`;
       section += row;
     });
     return section;
   };
 
-  let titleTimeframe = `this month`;
-  if (timeframe === constants.ratingRankingType.lastMonthly) {
-    titleTimeframe = `last month`;
-  } else if (timeframe === constants.ratingRankingType.yearly) {
-    titleTimeframe = `this year`;
-  } else if (timeframe === constants.ratingRankingType.lastYearly) {
-    titleTimeframe = `last year`;
-  } else if (timeframe === constants.ratingRankingType.allTime) {
-    titleTimeframe = `all time`;
-  }
-
   const embed = {
     // set title based on the type
-    title: `Here are the TOTD rankings for ${titleTimeframe}!`,
+    title: `Here are the ${timeframe} TOTD rankings!`,
     type: `rich`,
     fields: [
       {
@@ -368,30 +366,33 @@ const formatRankingMessage = (rankings, timeframe, commandIDs) => {
   };
 
   if (rankings.top.length > 5) {
-    embed.fields[0].name = `Top ${rankings.top.length} (1-5)`;
+    embed.fields[0].name = `Top ${rankings.top.length}`;
     embed.fields.splice(1, 0, {
-      name: `Top ${rankings.top.length} (6-${rankings.top.length})`,
+      name: ` `,
       value: formatRankingRows(rankings.top.slice(5, rankings.top.length)),
     },);
   }
 
-  // add disclaimer to description that month isn't over yet
-  if (timeframe === constants.ratingRankingType.monthly) {
+  // add disclaimer to footer that month isn't over yet
+  if (timeframe.includes(currentYear) && timeframe.includes(currentMonth)) {
     const description1 = `The month isn't over yet, so these aren't final -`;
-    const description2 = `check ${utils.formatCommand(`rankings`, commandIDs)} \`last month\` when it's over to see the final rankings!`;
-    embed.description = `${description1} ${description2}`;
-  } else if (timeframe === constants.ratingRankingType.yearly) {
+    const description2 = `check again when it's over to see the final rankings!`;
+    embed.footer = {
+      text: `${description1} ${description2}`
+    };
+  } else if (timeframe.includes(currentYear)) {
     const description1 = `The year isn't over yet, so these aren't final -`;
-    const description2 = `check ${utils.formatCommand(`rankings`, commandIDs)} \`last year\` when it's over to see the final rankings!`;
-    embed.description = `${description1} ${description2}`;
+    const description2 = `check again when it's over to see the final rankings!`;
+    embed.footer = {
+      text: `${description1} ${description2}`
+    };
   }
 
   // for allTime add disclaimer to footer
-  if (timeframe === constants.ratingRankingType.allTime) {
-    const footer1 = `This ranking only displays data starting from July 2021 - earlier bot ratings were not representative enough.`;
-    const footer2 = `So don't take this too seriously if it's missing your favorite track!`;
+  if (timeframe === `all-time`) {
+    const footer = `This ranking only displays data starting from July 2021.`;
     embed.footer = {
-      text: `${footer1} ${footer2}`
+      text: `${footer}`
     };
   }
 

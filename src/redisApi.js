@@ -229,37 +229,6 @@ const clearCurrentLeaderboard = async (redisClient) => {
   });
 };
 
-const getRatingRankings = async (redisClient, type) => {
-  return new Promise((resolve, reject) => {
-    const key = `${type}Ratings`;
-    redisClient.get(key, (err, ratings) => {
-      if (err) {
-        reject(err);
-      } else {
-        try {
-            const parsedRatings = JSON.parse(ratings);
-            resolve(parsedRatings);
-          } catch (error) {
-            reject(`Unable to parse monthly ratings JSON`);
-          }
-      }
-    });
-  });
-};
-
-const saveRatingRankings = async (redisClient, type, ratings) => {
-  return new Promise((resolve, reject) => {
-    const key = `${type}Ratings`;
-    redisClient.set(key, JSON.stringify(ratings), (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
-  });
-};
-
 const getTOTDRatings = async (redisClient) => {
   return new Promise((resolve, reject) => {
     redisClient.get(`ratings`, async (err, ratings) => {
@@ -536,8 +505,6 @@ module.exports = {
   getCurrentTOTD,
   getCurrentLeaderboard,
   clearCurrentLeaderboard,
-  getRatingRankings,
-  saveRatingRankings,
   getTOTDRatings,
   clearTOTDRatings,
   updateTOTDRatings,

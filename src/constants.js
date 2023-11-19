@@ -13,12 +13,9 @@ const cupRegions = {
   asia: `Asia`
 };
 
-const ratingRankingType = {
-  lastMonthly: `lastMonthly`,
-  monthly: `monthly`,
-  yearly: `yearly`,
-  lastYearly: `lastYearly`,
-  allTime: `allTime`
+const specialRankings = {
+  allTime: `all-time`,
+  completeYear: `complete`
 };
 
 const bingoFields = [
@@ -77,5 +74,5 @@ module.exports = {
   ratingEmojis,
   cupRegions,
   bingoFields,
-  ratingRankingType
+  specialRankings
 };

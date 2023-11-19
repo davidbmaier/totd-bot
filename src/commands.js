@@ -6,6 +6,8 @@ const format = require(`./format`);
 const utils = require(`./utils`);
 const constants = require(`./constants`);
 
+const luxon = require(`luxon`);
+
 const adminTag = process.env.ADMIN_TAG;
 
 const today = {
@@ -385,40 +387,65 @@ const rankings = {
         name: `timeframe`,
         description: `The time frame you want to see rankings for.`,
         required: true,
-        choices: [
-          {
-            name: `this month`,
-            value: constants.ratingRankingType.monthly,
-          },
-          {
-            name: `last month`,
-            value: constants.ratingRankingType.lastMonthly
-          },
-          {
-            name: `this year`,
-            value: constants.ratingRankingType.yearly
-          },
-          {
-            name: `last year`,
-            value: constants.ratingRankingType.lastYearly
-          },
-        ]
+        autocomplete: true
       }
     ]
   },
-  action: async (msg, client, commandIDs) => {
-    try {
-      const matchingTimeframe = msg.options.get(`timeframe`).value;
+  action: async (msg) => {
+    if (msg.isAutocomplete()) {
+      try {
+        const focusedValue = msg.options.getFocused();
 
-      const redisClient = await redisAPI.login();
-      const rankings = await redisAPI.getRatingRankings(redisClient, matchingTimeframe);
-      redisAPI.logout(redisClient);
+        const monthsBackwards = luxon.Info.months(`long`).reverse();
+        // hard-coded year and month for the first TOTD entry in the DB
+        const firstYear = 2021;
+        const firstMonth = `July`;
+        const currentYear = luxon.DateTime.now().year;
+        const currentMonth = luxon.DateTime.now().monthLong;
 
-      const rankingMessage = format.formatRankingMessage(rankings, matchingTimeframe, commandIDs);
-      utils.sendMessage(msg.channel, rankingMessage, msg);
-    } catch (error) {
-      discordAPI.sendErrorMessage(msg.channel);
-      console.log(error);
+        let options = [];
+
+        let currentMonthReached = false;
+        for (let year = currentYear; year >= firstYear; year--) {
+          for (const month of monthsBackwards) {
+            if (!currentMonthReached) {
+              if (month === currentMonth) {
+                currentMonthReached = true;
+              } else {
+                continue;
+              }
+            }
+
+            options.push({name: `${month} ${year}`, value: `${month} ${year}`});
+
+            if (month === `January`) {
+              options.push({name: `${year} (full year)`, value: `complete ${year}`});
+            }
+            if (year === firstYear && month === firstMonth) {
+              options.push({name: `All-time`, value: `all-time`});
+              break;
+            }
+          }
+        }
+
+        options = options.filter((option) => option.name.toLowerCase().includes(focusedValue.toLowerCase()));
+
+        await msg.respond(options.slice(0, 25));
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      let timeframe = ``;
+      try {
+        timeframe = msg.options.get(`timeframe`).value;
+
+        const rankings = await discordAPI.calculateRankings(timeframe);
+        const rankingMessage = format.formatRankingMessage(rankings, timeframe);
+        utils.sendMessage(msg.channel, rankingMessage, msg);
+      } catch (error) {
+        utils.sendMessage(msg.channel, error.message, msg);
+        console.warn(`Error during /rankings with timeframe "${timeframe}":`, error);
+      }
     }
   }
 };

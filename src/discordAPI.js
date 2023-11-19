@@ -5,6 +5,8 @@ const utils = require(`./utils`);
 const constants = require(`./constants`);
 const rating = require(`./rating`);
 
+const luxon = require(`luxon`);
+
 const adminChannelID = process.env.ADMIN_CHANNEL_ID;
 
 const errorMessage = `Oops, something went wrong here - please talk to <@141627532335251456> and let him know that didn't work.`;
@@ -331,25 +333,6 @@ const countBingoVotes = async (client) => {
   return redisAPI.logout(redisClient);
 };
 
-const processRatingRankings = async (redisClient, ratings, oldTOTD) => {
-  try {
-    console.log(`Updating rating rankings...`);
-    const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
-    const yearly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.yearly);
-    const allTime = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.allTime);
-
-    const updatedMonthly = rating.updateRanking(ratings, monthly, constants.ratingRankingType.monthly, oldTOTD);
-    const updatedYearly = rating.updateRanking(ratings, yearly, constants.ratingRankingType.yearly, oldTOTD);
-    const updatedAllTime = rating.updateRanking(ratings, allTime, constants.ratingRankingType.allTime, oldTOTD);
-
-    await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, updatedMonthly);
-    await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.yearly, updatedYearly);
-    await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.allTime, updatedAllTime);
-  } catch (error) {
-    console.log(`Rating processing failed:`, error);
-  }
-};
-
 const archiveRatings = async (client, oldTOTD) => {
   console.log(`Archiving existing ratings and clearing current ones...`);
   const redisClient = await redisAPI.login();
@@ -369,25 +352,6 @@ const archiveRatings = async (client, oldTOTD) => {
     };
     await redisAPI.storeTOTDs(redisClient, totds);
 
-    await processRatingRankings(redisClient, ratings, oldTOTD);
-
-    const today = new Date();
-    if (today.getDate() === 1 && today.getMonth() === 0) {
-      // if it's the 1st of the year, archive yearly rating rankings
-      console.log(`Archiving yearly rating ranking and resetting the active one...`);
-      const yearly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.yearly);
-      console.log(`Last yearly ratings:`, yearly);
-      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.lastYearly, yearly);
-      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.yearly, {top: [], bottom: []});
-    } else if (today.getDate() === 1) {
-      // if it's the 1st of the month, archive monthly rating rankings
-      console.log(`Archiving monthly rating ranking and resetting the active one...`);
-      const monthly = await redisAPI.getRatingRankings(redisClient, constants.ratingRankingType.monthly);
-      console.log(`Last monthly ratings:`, monthly);
-      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.lastMonthly, monthly);
-      await redisAPI.saveRatingRankings(redisClient, constants.ratingRankingType.monthly, {top: [], bottom: []});
-    }
-
     // send ratings to admin server
     console.log(`Sending verdict to admin server...`);
     const adminChannel = await client.channels.fetch(adminChannelID);
@@ -396,6 +360,100 @@ const archiveRatings = async (client, oldTOTD) => {
   await redisAPI.clearTOTDRatings(redisClient);
 
   return await redisAPI.logout(redisClient);
+};
+
+const calculateRankings = async (timeframe) => {
+  // timeframe has to use format "Month YYYY", "complete YYYY" or "all-time"
+  const allTimeMode = timeframe === constants.specialRankings.allTime;
+  const timeframeRegex = new RegExp(`(${luxon.Info.months(`long`).join(`|`)}|${constants.specialRankings.completeYear}) ([0-9]{4})`);
+  const regexResult = timeframe.match(timeframeRegex);
+  if (!regexResult && !allTimeMode) {
+    throw new Error(`Can't find that time frame, make sure you've picked one of the suggested options.`);
+  }
+
+  const month = regexResult?.[1];
+  const year = regexResult?.[2];
+  const yearMode = month === `complete`;
+
+  // get all totds stats
+  const redisClient = await redisAPI.login();
+  const ratings = await redisAPI.getAllStoredTOTDs(redisClient);
+  redisAPI.logout(redisClient);
+
+  let topMax = 10;
+  let bottomMax = 5;
+
+  // go through them from top to bottom and collect the top 10 and bottom 5
+  let topRanking = [];
+  let bottomRanking = [];
+  for (const [mapUid, ratingData] of Object.entries(ratings)) {
+    if (!allTimeMode) {
+      if (ratingData.year != year) {
+        if (topRanking.length > 0) {
+          // if data has been collected and we run into this case, we've gone through all relevant data
+          break;
+        } else {
+          continue;
+        }
+      } else {
+        if (!yearMode && ratingData.month != month) {
+          if (topRanking.length > 0) {
+            // if data has been collected and we run into this case, we've gone through all relevant data
+            break;
+          } else {
+            continue;
+          }
+        }
+      }
+    }
+
+    ratingData.mapUid = mapUid;
+    const {averageRating} = rating.calculateRatingStats(ratingData.ratings);
+    ratingData.averageRating = averageRating;
+
+    // go through top array - insert map if rating is higher than existing one
+    let topInserted = false;
+    for (let i = 0; i < topRanking.length; i++) {
+      const topItem = topRanking[i];
+      if (ratingData.averageRating > topItem.averageRating) {
+        topRanking.splice(i, 0, ratingData);
+        topInserted = true;
+        break;
+      }
+    }
+    // add to the back of the list if it hasn't been inserted yet
+    if (!topInserted) {
+      topRanking.push(ratingData);
+    }
+    // cut off excess rankings beyond the max
+    if (topRanking.length > topMax) {
+      topRanking = topRanking.slice(0, topMax);
+    }
+
+    // go through bottom array - insert map if rating is higher than existing one
+    let bottomInserted = false;
+    for (let i = 0; i < bottomRanking.length; i++) {
+      const bottomItem = bottomRanking[i];
+      if (ratingData.averageRating > bottomItem.averageRating) {
+        bottomRanking.splice(i, 0, ratingData);
+        bottomInserted = true;
+        break;
+      }
+    }
+    // add to the back of the list if it hasn't been inserted yet
+    if (!bottomInserted) {
+      bottomRanking.push(ratingData);
+    }
+    // cut off excess rankings beyond the max
+    if (bottomRanking.length > bottomMax) {
+      bottomRanking = bottomRanking.slice(-bottomMax);
+    }
+  }
+
+  return {
+    top: topRanking,
+    bottom: bottomRanking
+  };
 };
 
 const distributeTOTDMessages = async (client) => {
@@ -586,5 +644,6 @@ module.exports = {
   distributeTOTDMessages,
   sendCOTDPings,
   updateTOTDReactionCount,
-  archiveRatings
+  archiveRatings,
+  calculateRankings
 };
