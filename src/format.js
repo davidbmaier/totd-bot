@@ -337,7 +337,7 @@ const formatRankingMessage = (rankings, timeframe) => {
         // add the year if the ranking goes across multiple years
         date += ` ${rankingItem.year}`;
       }
-      const mapLink = `https://trackmania.io/#/leaderboard/${rankingItem.mapUId}`;
+      const mapLink = `https://trackmania.io/#/leaderboard/${rankingItem.mapUid}`;
       // escape Discord formatting characters
       const authorName = rankingItem.authorName.replace(/[_>*~|`]/g, `\\$&`);
       const voteCount = Object.values(rankingItem.ratings).reduce((sum, value) => sum + value, 0);
