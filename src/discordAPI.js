@@ -497,7 +497,7 @@ const distributeTOTDMessages = async (client) => {
         redisAPI.logout(redisClient);
       }
     } catch (error) {
-      let retryCount = 0;
+      //let retryCount = 0;
       if (error.message === `Missing Access` || error.message === `Missing Permissions` || error.message === `Unknown Channel`) {
         console.log(`Missing access or permissions, bot was probably kicked from server ${config.serverID} - removing config`);
         const redisClientForRemoval = await redisAPI.login();
@@ -507,10 +507,15 @@ const distributeTOTDMessages = async (client) => {
         // no need to log user abort errors, those are just Discord API problems
         if (error.message !== `The user aborted a request.`) {
           console.error(`Unexpected error during TOTD distribution for ${config.serverID}: ${error.message}`);
-          console.error(error);
         }
 
-        while (retryCount < 3) {
+        // always log the error and notify the admin
+        console.error(error);
+        const adminChannel = await client.channels.fetch(adminChannelID);
+        utils.sendMessage(adminChannel, `Unexpected error during TOTD distribution, check logs.`);
+
+        // disable retry logic in here for now
+        /* while (retryCount < 3) {
           retryCount++;
           // Discord API error, retry sending the message
           console.warn(`Discord API error during TOTD distribution for ${config.serverID}, retrying... (${retryCount})`);
@@ -527,7 +532,7 @@ const distributeTOTDMessages = async (client) => {
           }
         }
 
-        console.error(`Failed to send TOTD message after 3 retries, giving up`);
+        console.error(`Failed to send TOTD message after 3 retries, giving up`); */
         return;
       }
     }
@@ -536,7 +541,7 @@ const distributeTOTDMessages = async (client) => {
   // send the first message in a blocking way to store the image URL
   console.log(`Sending out the first TOTD message before posting the rest`);
   await distributeTOTDMessage(configs.shift(), true);
-  console.log(`Initial TOTD message process, continuing with the rest`);
+  console.log(`Initial TOTD message processed, continuing with the rest`);
   for (const [configIndex, config] of configs.entries()) {
     if (configIndex % 35 === 0 && configIndex !== 0) {
       // wait for 15 seconds before continuing to definitely avoid hitting Discord API rate limit (50 reqs/s)
