@@ -475,6 +475,7 @@ const help = {
     }
     try {
       const formattedMessage = format.formatHelpMessage(message, adminMessage);
+      formattedMessage.ephemeral = true;
       utils.sendMessage(msg.channel, formattedMessage, msg);
     } catch (error) {
       discordAPI.sendErrorMessage(msg.channel);
