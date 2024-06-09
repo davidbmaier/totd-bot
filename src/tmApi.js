@@ -195,7 +195,7 @@ const getCurrentTOTD = async () => {
     }
 
     if (!currentTOTDMeta) {
-      console.error(totds);
+      console.error(JSON.stringify(totds));
       throw `Couldn't find current TOTD, see above for retrieved maps`;
     }
 

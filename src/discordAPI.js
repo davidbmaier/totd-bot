@@ -476,6 +476,12 @@ const distributeTOTDMessages = async (client) => {
     message = await getTOTDMessage(true);
   }
 
+  if (!message || oldTOTD.mapUid === message.embeds[0].footer.text) {
+    // still the old map, fail the TOTD distribution
+    console.error(`Refetching failed too, aborting TOTD distribution`);
+    return;
+  }
+
   await archiveRatings(client, oldTOTD);
   await redisAPI.clearIndividualRatings(redisClient);
   countBingoVotes(client);

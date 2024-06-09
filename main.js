@@ -59,9 +59,9 @@ new cron(
   `Europe/Paris`
 );
 
-// display the current totd every day at 19:00:05
+// display the current totd every day at 19:00:20
 new cron(
-  `05 00 19 * * *`,
+  `20 00 19 * * *`,
   async () => {
     await discordAPI.distributeTOTDMessages(client);
   },
