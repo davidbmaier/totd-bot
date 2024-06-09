@@ -456,7 +456,7 @@ const calculateRankings = async (timeframe) => {
   };
 };
 
-const distributeTOTDMessages = async (client) => {
+const distributeTOTDMessages = async (client, oldTOTDOverride) => {
   // get cached TOTD for ratings
   const redisClient = await redisAPI.login();
   const oldTOTD = await redisAPI.getCurrentTOTD(redisClient);
@@ -466,20 +466,32 @@ const distributeTOTDMessages = async (client) => {
   try {
     message = await getTOTDMessage(true);
   } catch (error) {
-    console.error(`Failed to get TOTD message during distribution`);
+    console.error(`Failed to get TOTD message during distribution`, error);
   }
 
-  // check that the newly retrieved map is different from yesterday's
-  if (!message || oldTOTD.mapUid === message.embeds[0].footer.text) {
-    console.warn(`Refetching TOTD message in a few seconds`);
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    message = await getTOTDMessage(true);
+  let retryCount = 0;
+  while (
+    retryCount < 3
+    && (!message || (oldTOTD.mapUid === message.embeds[0].footer.text && !oldTOTDOverride))
+  ) {
+    // retries left + either no message or the same UID as the existing one (manual override disabled)
+    console.warn(`No new TOTD message available, refetching in a few seconds`);
+    retryCount++;
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      message = await getTOTDMessage(true);
+    } catch (error) {
+      console.error(`Failed refetch`, error);
+    }
   }
 
-  if (!message || oldTOTD.mapUid === message.embeds[0].footer.text) {
-    // still the old map, fail the TOTD distribution
-    console.error(`Refetching failed too, aborting TOTD distribution`);
-    return;
+  if (!oldTOTDOverride || !message) {
+    // no override or no message at all, so check whether we need to fail distribution
+    if (!message || oldTOTD.mapUid === message.embeds[0].footer.text) {
+      // still the old map, fail the TOTD distribution
+      console.error(`Retries failed, aborting TOTD distribution`);
+      return;
+    }
   }
 
   await archiveRatings(client, oldTOTD);

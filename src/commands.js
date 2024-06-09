@@ -646,7 +646,8 @@ const distributeTOTDMessages = {
         if (confirmation !== `yes`) {
           utils.sendMessage(msg.channel, `Ignoring broadcast command because it was missing the required confirmation.`, msg);
         } else {
-          discordAPI.distributeTOTDMessages(client);
+          // override the check for a new map since this is manual
+          discordAPI.distributeTOTDMessages(client, true);
         }
       } catch (error) {
         discordAPI.sendErrorMessage(msg.channel);
