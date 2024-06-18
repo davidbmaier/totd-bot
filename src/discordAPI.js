@@ -561,10 +561,10 @@ const distributeTOTDMessages = async (client, oldTOTDOverride) => {
   await distributeTOTDMessage(configs.shift(), true);
   console.log(`Initial TOTD message processed, continuing with the rest`);
   for (const [configIndex, config] of configs.entries()) {
-    if (configIndex % 30 === 0 && configIndex !== 0) {
-      // wait for 10 seconds before continuing to definitely avoid hitting Discord API rate limit (50 reqs/s)
-      await new Promise(resolve => setTimeout(resolve, 10000));
-      console.log(`Waiting 10 seconds before sending TOTD message to next batch of servers...`);
+    if (configIndex % 25 === 0 && configIndex !== 0) {
+      // wait a few seconds before continuing to definitely avoid hitting Discord API rate limit
+      await new Promise(resolve => setTimeout(resolve, 15000));
+      console.log(`Waiting 15 seconds before sending TOTD message to next batch of servers...`);
     }
     distributeTOTDMessage(config, false);
   }
