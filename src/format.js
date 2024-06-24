@@ -158,10 +158,10 @@ const formatLeaderboardMessage = (totd, records, date) => {
   const names = topTen.map((top) => top.playerName);
 
   // assemble makeshift table using spaces
-  let topTenField = `\`\`\`\n        Time       Name\n`;
+  let topTenField = `\`\`\`\n      Time      Name\n`;
   for (let i = 0; i < topTen.length; i++) {
-    const positionString = positions[i].toString().length > 1 ? ` ${positions[i]}   ` : ` ${positions[i]}    `;
-    const timeString = `${times[i]}  `;
+    const positionString = positions[i].toString().length > 1 ? ` ${positions[i]} ` : ` ${positions[i]}  `;
+    const timeString = `${times[i]} `;
     const nameString = names[i];
     topTenField += `${positionString}${timeString}${nameString}\n`;
   }
