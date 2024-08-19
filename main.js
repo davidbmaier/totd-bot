@@ -86,7 +86,7 @@ const setupRedis = async () => {
 
   const bingoBoards = await redisAPI.getAllBingoBoards(redisClient);
   if (!bingoBoards) {
-    await redisAPI.saveBingoBoard(redisClient, {}, adminServerID);
+    await redisAPI.resetBingoBoards(redisClient);
   }
 
   redisAPI.logout(redisClient);
