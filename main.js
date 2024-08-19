@@ -81,6 +81,17 @@ new cron(
   `Europe/Paris`
 );
 
+const setupRedis = async () => {
+  const redisClient = await redisAPI.login();
+
+  const bingoBoards = await redisAPI.getAllBingoBoards(redisClient);
+  if (!bingoBoards) {
+    await redisAPI.saveBingoBoard(redisClient, {}, adminServerID);
+  }
+
+  redisAPI.logout(redisClient);
+}
+
 client.on(`ready`, async () => {
   console.log(`Ready as ${client.user.tag}!`);
 
@@ -91,6 +102,8 @@ client.on(`ready`, async () => {
   if (deployMode === `prod`) {
     await discordAPI.getTOTDMessage(true);
   }
+
+  await setupRedis();
 
   // register all the commands (this might take a minute due to Discord rate limits)
   const globalCommandConfigs = commands.globalCommands.map((commandConfig) => commandConfig.slashCommand);
@@ -169,9 +182,6 @@ client.on(`interactionCreate`, async (interaction) => {
 
 client.on(`messageCreate`, async (msg) => {
   if (msg.mentions.has(client.user.id, {ignoreEveryone: true})) {
-    const redisClient = await redisAPI.login();
-    redisAPI.logout(redisClient);
-
     console.log(`Proxying mention to admin server...`);
     const adminChannel = await client.channels.fetch(adminChannelID);
     const proxyMessage = format.formatProxyMessage(msg);

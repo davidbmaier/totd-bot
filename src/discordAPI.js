@@ -380,6 +380,13 @@ const calculateRankings = async (timeframe) => {
   const ratings = await redisAPI.getAllStoredTOTDs(redisClient);
   redisAPI.logout(redisClient);
 
+  if (!ratings) {
+    return {
+      top: [],
+      bottom: []
+    };
+  }
+
   let topMax = 10;
   let bottomMax = 5;
 

@@ -65,16 +65,26 @@ const ratings = {
 
         const focusedValue = msg.options.getFocused();
         if (focusedValue === ``) {
+          const response = [];
+
           const today = await redisAPI.getCurrentTOTD(redisClient);
+          if (today) {
+            response.push({name: `Today's TOTD (${utils.removeNameFormatting(today.name)} by ${today.authorName})`, value: today.mapUid});
+          }
+
           const yesterday = await redisAPI.getPreviousTOTD(redisClient);
-          const response = [
-            {name: `Today's TOTD (${utils.removeNameFormatting(today.name)} by ${today.authorName})`, value: today.mapUid},
-            {name: `Yesterday's TOTD (${utils.removeNameFormatting(yesterday.name)} by ${yesterday.authorName})`, value: yesterday.mapUid},
-            {name: `Or just start typing to search for a previous TOTD...`, value: ``}
-          ];
+          if (yesterday) {
+            response.push({name: `Yesterday's TOTD (${utils.removeNameFormatting(yesterday.name)} by ${yesterday.authorName})`, value: yesterday.mapUid});
+          }
+
+          response.push({name: `Or just start typing to search for a previous TOTD...`, value: ``});
           await msg.respond(response);
         } else {
           const storedTOTDs = await redisAPI.getAllStoredTOTDs(redisClient);
+          if (!storedTOTDs) {
+            return await msg.respond([]);
+          }
+
           const options = Object.entries(storedTOTDs).reverse().map(
             ([mapUid, map]) => ({ name: `${utils.removeNameFormatting(map.name)} by ${map.authorName} (${map.month} ${utils.formatDay(map.day)} ${map.year})`, value: mapUid })).filter((option) => option.name.toLowerCase().includes(focusedValue.toLowerCase())
           );
