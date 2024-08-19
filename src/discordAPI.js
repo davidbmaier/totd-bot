@@ -52,7 +52,11 @@ const getTOTDMessage = async (forceRefresh) => {
 const getTOTDLeaderboardMessage = async (forceRefresh) => {
   const redisClient = await redisAPI.login();
   const cachedleaderBoardMessage = await redisAPI.getCurrentLeaderboard(redisClient);
-  const totd = await redisAPI.getCurrentTOTD(redisClient);
+  let totd = await redisAPI.getCurrentTOTD(redisClient);
+  if (!totd) {
+    await getTOTDMessage();
+    totd = await redisAPI.getCurrentTOTD(redisClient);
+  }
   redisAPI.logout(redisClient);
 
   if (
