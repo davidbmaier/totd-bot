@@ -58,6 +58,8 @@ To run it, just run an `npm i` and an `npm start`. Make sure you've added a `.en
 
 The `emojiMapping.json` file contains hard-coded references to production emotes, which you won't be able to access in your own environment. You'll want to change their values to emotes your bot will have access to, or to some arbitrary strings for debugging.
 
+Other than that, there may be some commands that only work properly once the bot has collected a day or two of data - if you encounter breaking errors in this stage, feel free to report them.
+
 ## TODOs 📋
 
 I consider the bot to be pretty much finished, but if I get back to it, this is what I'd probably look at.
