@@ -2,9 +2,9 @@
 
 This is a Discord bot for displaying the daily [Trackmania](https://www.trackmania.com/) Track of the Day (and a few other things).
 
-**Disclaimer:** This bot uses undocumented APIs (and libraries based on them), so it may break at any time - potentially indefinitely if Nadeo/Ubisoft decide to close off those APIs.
+**Disclaimer:** This bot uses undocumented APIs, so it may break at any time - potentially indefinitely if Nadeo/Ubisoft decide to close off those APIs.
 
-**Extra disclaimer:** This is just a pet project I'm working on for fun (and to learn a bit about Discord bots) - don't expect super-tidy code or great documentation. If you encounter any issues with it, either open an issue on Github or talk to me on Discord (tooInfinite).
+**Extra disclaimer:** This is just a pet project I've worked on for fun - don't expect super-tidy code or great documentation. If you encounter any issues with it, either open an issue on Github or talk to me on Discord (@tooInfinite).
 
 ## What can this bot do? 🤖
 
@@ -54,8 +54,7 @@ To run it, just run an `npm i` and an `npm start`. Make sure you've added a `.en
 - `REDIS_URL` is a Redis database - it's required for the scheduled messages and caching. If you're using an insecure instance for local development, you can omit the auth part.
 - `ADMIN_TAG` is the Discord tag of the bot admin - used for administration commands that only they should be allowed to run.
 - `ADMIN_SERVER_ID` and `ADMIN_CHANNEL_ID` are Discord IDs of the admin server and channel - used for all admin commands.
-
-Every commit on `main` triggers an update to the live version of the bot running on a Heroku dyno.
+- `OAUTH_ID` and `OAUTH_SECRET` are ID and secret from [api.trackmania.com](https://api.trackmania.com/manager) - create a new app if you don't have one yet (make sure to enable "Confidential").
 
 ## TODOs 📋
 
@@ -91,6 +90,7 @@ When you invite this bot to your server or interact with it on another server, y
 ## Privacy Policy
 
 The TOTD Bot only stores data that is required for its core functionality:
+
 - It stores server and channel IDs for all servers that set up scheduled posts with the bot - this data is removed as soon as the configuration is deleted by a server admin/whenever the bot can't access a given server anymore (i.e. when it was kicked).
 - It also stores user IDs and the corresponding rating that a user submitted for the current TOTD to prevent people from voting more than once - this data is removed after a day.
 - Apart from that, it only stores past TOTD data (map and rating information) to be able to display historical data to users.
