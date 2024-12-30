@@ -46,8 +46,6 @@ const formatTOTDMessage = (totd) => {
   let trackAuthor = totd.author;
   if (totd.authorName) {
     trackAuthor = totd.authorName;
-  } else if (totd.tmxAuthor) {
-    trackAuthor = totd.tmxAuthor;
   }
 
   // assemble style info
@@ -66,7 +64,7 @@ const formatTOTDMessage = (totd) => {
   let links = `[TM.io](https://trackmania.io/#/totd/leaderboard/${totd.seasonUid}/${totd.mapUid}) `;
 
   if (totd.tmxTrackId) {
-    links += `| [TMX](https://trackmania.exchange/s/tr/${totd.tmxTrackId})`;
+    links += `| [TMX](https://trackmania.exchange/mapshow/${totd.tmxTrackId})`;
   }
 
   const scoreNote = `React to this message to rate the TOTD!`;
@@ -118,7 +116,7 @@ const formatTOTDMessage = (totd) => {
 
     if (styles) {
       embed.fields.splice(5, 0, {
-        name: `Styles (according to TMX)`,
+        name: `Styles (on TMX)`,
         value: styles,
         inline: true
       });

@@ -140,29 +140,21 @@ const getMaps = async (mapUids) => {
 
 const getTMXInfo = async (mapUid) => {
   try {
-    const tmxResponse = await axios.get(`https://trackmania.exchange/api/tracks/get_track_info/multi/${mapUid}`, {
+    const tmxResponse = await axios.get(`https://trackmania.exchange/api/maps/?uid=${mapUid}&fields=Tags,Name,HasImages,MapId,UpdatedAt`, {
       timeout: 5000 // timeout of 5s in case TMX is down
     });
-    if (tmxResponse.data.length === 1) {
-      // get tags
-      const tmxTagsResponse = await axios.get(`https://trackmania.exchange/api/tags/gettags`);
-      const resolvedTags = [];
-      tmxResponse.data[0].Tags.split(`,`).forEach((tag) => {
-        const matchingTag = tmxTagsResponse.data.find((tmxTag) => tmxTag.ID.toString() === tag);
-        resolvedTags.push(matchingTag.Name);
-      });
+    if (tmxResponse.data.Results.length === 1) {
+      const tmxResult = { ...tmxResponse.data.Results[0] };
 
       // get available image
       let imageLink;
-      if (tmxResponse.data[0].ImageCount > 0) {
-        imageLink = `https://trackmania.exchange/maps/${tmxResponse.data[0].TrackID}/image/1`;
+      if (tmxResult.HasImages) {
+        imageLink = `https://trackmania.exchange/mapimage/${tmxResult.MapId}/1`;
       }
 
-      if (!imageLink && tmxResponse.data[0].HasThumbnail) {
-        imageLink = `https://trackmania.exchange/maps/thumbnail/${tmxResponse.data[0].TrackID}`;
+      if (!imageLink && tmxResult.HasThumbnail) {
+        imageLink = `https://trackmania.exchange/mapimage/${tmxResult.MapId}/0`;
       }
-
-      const tmxResult = { ...tmxResponse.data[0], Tags: resolvedTags };
       if (imageLink) {
         tmxResult.ImageLink = imageLink;
       }
@@ -226,9 +218,8 @@ const getCurrentTOTD = async () => {
 
     if (tmxInfo) {
       currentTOTD.tmxName = tmxInfo.Name;
-      currentTOTD.tmxAuthor = tmxInfo.Username;
-      currentTOTD.tmxTrackId = tmxInfo.TrackID;
-      currentTOTD.tmxTags = tmxInfo.Tags;
+      currentTOTD.tmxTrackId = tmxInfo.MapId;
+      currentTOTD.tmxTags = tmxInfo.Tags.map((tag) => tag.Name);
       currentTOTD.tmxTimestamp = tmxInfo.UpdatedAt;
       if (!currentTOTD.tmxTimestamp.includes(`+`)) {
         // if there's no timezone information, assume UTC
