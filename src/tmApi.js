@@ -132,7 +132,7 @@ const getPlayerName = async (accountID) => {
 
 const getMaps = async (mapUids) => {
   const maps = await sendRequest({
-    url: `https://prod.trackmania.core.nadeo.online/maps/?mapUidList=${mapUids.join(`,`)}`,
+    url: `https://prod.trackmania.core.nadeo.online/maps/by-uid/?mapUidList=${mapUids.join(`,`)}`,
     token: `core`
   });
   return maps;
