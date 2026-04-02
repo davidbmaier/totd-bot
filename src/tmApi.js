@@ -6,7 +6,9 @@ const oauthID = process.env.OAUTH_ID;
 const oauthSecret = process.env.OAUTH_SECRET;
 
 let coreToken;
+let coreRefreshToken;
 let liveToken;
+let liveRefreshToken;
 let oauthToken;
 
 let lastRequestSent;
@@ -63,37 +65,77 @@ const sendRequest = async ({url, token, method = `get`, body = {}, headersOverri
   }
 };
 
-const login = async () => {
-  const ticketResponse = await sendRequest({
-    url: `https://public-ubiservices.ubi.com/v3/profiles/sessions`,
-    method: `post`,
-    headersOverride: {
-      'Ubi-AppId': `86263886-327a-4328-ac69-527f0d20a237`,
-      Authorization: `Basic ${Buffer.from(userLogin).toString(`base64`)}`
-    }
-  });
-  const ticket = ticketResponse.ticket;
+const getCoreToken = async () => {
+  if (coreRefreshToken) {
+    try {
+      const response = await sendRequest({
+        url: `https://prod.trackmania.core.nadeo.online/v2/authentication/token/refresh`,
+        method: `post`,
+        headersOverride: {
+          Authorization: `nadeo_v1 t=${coreRefreshToken}`
+        }
+      });
 
-  const coreTokenResponse = await sendRequest({
-    url: `https://prod.trackmania.core.nadeo.online/v2/authentication/token/ubiservices`,
+      coreToken = response.accessToken;
+      coreRefreshToken = response.refreshToken;
+      return;
+    } catch (error) {
+      console.log(`--- 401: Core refresh failed, go through primary auth flow`);
+    }
+  } else {
+    console.log(`--- No Core refresh token available, go through primary auth flow`);
+  }
+
+  const response = await sendRequest({
+    url: `https://prod.trackmania.core.nadeo.online/v2/authentication/token/basic`,
     method: `post`,
     headersOverride: {
-      Authorization: `ubi_v1 t=${ticket}`
+      Authorization: `Basic ${Buffer.from(userLogin).toString(`base64`)}`
     },
     body: {audience: `NadeoServices`}
   });
-  coreToken = coreTokenResponse.accessToken;
 
-  const liveTokenResponse = await sendRequest({
-    url: `https://prod.trackmania.core.nadeo.online/v2/authentication/token/ubiservices`,
+  coreToken = response.accessToken;
+  coreRefreshToken = response.refreshToken;
+};
+
+const getLiveToken = async () => {
+  if (liveRefreshToken) {
+    try {
+      const response = await sendRequest({
+        url: `https://prod.trackmania.core.nadeo.online/v2/authentication/token/refresh`,
+        method: `post`,
+        headersOverride: {
+          Authorization: `nadeo_v1 t=${liveRefreshToken}`
+        }
+      });
+
+      liveToken = response.accessToken;
+      liveRefreshToken = response.refreshToken;
+      return;
+    } catch (error) {
+      console.log(`--- 401: Live refresh failed, go through primary auth flow`);
+    }
+  } else {
+    console.log(`--- No Live refresh token available, go through primary auth flow`);
+  }
+
+  const response = await sendRequest({
+    url: `https://prod.trackmania.core.nadeo.online/v2/authentication/token/basic`,
     method: `post`,
     headersOverride: {
-      Authorization: `ubi_v1 t=${ticket}`
+      Authorization: `Basic ${Buffer.from(userLogin).toString(`base64`)}`
     },
     body: {audience: `NadeoLiveServices`}
   });
-  liveToken = liveTokenResponse.accessToken;
 
+  liveToken = response.accessToken;
+  liveRefreshToken = response.refreshToken;
+};
+
+const login = async () => {
+  await getCoreToken();
+  await getLiveToken();
   console.log(`Game API login successful`);
 };
 
