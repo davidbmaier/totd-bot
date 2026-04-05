@@ -13,7 +13,7 @@ let oauthToken;
 
 let lastRequestSent;
 
-const sendRequest = async ({url, token, method = `get`, body = {}, headersOverride}) => {
+const sendRequest = async ({url, token, method = `get`, body = {}, headersOverride}, {throwError = false} = {}) => {
   let authOverride;
 
   let tokenValue = coreToken;
@@ -50,7 +50,7 @@ const sendRequest = async ({url, token, method = `get`, body = {}, headersOverri
 
     return response.data;
   } catch (error) {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !throwError) {
       console.log(`--- 401: Refresh tokens and call the endpoint again`);
       if (token === `oauth`) {
         await loginOAuth();
@@ -74,7 +74,7 @@ const getCoreToken = async () => {
         headersOverride: {
           Authorization: `nadeo_v1 t=${coreRefreshToken}`
         }
-      });
+      }, {throwError: true});
 
       coreToken = response.accessToken;
       coreRefreshToken = response.refreshToken;
@@ -93,7 +93,7 @@ const getCoreToken = async () => {
       Authorization: `Basic ${Buffer.from(userLogin).toString(`base64`)}`
     },
     body: {audience: `NadeoServices`}
-  });
+  }, {throwError: true});
 
   coreToken = response.accessToken;
   coreRefreshToken = response.refreshToken;
@@ -108,7 +108,7 @@ const getLiveToken = async () => {
         headersOverride: {
           Authorization: `nadeo_v1 t=${liveRefreshToken}`
         }
-      });
+      }, {throwError: true});
 
       liveToken = response.accessToken;
       liveRefreshToken = response.refreshToken;
@@ -127,7 +127,7 @@ const getLiveToken = async () => {
       Authorization: `Basic ${Buffer.from(userLogin).toString(`base64`)}`
     },
     body: {audience: `NadeoLiveServices`}
-  });
+  }, {throwError: true});
 
   liveToken = response.accessToken;
   liveRefreshToken = response.refreshToken;
